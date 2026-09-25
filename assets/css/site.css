@@ -150,11 +150,6 @@ p { margin: 0; }
 .retro-head { background: #FBB117; display: flex; align-items: center; gap: 22px; padding: 10px 24px; font-family: Geneva, Arial, Helvetica, sans-serif; min-height: 130px; }
 .retro-head .cubes { width: 110px; height: 110px; object-fit: contain; }
 .retro-head .title { flex: 1; font-weight: 700; font-size: 36px; color: #555; letter-spacing: -0.5px; line-height: 1.15; }
-.marquee { width: 420px; height: 95px; overflow: hidden; flex-shrink: 0; }
-.marquee-track { display: flex; gap: 2px; width: max-content; animation: slide 30s linear infinite; }
-.marquee-track img { width: 207px; height: 95px; object-fit: cover; display: block; }
-@keyframes slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-@media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
 .retro-body { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 760px; }
 .retro-menu { background: #999966; padding: 26px 18px; display: flex; flex-direction: column; gap: 6px; font-family: Geneva, Arial, Helvetica, sans-serif; }
 .retro-menu button, .retro-menu span { text-align: left; background: none; border: 0; font: inherit; font-weight: 700; font-size: 19px; color: #fff; padding: 10px 12px; border-radius: 6px; line-height: 1.3; }
@@ -316,8 +311,7 @@ dialog::backdrop { background: rgba(42,50,66,.45); }
   .wrap { padding: 0 40px; }
   .timeline, .lists, .archive-card, .retro, .notes { margin-left: 40px; margin-right: 40px; }
   .hero h1 { font-size: 56px; }
-  .marquee { width: 207px; }
-  .readers-layout { grid-template-columns: minmax(0, 1fr); }
+    .readers-layout { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 900px) {
   .wrap { padding: 0 20px; }
@@ -357,8 +351,7 @@ dialog::backdrop { background: rgba(42,50,66,.45); }
   .retro-head { flex-wrap: wrap; padding: 14px; min-height: 0; }
   .retro-head .cubes { width: 64px; height: 64px; }
   .retro-head .title { font-size: 24px; }
-  .marquee { width: 100%; }
-  .retro-body { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+    .retro-body { grid-template-columns: minmax(0, 1fr); min-height: 0; }
   .retro-menu { flex-direction: row; flex-wrap: wrap; padding: 12px; }
   .retro-menu button, .retro-menu span { font-size: 17px; padding: 8px 10px; }
   .retro-page { padding: 28px 20px; }
