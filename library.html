@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<title>Documentation library — Cuberoot</title>
+<meta name="description" content="Documentation library for Cuberoot apps. Invited readers only.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+<script type="module" src="assets/js/library.js"></script>
+</head>
+<body>
+<main id="main">
+<div class="signin" id="signin-view">
+<div class="signin-info">
+<a class="brand" href="index.html"><img src="assets/img/logo.svg" alt="" width="46" height="35"><span>Cuberoot</span></a>
+<div class="intro">
+<h1>Documentation library</h1>
+<p>User guides, code documentation and setup notes for every Cuberoot app. For invited readers only.</p>
+</div>
+<div class="points">
+<div class="point"><div class="note-icon"><span data-icon="lock"></span></div><div>Every document is stored <b>encrypted</b>. Even on GitHub it’s unreadable without a key.</div></div>
+<div class="point"><div class="note-icon"><span data-icon="device"></span></div><div>Your passphrase unlocks them <b>on this device only</b>. It is never sent anywhere.</div></div>
+<div class="point"><div class="note-icon"><span data-icon="clock"></span></div><div>The library <b>locks itself</b> after 15 minutes without use.</div></div>
+</div>
+</div>
+<div class="signin-form">
+<form id="signin-form" novalidate>
+<h2>Sign in</h2>
+<div class="alert info" id="locked-note" hidden>The library locked itself after 15 minutes without use. Sign in again to continue.</div>
+<div class="field">
+<label for="email">Email</label>
+<input class="input" id="email" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" required>
+</div>
+<div class="field">
+<label for="pass">Passphrase</label>
+<div class="pass-wrap">
+<input class="input" id="pass" name="pass" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" required>
+<button class="show-btn" type="button" id="show-pass" aria-pressed="false" aria-controls="pass"><span data-icon="eye"></span><span class="label">Show</span></button>
+</div>
+<div class="hint">Type it exactly as Willy sent it. Capitals and dashes don’t matter for invitation passphrases.</div>
+</div>
+<div class="alert error" id="signin-error" role="alert" hidden></div>
+<button class="btn btn-block" type="submit" id="signin-btn">Unlock the library</button>
+<div class="progress-note" id="signin-progress" hidden><div class="spinner"></div>Unlocking… this takes a moment on purpose, to slow down guessing.</div>
+<div class="foot">
+<div>No invitation yet? <a href="#" data-contact data-contact-text="Ask Willy directly for an invitation.">Ask for access</a></div>
+<div>Forgotten your passphrase? Willy can send you a new one.</div>
+</div>
+</form>
+</div>
+</div>
+
+<div id="library-view" hidden>
+<header class="site-header lib-header">
+<div class="wrap">
+<a class="brand" href="index.html"><img src="assets/img/logo.svg" alt="" width="46" height="35"><span>Cuberoot Library</span></a>
+<div class="lib-tools">
+<span class="pill ok"><span data-icon="unlock"></span><span id="who">Unlocked</span></span>
+<button class="btn btn-ghost btn-small" type="button" id="lock-btn">Lock now</button>
+</div>
+</div>
+</header>
+<div class="wrap lib">
+<nav class="lib-side" id="lib-side" aria-label="Apps"></nav>
+<div class="lib-main">
+<div class="lib-top">
+<h1>Documentation</h1>
+<div class="field lib-search">
+<label for="search">Search documents</label>
+<input class="input" id="search" type="search" placeholder="e.g. setup, guide" autocomplete="off">
+</div>
+</div>
+<div class="alert info" id="lib-status" hidden></div>
+<div id="lib-content" class="stack-lg"></div>
+</div>
+</div>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "apps": [
+    { "name": "FIDUNIO", "slug": "fidunio", "icon": "fidunio",
+      "description": "Private, invitation-only messaging with true end-to-end encryption. Group chats, photo sharing and disappearing messages — the everyday features of the leading messaging apps, for invited members only." },
+    { "name": "Split It", "slug": "split-it", "icon": "split",
+      "description": "Split shared expenses evenly with everyone — no awkward maths, no chasing." },
+    { "name": "The Scorecard", "slug": "the-scorecard", "icon": "flag",
+      "description": "Golf handicaps for small groups — games, leaderboards and rankings." },
+    { "name": "Wire", "slug": "wire", "icon": "news",
+      "description": "Philippine and world news in one calm reader." },
+    { "name": "Expense Ledger", "slug": "expense-ledger", "icon": "receipt",
+      "description": "Personal expenses in any currency, summarised by month and category." },
+    { "name": "Cipher", "slug": "cipher", "icon": "chat",
+      "description": "End-to-end encrypted messaging." }
+  ],
+  "availability": { "now": "Web app now", "soon": "iOS & Android soon" }
+}
