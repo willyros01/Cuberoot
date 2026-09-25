@@ -1,6 +1,6 @@
 // Site settings — the only file you may need to edit by hand.
 export const SITE = {
-  version: '1.0.3',
+  version: '1.0.5',
   // The GitHub repository that hosts this site and the encrypted library.
   owner: 'willyros01',
   repo: 'Cuberoot',
