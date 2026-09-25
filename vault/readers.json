@@ -1,0 +1,21 @@
+{
+ "v": 1,
+ "readers": [
+  {
+   "id": "bf532a5297dbe06438a8a1ff5ccd8f7acbabe67371fa1f8481f9d0afc0add506",
+   "norm": "text",
+   "kdf": {
+    "salt": "LRCMfcTjM5RXjlYIxTEQpQ==",
+    "iter": 600000
+   },
+   "wrap": {
+    "v": 1,
+    "data": "AeDdBCA63PjO2vMyy0nVbCNEnlInR7yE6Y10u+WEdCHHuoqycR1TU+SoX1/27PyQO5PLqzrotOW8OeZXCuEHK6o1uXih6FTKiI/UPBqBbFEK11vX"
+   },
+   "grant": {
+    "v": 1,
+    "data": "AfbdeUBxKXxuUGa2+B3X0p7ePNvtuS9RuEYP3OZd8f4Vbr+iO4PcZHIFt3UhTuF1JuALObhdwjl81Koymd14Duo/vMmPFQ4Cla+45hlW8tGhTRI4P/fRxoX/7bf1xg=="
+   }
+  }
+ ]
+}
