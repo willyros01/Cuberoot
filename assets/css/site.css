@@ -150,7 +150,7 @@ p { margin: 0; }
 .retro-head { background: #FBB117; display: flex; align-items: center; gap: 22px; padding: 10px 24px; font-family: Geneva, Arial, Helvetica, sans-serif; min-height: 130px; }
 .retro-head .cubes { width: 110px; height: 110px; object-fit: contain; }
 .retro-head .title { flex: 1; font-weight: 700; font-size: 36px; color: #555; letter-spacing: -0.5px; line-height: 1.15; }
-.retro-body { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 760px; }
+.retro-body { display: grid; grid-template-columns: 240px minmax(0, 1fr); }
 .retro-menu { background: #999966; padding: 26px 18px; display: flex; flex-direction: column; gap: 6px; font-family: Geneva, Arial, Helvetica, sans-serif; }
 .retro-menu button, .retro-menu span { text-align: left; background: none; border: 0; font: inherit; font-weight: 700; font-size: 19px; color: #fff; padding: 10px 12px; border-radius: 6px; line-height: 1.3; }
 .retro-menu button { cursor: pointer; text-decoration: underline; }

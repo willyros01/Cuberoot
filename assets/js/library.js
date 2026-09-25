@@ -110,16 +110,14 @@ function render() {
 
   for (const app of session.apps) {
     const docs = app.docs.filter(match).sort((a, b) => String(b.date).localeCompare(String(a.date)));
-    if (q && !docs.length) continue;
+    if (!docs.length) continue;   // only show apps that have documents
     side.push(el('a', { href: '#app-' + app.slug }, app.name, el('span', { text: String(docs.length) })));
-    const rows = docs.length ? docs.map(d => docRow(app, d)) :
-      [el('div', { class: 'doc-row' }, el('div', { class: 'grow muted', text: 'No documents yet.' }))];
+    const rows = docs.map(d => docRow(app, d));
     content.push(el('section', { class: 'app-section', id: 'app-' + app.slug, 'aria-labelledby': 'h-' + app.slug },
       el('h2', { id: 'h-' + app.slug }, el('span', { class: 'app-badge' }, icon(app.icon)), app.name),
       el('div', { class: 'panel' }, rows)));
   }
-  if (!session.apps.length) content.push(el('div', { class: 'empty', text: 'No apps have been shared with you yet.' }));
-  else if (!content.length) content.push(el('div', { class: 'empty', text: 'No documents match your search.' }));
+  if (!content.length) content.push(el('div', { class: 'empty', text: q ? 'No documents match your search.' : 'No documents have been published for you yet. Please check back later.' }));
   $('lib-side').replaceChildren(...side);
   $('lib-content').replaceChildren(...content);
 }
