@@ -142,7 +142,9 @@ p { margin: 0; }
 .lists .white li { border-bottom-color: var(--line-soft); }
 .lists li:last-child { border-bottom: 0; padding-bottom: 0; }
 .archive-card { margin: 72px 64px 0; display: flex; align-items: center; gap: 36px; padding: 36px 40px; }
-.archive-card img { width: 260px; height: 160px; object-fit: cover; border-radius: 14px; border: 1px solid var(--line); flex-shrink: 0; }
+.archive-thumb { width: 260px; min-height: 160px; flex-shrink: 0; border-radius: 14px; background: #FBB117; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 18px; text-decoration: none; text-align: center; }
+.archive-thumb img { width: 96px; height: 96px; object-fit: contain; }
+.archive-thumb span { font-family: Geneva, Arial, Helvetica, sans-serif; font-weight: 700; font-size: 17px; line-height: 1.25; color: #444; }
 .archive-card h2 { font-weight: 800; font-size: 30px; letter-spacing: -0.5px; }
 
 /* ---------- archive (original site) ---------- */
@@ -165,8 +167,8 @@ p { margin: 0; }
 .retro-page dd { margin: 0; }
 .retro-page dd.removed { color: #444; font-style: italic; }
 .logos { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; padding-top: 20px; }
-.logos img { width: 200px; height: 62px; object-fit: contain; background: #fff; border: 1px solid #999; padding: 6px; }
-.notes { margin: 48px 64px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; padding: 36px 40px; }
+.logos img { width: auto; height: auto; max-width: 220px; max-height: 80px; background: #fff; border: 1px solid #999; padding: 10px 14px; }
+.notes { margin: 48px 64px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; padding: 36px 40px; }
 .note { display: flex; gap: 16px; align-items: flex-start; }
 .note-icon { width: 46px; height: 46px; border-radius: 14px; background: var(--blue-soft); color: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .note-icon svg { width: 22px; height: 22px; }
@@ -347,7 +349,7 @@ dialog::backdrop { background: rgba(42,50,66,.45); }
   .timeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lists { grid-template-columns: minmax(0, 1fr); margin-top: 48px; }
   .archive-card { flex-direction: column; align-items: stretch; padding: 24px; margin-top: 48px; }
-  .archive-card img { width: 100%; height: auto; }
+  .archive-thumb { width: 100%; }
   .retro-head { flex-wrap: wrap; padding: 14px; min-height: 0; }
   .retro-head .cubes { width: 64px; height: 64px; }
   .retro-head .title { font-size: 24px; }
