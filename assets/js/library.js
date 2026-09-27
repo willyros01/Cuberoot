@@ -1,7 +1,7 @@
 // Documentation library: sign in, decrypt the lists, open documents. All in the browser.
 import { SITE } from './config.js';
 import { init, el, icon, formatDate, formatSize } from './common.js';
-import { openReader, decryptIndex, decryptDoc, indexPath, docPath } from './vault.js';
+import { openReader, decryptIndex, decryptDoc, indexPath, docPath, PUBLIC_INDEX } from './vault.js';
 
 init();
 
@@ -83,6 +83,19 @@ async function openLibrary(grant) {
       if (box) app.docs = (await decryptIndex(app.key, app.slug, box)).docs || [];
     } catch (e) { console.error(e); failed++; }
   }
+  // Public documents are shown to every signed-in reader, alongside their protected ones.
+  try {
+    const pub = (await fetchJSON(PUBLIC_INDEX)) || { apps: {} };
+    for (const [slug, pa] of Object.entries(pub.apps || {})) {
+      let app = apps.find(a => a.slug === slug);
+      if (!app) { app = { slug, name: pa.name, icon: iconFor(slug), docs: [] }; apps.push(app); }
+      app.docs.push(...pa.docs.map(d => ({ ...d, public: true })));
+    }
+    apps.sort((a, b) => {
+      const ia = order.indexOf(a.slug), ib = order.indexOf(b.slug);
+      return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+    });
+  } catch (e) { console.error(e); failed++; }
   session = { name: grant.name, email: grant.email, apps };
   $('who').textContent = 'Unlocked · ' + (grant.email || grant.name || 'reader');
   $('signin-view').hidden = true;
@@ -124,9 +137,20 @@ function render() {
 
 function docRow(app, d) {
   const meta = [d.date ? 'Updated ' + formatDate(d.date) : '', d.size ? formatSize(d.size) : ''].filter(Boolean).join(' · ');
+  const tag = d.public ? el('span', { class: 'badge public' }, icon('globe'), 'Public') : el('span', { class: 'badge private' }, icon('lock'), 'By invitation');
+  if (d.public) {
+    return el('div', { class: 'doc-row' },
+      el('span', { class: 'type' + (d.ext === 'pdf' ? ' pdf' : ''), text: (d.ext || 'file').toUpperCase().slice(0, 4) }),
+      el('div', { class: 'grow' }, el('div', { class: 'title', text: d.title }), el('div', { class: 'meta', text: meta })),
+      tag,
+      el('div', { class: 'doc-actions' },
+        el('a', { class: 'btn btn-small', href: `view.html?app=${encodeURIComponent(app.slug)}&id=${encodeURIComponent(d.id)}`, target: '_blank', rel: 'noopener', 'aria-label': 'Read ' + d.title, text: 'Read' }),
+        el('a', { class: 'btn btn-ghost btn-small', href: d.path, download: d.original || '', 'aria-label': 'Download ' + d.title, text: 'Download' })));
+  }
   return el('div', { class: 'doc-row' },
     el('span', { class: 'type' + (d.ext === 'pdf' ? ' pdf' : ''), text: (d.ext || 'file').toUpperCase().slice(0, 4) }),
     el('div', { class: 'grow' }, el('div', { class: 'title', text: d.title }), el('div', { class: 'meta', text: meta })),
+    tag,
     el('div', { class: 'doc-actions' },
       el('button', { class: 'btn btn-small', type: 'button', onclick: e => openDoc(app, d, e.currentTarget, false), 'aria-label': 'Read ' + d.title, text: 'Read' }),
       el('button', { class: 'btn btn-ghost btn-small', type: 'button', onclick: e => openDoc(app, d, e.currentTarget, true), 'aria-label': 'Download ' + d.title, text: 'Download' })));

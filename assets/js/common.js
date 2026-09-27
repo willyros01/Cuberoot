@@ -15,6 +15,9 @@ export const ICONS = {
   key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3"/>',
   window: '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  back: '<path d="M15 18l-6-6 6-6"/>',
+  download: '<path d="M12 4v12M6 10l6 6 6-6"/><path d="M4 20h16"/>',
   // app icons
   fidunio: '<polygon points="12,2 21,7 21,17 12,22 3,17 3,7"/><path d="M12 22V12M21 7l-9 5-9-5"/>',
   split: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18M12 12l7-5"/>',

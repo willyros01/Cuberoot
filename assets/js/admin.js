@@ -18,7 +18,8 @@ let adminFile = null;      // the public, encrypted admin.json as loaded
 let kek = null;            // key derived from the admin passphrase (memory only)
 let state = null;          // decrypted admin state
 let siteApps = [];         // apps from assets/data/apps.json
-const indexes = {};        // slug -> { v, app, docs }
+const indexes = {};        // slug -> { v, app, docs }  (encrypted, by invitation)
+let publicIndex = { v: 1, apps: {} };   // guides/index.json (public documents)
 const ui = { tab: 'docs', app: null, newApp: '', pending: [], flash: null };
 
 // ---------------- helpers ----------------
@@ -123,6 +124,7 @@ async function fetchAdminFile() {
   }
 }
 async function loadIndexes() {
+  publicIndex = (await repo.readJSON(V.PUBLIC_INDEX, knownHead)) || { v: 1, apps: {} };
   for (const slug of Object.keys(state.apps)) {
     const box = await repo.readJSON(V.indexPath(slug), knownHead);
     indexes[slug] = box ? await V.decryptIndex(state.apps[slug].key, slug, box) : { v: 1, app: { slug, name: state.apps[slug].name }, docs: [] };
@@ -303,11 +305,39 @@ function mainScreen() {
 }
 
 // ----- documents -----
+// A document is either "By invitation" (encrypted in vault/) or "Public" (plain in guides/).
+function publicDocs(slug) { return (publicIndex.apps[slug] && publicIndex.apps[slug].docs) || []; }
+function allDocs(slug) {
+  const priv = (indexes[slug] ? indexes[slug].docs : []).map(d => ({ ...d, public: false }));
+  const pub = publicDocs(slug).map(d => ({ ...d, public: true }));
+  return [...pub, ...priv].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+function takenPaths() {
+  const s = new Set();
+  for (const a of Object.values(publicIndex.apps)) for (const d of a.docs) s.add(d.path);
+  return s;
+}
+function publicIndexChange(pi) { return { path: V.PUBLIC_INDEX, bytes: JSON.stringify(pi, null, 1) }; }
+function withPublicApp(pi, slug, name) {
+  if (!pi.apps[slug]) pi.apps[slug] = { name, docs: [] };
+  pi.apps[slug].name = name;
+  return pi.apps[slug];
+}
+
+// Segmented switch: Public | By invitation
+function visibilitySwitch(isPublic, onPublic, onPrivate, label) {
+  return el('div', { class: 'switch', role: 'group', 'aria-label': 'Who can read ' + label },
+    el('button', { type: 'button', class: 'switch-opt', 'aria-pressed': String(isPublic), onclick: () => { if (!isPublic) onPublic(); } }, icon('globe'), 'Public'),
+    el('button', { type: 'button', class: 'switch-opt', 'aria-pressed': String(!isPublic), onclick: () => { if (isPublic) onPrivate(); } }, icon('lock'), 'By invitation'));
+}
+
+const PUBLIC_WARNING = 'Anyone will be able to read it, without signing in. Switching it back later removes it from the site, but copies stay in GitHub’s history and with anyone who downloaded it.';
+
 function docsTab() {
   const apps = knownApps();
   const picker = el('div', { class: 'panel app-picker' },
     apps.map(a => {
-      const n = indexes[a.slug] ? indexes[a.slug].docs.length : 0;
+      const n = allDocs(a.slug).length;
       return el('button', { class: 'app-pick', type: 'button', 'aria-pressed': String(ui.app === a.slug),
         onclick: () => { ui.app = a.slug; ui.pending = []; flash(); mainScreen(); } }, a.name, el('span', { text: n ? String(n) : 'none yet' }));
     }),
@@ -332,7 +362,7 @@ function addSection(appName) {
   const input = el('input', { type: 'file', multiple: true, hidden: true, accept: '.pdf,.md,.markdown,.txt,.docx,.xlsx,.png,.jpg,.jpeg,.zip' });
   const addFiles = files => {
     const name = ui.app === '__new' ? ui.newApp : appName;
-    for (const f of files) ui.pending.push({ file: f, title: V.titleFromFilename(f.name, name) });
+    for (const f of files) ui.pending.push({ file: f, title: V.titleFromFilename(f.name, name), public: false });
     flash(); mainScreen();
   };
   input.addEventListener('change', () => addFiles([...input.files]));
@@ -355,35 +385,41 @@ function addSection(appName) {
         return el('div', { class: 'file-row' },
           el('span', { class: 'type' + (kind.ext === 'pdf' ? ' pdf' : ''), text: kind.label }),
           el('div', { class: 'grow' }, el('label', { for: 'pt' + i, text: p.file.name + ' · ' + formatSize(p.file.size) }), tin),
+          visibilitySwitch(p.public, () => { p.public = true; mainScreen(); }, () => { p.public = false; mainScreen(); }, p.file.name),
           el('button', { class: 'btn btn-ghost icon-btn', type: 'button', 'aria-label': 'Remove ' + p.file.name, onclick: () => { ui.pending.splice(i, 1); mainScreen(); } }, icon('close')));
-      }));
+      }),
+      el('div', { class: 'list-foot hint', text: 'New documents start as By invitation. Switch to Public only for documents anyone may keep, such as user guides.' }));
   }
   return el('div', { class: 'stack' }, el('div', { class: 'step-title', text: '2 · Add documents to ' + appName }), input, drop, list);
 }
 
 function publishSection(current) {
   const n = ui.pending.length;
+  const pubN = ui.pending.filter(p => p.public).length;
   const btn = el('button', { class: 'btn btn-block', type: 'button', disabled: !n,
-    text: n ? `Encrypt and publish ${n} document${n === 1 ? '' : 's'}` : 'Choose documents first', onclick: () => publish(current) });
+    text: n ? `Publish ${n} document${n === 1 ? '' : 's'}` : 'Choose documents first', onclick: () => publish(current) });
   const step = (t, i) => el('div', { class: 'step' }, el('i', { text: String(i) }), t);
+  const summary = n ? (pubN === 0 ? `All ${n} will be encrypted, for invited readers only.` :
+    pubN === n ? `All ${n} will be public — readable by anyone.` : `${n - pubN} encrypted for invited readers · ${pubN} public.`) : '';
   return el('div', { class: 'stack' }, el('div', { class: 'step-title', text: '3 · Publish' }),
     el('div', { class: 'panel publish-box' },
-      el('div', { class: 'steps' }, step('Encrypt on this device', 1), step('Upload to GitHub', 2), step('Update the library index', 3)),
+      el('div', { class: 'steps' }, step('Encrypt on this device', 1), step('Upload to GitHub', 2), step('Update the lists', 3)),
+      summary ? el('div', { class: 'alert ' + (pubN ? 'info' : 'ok'), text: summary }) : null,
       btn,
-      el('div', { class: 'hint', text: 'Originals never leave this device unencrypted. Only encrypted copies with random names reach the Cuberoot repository.' })));
+      el('div', { class: 'hint', text: 'By-invitation documents are encrypted on this device before upload. Public documents are uploaded as they are.' })));
 }
 
 function publishedSection(current) {
   if (!current) return null;
-  const idx = indexes[current.slug];
-  const docs = idx ? [...idx.docs].sort((a, b) => String(b.date).localeCompare(String(a.date))) : [];
+  const docs = allDocs(current.slug);
   const list = docs.length ? el('div', { class: 'panel' }, docs.map(d => {
     const rep = el('input', { type: 'file', hidden: true });
     rep.addEventListener('change', () => { if (rep.files[0]) replaceDoc(current, d, rep.files[0]); });
-    return el('div', { class: 'doc-row' },
+    return el('div', { class: 'doc-row admin-doc' },
       el('span', { class: 'type' + (d.ext === 'pdf' ? ' pdf' : ''), text: (d.ext || 'file').toUpperCase().slice(0, 4) }),
       el('div', { class: 'grow' }, el('div', { class: 'title', text: d.title }),
         el('div', { class: 'meta', text: 'Published ' + formatDate(d.date) + ' · ' + formatSize(d.size || 0) + (d.original ? ' · ' + d.original : '') })),
+      visibilitySwitch(d.public, () => makePublic(current, d), () => makePrivate(current, d), d.title),
       el('div', { class: 'doc-actions' }, rep,
         el('button', { class: 'btn btn-ghost btn-small', type: 'button', text: 'Replace', 'aria-label': 'Replace ' + d.title, onclick: () => rep.click() }),
         el('button', { class: 'btn btn-danger btn-small', type: 'button', text: 'Remove', 'aria-label': 'Remove ' + d.title, onclick: () => removeDoc(current, d) })));
@@ -393,7 +429,7 @@ function publishedSection(current) {
 
 async function ensureApp(current) {
   if (current) {
-    if (!state.apps[current.slug]) { state.apps[current.slug] = { name: current.name, key: V.newKeyB64(), created: new Date().toISOString() }; return current.slug; }
+    if (!state.apps[current.slug]) state.apps[current.slug] = { name: current.name, key: V.newKeyB64(), created: new Date().toISOString() };
     return current.slug;
   }
   const name = ui.newApp.trim();
@@ -403,72 +439,160 @@ async function ensureApp(current) {
   return slug;
 }
 
+// Every change below is one GitHub commit. Local lists are updated only after
+// GitHub confirms it; on any failure everything is rolled back and nothing changes.
 async function publish(current) {
   if (!ui.pending.length) return;
+  const pubN = ui.pending.filter(p => p.public).length;
+  if (pubN) {
+    const ok = await confirmBox({ title: pubN === 1 ? 'Publish 1 document as public?' : `Publish ${pubN} documents as public?`,
+      text: PUBLIC_WARNING, yes: 'Yes, publish', no: 'No, go back', danger: false });
+    if (!ok) return;
+  }
   const snapshot = JSON.stringify(state);
-  const b = busy('Encrypting…');
+  const b = busy('Preparing…');
   try {
     const slug = await ensureApp(current);
     const app = state.apps[slug];
     const index = indexes[slug] ? structuredClone(indexes[slug]) : { v: 1, app: { slug, name: app.name }, docs: [] };
+    const pi = structuredClone(publicIndex);
+    const taken = takenPaths();
     const changes = [];
-    let i = 0;
+    let i = 0, priv = 0;
     for (const p of ui.pending) {
-      i++; b.set(`Encrypting ${i} of ${ui.pending.length}: ${p.title}`);
+      i++; b.set(`${p.public ? 'Preparing' : 'Encrypting'} ${i} of ${ui.pending.length}: ${p.title}`);
       const bytes = new Uint8Array(await p.file.arrayBuffer());
       const id = V.randomId();
       const kind = V.fileKind(p.file.name);
-      changes.push({ path: V.docPath(slug, id), bytes: await V.encryptDoc(app.key, slug, id, bytes) });
-      index.docs.push({ id, title: (p.title || '').trim() || V.titleFromFilename(p.file.name, app.name), ext: kind.ext, mime: kind.mime,
-        size: bytes.length, date: new Date().toISOString(), original: p.file.name });
+      const meta = { id, title: (p.title || '').trim() || V.titleFromFilename(p.file.name, app.name), ext: kind.ext, mime: kind.mime,
+        size: bytes.length, date: new Date().toISOString(), original: p.file.name };
+      if (p.public) {
+        meta.path = V.publicPath(slug, meta.title, kind.ext, taken); taken.add(meta.path);
+        changes.push({ path: meta.path, bytes });
+        withPublicApp(pi, slug, app.name).docs.push(meta);
+      } else {
+        priv++;
+        changes.push({ path: V.docPath(slug, id), bytes: await V.encryptDoc(app.key, slug, id, bytes) });
+        index.docs.push(meta);
+      }
     }
-    changes.push({ path: V.indexPath(slug), bytes: JSON.stringify(await V.encryptIndex(app.key, slug, index)) });
+    if (priv) changes.push({ path: V.indexPath(slug), bytes: JSON.stringify(await V.encryptIndex(app.key, slug, index)) });
+    if (pubN) changes.push(publicIndexChange(pi));
     b.set('Uploading to GitHub…');
     await save(changes, (done, total) => b.set(`Uploading to GitHub… ${done} of ${total}`));
-    indexes[slug] = index;
+    indexes[slug] = index; publicIndex = pi;
     const n = ui.pending.length;
     ui.pending = []; ui.app = slug; ui.newApp = '';
     b.done();
-    flash('ok', `Published ${n} document${n === 1 ? '' : 's'} to ${app.name}. Readers will see ${n === 1 ? 'it' : 'them'} within a minute or two, once GitHub Pages refreshes.`);
+    flash('ok', `Published ${n} document${n === 1 ? '' : 's'} to ${app.name}. ${n === 1 ? 'It appears' : 'They appear'} on the site within a minute or two, once GitHub Pages refreshes.`);
     mainScreen();
   } catch (e) {
     state = JSON.parse(snapshot);
-    b.done(); flash('error', errorText(e)); mainScreen();
+    b.done(); flash('error', 'Nothing was published. ' + errorText(e)); mainScreen();
   }
 }
 
+async function makePublic(current, d) {
+  const ok = await confirmBox({ title: 'Make this document public?', text: `“${d.title}” — ${PUBLIC_WARNING}`, yes: 'Yes, make it public', no: 'No, keep it private', danger: false });
+  if (!ok) return;
+  const slug = current.slug, app = state.apps[slug];
+  const b = busy('Making it public…');
+  try {
+    const data = await repo.read(V.docPath(slug, d.id), knownHead);
+    if (!data) throw new Error('the encrypted file could not be found');
+    const plain = await V.decryptDoc(app.key, slug, d.id, data);
+    const index = structuredClone(indexes[slug]);
+    index.docs = index.docs.filter(x => x.id !== d.id);
+    const pi = structuredClone(publicIndex);
+    const { public: _p, ...meta } = d;
+    meta.path = V.publicPath(slug, d.title, d.ext, takenPaths());
+    withPublicApp(pi, slug, app.name).docs.push(meta);
+    await save([{ path: meta.path, bytes: plain }, { path: V.docPath(slug, d.id), bytes: null },
+      { path: V.indexPath(slug), bytes: JSON.stringify(await V.encryptIndex(app.key, slug, index)) }, publicIndexChange(pi)]);
+    indexes[slug] = index; publicIndex = pi;
+    b.done(); flash('ok', `“${d.title}” is now public.`); mainScreen();
+  } catch (e) { b.done(); flash('error', 'Nothing was changed. ' + errorText(e)); mainScreen(); }
+}
+
+async function makePrivate(current, d) {
+  const slug = current.slug;
+  const snapshot = JSON.stringify(state);
+  const b = busy('Encrypting it for invited readers…');
+  try {
+    await ensureApp(current);
+    const app = state.apps[slug];
+    const plain = await repo.read(d.path, knownHead);
+    if (!plain) throw new Error('the public file could not be found');
+    const id = V.randomId();
+    const index = indexes[slug] ? structuredClone(indexes[slug]) : { v: 1, app: { slug, name: app.name }, docs: [] };
+    const { public: _p, path: _path, ...meta } = d;
+    meta.id = id;
+    index.docs.push(meta);
+    const pi = structuredClone(publicIndex);
+    pi.apps[slug].docs = pi.apps[slug].docs.filter(x => x.id !== d.id);
+    if (!pi.apps[slug].docs.length) delete pi.apps[slug];
+    await save([{ path: V.docPath(slug, id), bytes: await V.encryptDoc(app.key, slug, id, plain) }, { path: d.path, bytes: null },
+      { path: V.indexPath(slug), bytes: JSON.stringify(await V.encryptIndex(app.key, slug, index)) }, publicIndexChange(pi)]);
+    indexes[slug] = index; publicIndex = pi;
+    b.done(); flash('ok', `“${d.title}” is now for invited readers only. Copies made while it was public cannot be recalled.`); mainScreen();
+  } catch (e) { state = JSON.parse(snapshot); b.done(); flash('error', 'Nothing was changed. ' + errorText(e)); mainScreen(); }
+}
+
 async function removeDoc(current, d) {
-  const ok = await confirmBox({ title: 'Remove this document?', text: `“${d.title}” will be removed from the library for everyone.`, yes: 'Yes, remove it' });
+  const ok = await confirmBox({ title: 'Remove this document?', text: `“${d.title}” will be removed from the site for everyone.`, yes: 'Yes, remove it' });
   if (!ok) return;
   const slug = current.slug, app = state.apps[slug];
   const b = busy('Removing…');
   try {
-    const index = structuredClone(indexes[slug]);
-    index.docs = index.docs.filter(x => x.id !== d.id);
-    await save([{ path: V.docPath(slug, d.id), bytes: null }, { path: V.indexPath(slug), bytes: JSON.stringify(await V.encryptIndex(app.key, slug, index)) }]);
-    indexes[slug] = index;
+    if (d.public) {
+      const pi = structuredClone(publicIndex);
+      pi.apps[slug].docs = pi.apps[slug].docs.filter(x => x.id !== d.id);
+      if (!pi.apps[slug].docs.length) delete pi.apps[slug];
+      await save([{ path: d.path, bytes: null }, publicIndexChange(pi)]);
+      publicIndex = pi;
+    } else {
+      const index = structuredClone(indexes[slug]);
+      index.docs = index.docs.filter(x => x.id !== d.id);
+      await save([{ path: V.docPath(slug, d.id), bytes: null }, { path: V.indexPath(slug), bytes: JSON.stringify(await V.encryptIndex(app.key, slug, index)) }]);
+      indexes[slug] = index;
+    }
     b.done(); flash('ok', `Removed “${d.title}”.`); mainScreen();
-  } catch (e) { b.done(); flash('error', errorText(e)); mainScreen(); }
+  } catch (e) { b.done(); flash('error', 'Nothing was removed. ' + errorText(e)); mainScreen(); }
 }
 
 async function replaceDoc(current, d, file) {
-  const ok = await confirmBox({ title: 'Replace this document?', text: `“${d.title}” will be replaced by ${file.name}. The title stays the same.`, yes: 'Yes, replace it', danger: false });
+  const ok = await confirmBox({ title: 'Replace this document?', text: `“${d.title}” will be replaced by ${file.name}. The title and who can read it stay the same.`, yes: 'Yes, replace it', danger: false });
   if (!ok) return;
   const slug = current.slug, app = state.apps[slug];
-  const b = busy('Encrypting the new version…');
+  const b = busy('Preparing the new version…');
   try {
     const bytes = new Uint8Array(await file.arrayBuffer());
-    const id = V.randomId(), kind = V.fileKind(file.name);
-    const index = structuredClone(indexes[slug]);
-    const entry = index.docs.find(x => x.id === d.id);
-    Object.assign(entry, { id, ext: kind.ext, mime: kind.mime, size: bytes.length, date: new Date().toISOString(), original: file.name });
-    b.set('Uploading to GitHub…');
-    await save([{ path: V.docPath(slug, id), bytes: await V.encryptDoc(app.key, slug, id, bytes) },
-      { path: V.docPath(slug, d.id), bytes: null },
-      { path: V.indexPath(slug), bytes: JSON.stringify(await V.encryptIndex(app.key, slug, index)) }]);
-    indexes[slug] = index;
+    const kind = V.fileKind(file.name);
+    const upd = { ext: kind.ext, mime: kind.mime, size: bytes.length, date: new Date().toISOString(), original: file.name };
+    if (d.public) {
+      const pi = structuredClone(publicIndex);
+      const entry = pi.apps[slug].docs.find(x => x.id === d.id);
+      const changes = [];
+      let path = d.path;
+      if (kind.ext !== d.ext) { path = V.publicPath(slug, d.title, kind.ext, takenPaths()); changes.push({ path: d.path, bytes: null }); }
+      Object.assign(entry, upd, { path });
+      changes.unshift({ path, bytes });
+      changes.push(publicIndexChange(pi));
+      b.set('Uploading to GitHub…');
+      await save(changes);
+      publicIndex = pi;
+    } else {
+      const id = V.randomId();
+      const index = structuredClone(indexes[slug]);
+      Object.assign(index.docs.find(x => x.id === d.id), upd, { id });
+      b.set('Uploading to GitHub…');
+      await save([{ path: V.docPath(slug, id), bytes: await V.encryptDoc(app.key, slug, id, bytes) },
+        { path: V.docPath(slug, d.id), bytes: null },
+        { path: V.indexPath(slug), bytes: JSON.stringify(await V.encryptIndex(app.key, slug, index)) }]);
+      indexes[slug] = index;
+    }
     b.done(); flash('ok', `Replaced “${d.title}”.`); mainScreen();
-  } catch (e) { b.done(); flash('error', errorText(e)); mainScreen(); }
+  } catch (e) { b.done(); flash('error', 'Nothing was replaced. ' + errorText(e)); mainScreen(); }
 }
 
 // ----- readers -----

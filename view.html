@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Document — Cuberoot</title>
+<meta name="description" content="A public Cuberoot document.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+<script type="module" src="assets/js/view.js"></script>
+</head>
+<body class="viewer-body">
+<header class="viewer-bar" id="viewer-bar">
+<a class="btn" id="back" href="docs.html"><span data-icon="back"></span>Back to documents</a>
+<div class="grow"><div class="title" id="doc-title">Loading…</div><div class="meta" id="doc-meta"></div></div>
+<div class="viewer-tools" id="tools" hidden>
+<button class="btn btn-ghost zoom-btn" type="button" id="zoom-out" aria-label="Zoom out">−</button>
+<span class="zoom-val" id="zoom-val" aria-live="polite">100%</span>
+<button class="btn btn-ghost zoom-btn" type="button" id="zoom-in" aria-label="Zoom in">+</button>
+</div>
+<a class="btn btn-ghost" id="download" href="#" hidden><span data-icon="download"></span>Download</a>
+</header>
+<main id="main"><div id="doc-body"></div></main>
+</body>
+</html>

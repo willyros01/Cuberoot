@@ -203,3 +203,15 @@ export function fileKind(filename) {
   const ext = m ? m[1].toLowerCase() : '';
   return { ext, label: (ext || 'FILE').toUpperCase().slice(0, 4), mime: MIME[ext] || 'application/octet-stream' };
 }
+
+// ---------- public documents (not encrypted) ----------
+// Public documents live in guides/<slug>/<readable-name>.<ext> with a plain index
+// at guides/index.json, so anyone can read them without signing in.
+export const PUBLIC_INDEX = 'guides/index.json';
+export function publicPath(slug, title, ext, taken) {
+  const base = slugify(title) || 'document';
+  const e = ext ? '.' + ext : '';
+  let name = `guides/${slug}/${base}${e}`, n = 2;
+  while (taken.has(name)) name = `guides/${slug}/${base}-${n++}${e}`;
+  return name;
+}
