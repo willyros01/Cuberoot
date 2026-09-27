@@ -1,5 +1,5 @@
 // Cuberoot vault — all encryption for the documentation library.
-// Runs entirely in the browser (Web Crypto API). Nothing here talks to a server.
+// Runs entirely in the page, using Cuberoot's own encryption engine (cipher.js). Nothing here talks to a server.
 //
 // Scheme (version 1)
 // - Each app has its own random 256-bit AES-GCM key.
@@ -12,82 +12,57 @@
 //   A separate "grant", encrypted with the reader key, holds the keys of the apps
 //   that reader may read. The admin keeps every reader key inside the admin state,
 //   so access can be changed or keys rotated without knowing anyone's passphrase.
-// - The admin state (vault/admin.json) is encrypted with a key derived from the
-//   admin passphrase the same way.
+// - The admin state (vault/admin.json) is encrypted with a random master key, which is
+//   locked twice: with the admin passphrase and with a recovery code (see below).
 
 export const ITERATIONS = 600000;
-const enc = new TextEncoder();
-const dec = new TextDecoder();
-const subtle = globalThis.crypto.subtle;
+import { utf8Encode, utf8Decode, toBase64, fromBase64, randomBytes as rb, sha256, pbkdf2Sha256, aesGcmEncrypt, aesGcmDecrypt } from './cipher.js?v=1.3.0';
+
+// Everything below uses Cuberoot's own engine (cipher.js), never the browser's crypto.
+// Keys are plain 32-byte arrays held in memory only while the page is unlocked.
 
 // ---------- encoding helpers ----------
-export function toB64(bytes) {
-  const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-  let s = '';
-  const CH = 0x8000;
-  for (let i = 0; i < u8.length; i += CH) s += String.fromCharCode.apply(null, u8.subarray(i, i + CH));
-  return btoa(s);
-}
-export function fromB64(b64) {
-  const s = atob(b64);
-  const u8 = new Uint8Array(s.length);
-  for (let i = 0; i < s.length; i++) u8[i] = s.charCodeAt(i);
-  return u8;
-}
-export function randomBytes(n) {
-  const u8 = new Uint8Array(n);
-  for (let i = 0; i < n; i += 65536) globalThis.crypto.getRandomValues(u8.subarray(i, Math.min(n, i + 65536)));
-  return u8;
-}
+export const toB64 = toBase64;
+export const fromB64 = fromBase64;
+export const randomBytes = rb;
 export function randomId() {
   return Array.from(randomBytes(16), b => b.toString(16).padStart(2, '0')).join('');
 }
-async function sha256Hex(text) {
-  const h = new Uint8Array(await subtle.digest('SHA-256', enc.encode(text)));
-  return Array.from(h, b => b.toString(16).padStart(2, '0')).join('');
+function sha256Hex(text) {
+  return Array.from(sha256(utf8Encode(text)), b => b.toString(16).padStart(2, '0')).join('');
 }
 
 // ---------- keys ----------
 export function newKeyB64() { return toB64(randomBytes(32)); }
-
-export async function importKey(rawB64) {
-  return subtle.importKey('raw', fromB64(rawB64), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
-}
-
+export async function importKey(rawB64) { return fromB64(rawB64); }
 export async function deriveKey(passphrase, saltB64, iterations = ITERATIONS) {
-  const base = await subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
-  return subtle.deriveKey(
-    { name: 'PBKDF2', hash: 'SHA-256', salt: fromB64(saltB64), iterations },
-    base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  // Let the page draw its "Unlocking…" message before the long calculation starts.
+  await new Promise(r => setTimeout(r, 30));
+  return pbkdf2Sha256(utf8Encode(passphrase), fromB64(saltB64), iterations);
 }
-
-async function asKey(k) { return typeof k === 'string' ? importKey(k) : k; }
+function asKey(k) { return typeof k === 'string' ? fromB64(k) : k; }
 
 // ---------- raw encryption ----------
 export async function encryptBytes(key, bytes, aad) {
-  const k = await asKey(key);
   const iv = randomBytes(12);
-  const ct = new Uint8Array(await subtle.encrypt({ name: 'AES-GCM', iv, additionalData: enc.encode(aad) }, k, bytes));
+  const ct = aesGcmEncrypt(asKey(key), iv, bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes), utf8Encode(aad));
   const out = new Uint8Array(1 + 12 + ct.length);
   out[0] = 1; out.set(iv, 1); out.set(ct, 13);
   return out;
 }
 
 export async function decryptBytes(key, data, aad) {
-  const k = await asKey(key);
   const u8 = data instanceof Uint8Array ? data : new Uint8Array(data);
   if (u8[0] !== 1) throw new Error('Unknown file format');
-  const iv = u8.subarray(1, 13);
-  const pt = await subtle.decrypt({ name: 'AES-GCM', iv, additionalData: enc.encode(aad) }, k, u8.subarray(13));
-  return new Uint8Array(pt);
+  return aesGcmDecrypt(asKey(key), u8.subarray(1, 13), u8.subarray(13), utf8Encode(aad));
 }
 
 export async function encryptJSON(key, obj, aad) {
-  return { v: 1, data: toB64(await encryptBytes(key, enc.encode(JSON.stringify(obj)), aad)) };
+  return { v: 1, data: toB64(await encryptBytes(key, utf8Encode(JSON.stringify(obj)), aad)) };
 }
 export async function decryptJSON(key, box, aad) {
   if (!box || box.v !== 1) throw new Error('Unknown format');
-  return JSON.parse(dec.decode(await decryptBytes(key, fromB64(box.data), aad)));
+  return JSON.parse(utf8Decode(await decryptBytes(key, fromB64(box.data), aad)));
 }
 
 // ---------- passphrases ----------
@@ -152,17 +127,87 @@ export async function openReader(readersFile, email, passphrase) {
 }
 
 // ---------- admin state ----------
-export async function sealAdmin(state, passphrase, saltB64) {
+// Version 2 (from site version 1.3.0)
+//   The admin state is encrypted with a random 256-bit master key. The master key is
+//   stored twice, each copy locked differently:
+//     key      — locked with the admin passphrase   (PBKDF2, 600,000 iterations)
+//     recovery — locked with the recovery code       (PBKDF2, 600,000 iterations)
+//   Either one opens the library. Changing the passphrase or the recovery code only
+//   re-locks the master key; the state and every document stay as they are.
+//   { v: 2, kdf: {salt, iter}, key: box{mk}, recovery: { kdf: {salt, iter}, key: box{mk}, created }, state: box }
+// Version 1 (site versions 1.0 to 1.2): the state is encrypted directly with the
+//   passphrase-derived key: { v: 1, kdf: {salt, iter}, state: box }. It still opens,
+//   and Publish upgrades it to version 2 on the next unlock.
+
+// Recovery codes: 6 groups of 4 characters without look-alikes (about 120 bits).
+export function generateRecoveryCode() {
+  const groups = [];
+  for (let g = 0; g < 6; g++) {
+    let s = '';
+    while (s.length < 4) {
+      const b = randomBytes(1)[0];
+      if (b < 256 - (256 % ALPHABET.length)) s += ALPHABET[b % ALPHABET.length];
+    }
+    groups.push(s);
+  }
+  return groups.join('-');
+}
+
+async function lockMaster(mk, secret, norm, aad) {
+  const salt = toB64(randomBytes(16));
+  const k = await deriveKey(normalizePassphrase(secret, norm), salt);
+  return { kdf: { salt, iter: ITERATIONS }, key: await encryptJSON(k, { mk: toB64(mk) }, aad) };
+}
+async function unlockMaster(lock, secret, norm, aad) {
+  const k = await deriveKey(normalizePassphrase(secret, norm), lock.kdf.salt, lock.kdf.iter);
+  return fromB64((await decryptJSON(k, lock.key, aad)).mk);
+}
+
+// New library (or upgrade): returns { file, kek } where kek is the master key.
+export async function sealAdmin(state, passphrase, recoveryCode, masterKey) {
+  const mk = masterKey ? asKey(masterKey) : randomBytes(32);
+  const p = await lockMaster(mk, passphrase, 'text', 'admin-key');
+  const r = await lockMaster(mk, recoveryCode, 'code', 'admin-recovery');
+  return { file: { v: 2, kdf: p.kdf, key: p.key, recovery: { kdf: r.kdf, key: r.key, created: new Date().toISOString() },
+    state: await encryptJSON(mk, state, 'admin-state') }, kek: mk };
+}
+// Version 1 format — kept only so older files can be made in the tests.
+export async function sealAdminV1(state, passphrase, saltB64) {
   const salt = saltB64 || toB64(randomBytes(16));
   const kek = await deriveKey(normalizePassphrase(passphrase, 'text'), salt);
   return { file: { v: 1, kdf: { salt, iter: ITERATIONS }, state: await encryptJSON(kek, state, 'admin-state') }, kek };
 }
+// Unlock with the passphrase. Returns { state, kek, legacy } (legacy = version 1 file).
 export async function openAdmin(file, passphrase) {
-  const kek = await deriveKey(normalizePassphrase(passphrase, 'text'), file.kdf.salt, file.kdf.iter);
-  try { return { state: await decryptJSON(kek, file.state, 'admin-state'), kek }; }
-  catch (e) { throw new Error('wrong-passphrase'); }
+  try {
+    if (file.v === 2) {
+      const mk = await unlockMaster(file, passphrase, 'text', 'admin-key');
+      return { state: await decryptJSON(mk, file.state, 'admin-state'), kek: mk, legacy: false };
+    }
+    const kek = await deriveKey(normalizePassphrase(passphrase, 'text'), file.kdf.salt, file.kdf.iter);
+    return { state: await decryptJSON(kek, file.state, 'admin-state'), kek, legacy: true };
+  } catch (e) { throw new Error('wrong-passphrase'); }
+}
+// Unlock with the recovery code instead of the passphrase.
+export async function openAdminWithRecovery(file, code) {
+  if (file.v !== 2 || !file.recovery) throw new Error('no-recovery');
+  try {
+    const mk = await unlockMaster(file.recovery, code, 'code', 'admin-recovery');
+    return { state: await decryptJSON(mk, file.state, 'admin-state'), kek: mk, legacy: false };
+  } catch (e) { throw new Error('wrong-code'); }
+}
+// Same master key, new passphrase lock.
+export async function relockPassphrase(file, mk, passphrase) {
+  const p = await lockMaster(asKey(mk), passphrase, 'text', 'admin-key');
+  return { ...file, kdf: p.kdf, key: p.key };
+}
+// Same master key, new recovery code (the old code stops working).
+export async function relockRecovery(file, mk, code) {
+  const r = await lockMaster(asKey(mk), code, 'code', 'admin-recovery');
+  return { ...file, recovery: { kdf: r.kdf, key: r.key, created: new Date().toISOString() } };
 }
 export async function resealAdmin(file, kek, state) {
+  if (file.v === 2) return { ...file, state: await encryptJSON(kek, state, 'admin-state') };
   return { v: 1, kdf: file.kdf, state: await encryptJSON(kek, state, 'admin-state') };
 }
 

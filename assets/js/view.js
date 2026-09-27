@@ -1,7 +1,7 @@
 // Public document viewer: view.html?app=<slug>&id=<id>
 // Shows every page of a PDF (with PDF.js, stored on this site) plus a large Back button.
-import { hydrateIcons, el, icon, formatDate } from './common.js';
-import { PUBLIC_INDEX } from './vault.js';
+import { hydrateIcons, el, icon, formatDate } from './common.js?v=1.3.0';
+import { PUBLIC_INDEX } from './vault.js?v=1.3.0';
 
 hydrateIcons();
 const $ = id => document.getElementById(id);
@@ -18,7 +18,7 @@ async function main() {
   $('back').href = 'docs.html' + (slug ? '?app=' + encodeURIComponent(slug) : '');
   let index;
   try {
-    const res = await fetch(PUBLIC_INDEX, { cache: 'no-cache' });
+    const res = await fetch(PUBLIC_INDEX, { cache: 'no-store' });
     index = res.ok ? await res.json() : { apps: {} };
   } catch (e) { index = { apps: {} }; }
   const app = (index.apps || {})[slug];
@@ -34,17 +34,17 @@ async function main() {
   $('doc-title').textContent = doc.title;
   $('doc-meta').replaceChildren(el('span', { class: 'badge public' }, icon('globe'), 'Public'), el('span', { text: app.name + ' · Updated ' + formatDate(doc.date) }), el('span', { id: 'page-info' }));
   const dl = $('download');
-  dl.href = doc.path; dl.setAttribute('download', doc.original || doc.path.split('/').pop()); dl.hidden = false;
+  dl.href = doc.path + '?t=' + encodeURIComponent(doc.date || ''); dl.setAttribute('download', doc.original || doc.path.split('/').pop()); dl.hidden = false;
 
   if (doc.ext === 'pdf') return showPdf(doc);
   if (['md', 'markdown', 'txt'].includes(doc.ext)) {
-    const res = await fetch(doc.path, { cache: 'no-cache' });
+    const res = await fetch(doc.path + '?t=' + encodeURIComponent(doc.date || ''), { cache: 'no-store' });
     if (!res.ok) return message('This document couldn’t be loaded', 'Please refresh the page and try again.');
     body.replaceChildren(el('pre', { class: 'text-doc', text: await res.text() }));
     return;
   }
   if (['png', 'jpg', 'jpeg'].includes(doc.ext)) {
-    body.replaceChildren(el('div', { class: 'pages' }, el('img', { src: doc.path, alt: doc.title })));
+    body.replaceChildren(el('div', { class: 'pages' }, el('img', { src: doc.path + '?t=' + encodeURIComponent(doc.date || ''), alt: doc.title })));
     return;
   }
   message('This file can’t be shown here', 'Use the Download button to open it on your device.');
@@ -57,10 +57,10 @@ const visible = new Map();
 async function showPdf(doc) {
   body.replaceChildren(el('div', { class: 'viewer-msg progress-note' }, el('div', { class: 'spinner' }), 'Opening the document…'));
   try {
-    const lib = await import('../vendor/pdfjs/pdf.min.mjs');
-    lib.GlobalWorkerOptions.workerSrc = new URL('../vendor/pdfjs/pdf.worker.min.mjs', import.meta.url).href;
+    const lib = await import('../vendor/pdfjs/pdf.min.mjs?v=1.3.0');
+    lib.GlobalWorkerOptions.workerSrc = new URL('../vendor/pdfjs/pdf.worker.min.mjs?v=1.3.0', import.meta.url).href;
     pdf = await lib.getDocument({
-      url: doc.path,
+      url: doc.path + '?t=' + encodeURIComponent(doc.date || ''),
       isEvalSupported: false,
       standardFontDataUrl: new URL('../vendor/pdfjs/standard_fonts/', import.meta.url).href,
       wasmUrl: new URL('../vendor/pdfjs/wasm/', import.meta.url).href,

@@ -1,10 +1,10 @@
-import { init, el, icon } from './common.js';
+import { init, el, icon } from './common.js?v=1.3.0';
 init();
 
 async function loadApps() {
   const box = document.getElementById('app-list');
   try {
-    const res = await fetch('assets/data/apps.json', { cache: 'no-cache' });
+    const res = await fetch('assets/data/apps.json', { cache: 'no-store' });
     const data = await res.json();
     const av = data.availability || {};
     box.replaceChildren(...data.apps.map(a => el('div', { class: 'app-row' },

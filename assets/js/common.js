@@ -1,5 +1,7 @@
 // Shared page behaviour: mobile menu, contact links, icons, small DOM helpers.
-import { SITE } from './config.js';
+import { SITE } from './config.js?v=1.3.0';
+
+
 
 export const ICONS = {
   lock: '<rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
@@ -97,6 +99,12 @@ function setupContact() {
     if (!SITE.contactEmail) n.textContent = n.dataset.contactText;
   });
   document.querySelectorAll('[data-year]').forEach(n => { n.textContent = String(new Date().getFullYear()); });
+}
+
+// On a plain http:// address the page still works fully, but warn about public Wi-Fi.
+export function connectionNotice() {
+  if (location.protocol !== 'http:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return null;
+  return el('div', { class: 'alert info', role: 'status', text: 'Connection not secure (http://). Everything still works and your documents stay encrypted, but avoid signing in on public Wi-Fi.' });
 }
 
 export function init() {

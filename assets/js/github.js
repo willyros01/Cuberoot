@@ -1,6 +1,7 @@
 // Minimal GitHub client for the admin Publish page.
 // Uses the Git Data API so each publish is ONE commit, however many files it touches.
-import { toB64 } from './vault.js';
+import { toB64 } from './vault.js?v=1.3.0';
+import { utf8Encode, utf8Decode } from './cipher.js?v=1.3.0';
 
 const API = 'https://api.github.com';
 
@@ -47,7 +48,7 @@ export class GitHubRepo {
 
   async readJSON(path, ref) {
     const b = await this.read(path, ref);
-    return b ? JSON.parse(new TextDecoder().decode(b)) : null;
+    return b ? JSON.parse(utf8Decode(b)) : null;
   }
 
   async head() {
@@ -72,7 +73,7 @@ export class GitHubRepo {
     const uploads = changes.filter(c => c.bytes !== null);
     for (const c of changes) {
       if (c.bytes === null) { tree.push({ path: c.path, mode: '100644', type: 'blob', sha: null }); continue; }
-      const bytes = typeof c.bytes === 'string' ? new TextEncoder().encode(c.bytes) : c.bytes;
+      const bytes = typeof c.bytes === 'string' ? utf8Encode(c.bytes) : c.bytes;
       const blob = await this.json('/git/blobs', { method: 'POST', body: { content: toB64(bytes), encoding: 'base64' } });
       tree.push({ path: c.path, mode: '100644', type: 'blob', sha: blob.sha });
       done++; if (onProgress) onProgress(done, uploads.length);

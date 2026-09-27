@@ -1,9 +1,10 @@
 // Documentation library: sign in, decrypt the lists, open documents. All in the browser.
-import { SITE } from './config.js';
-import { init, el, icon, formatDate, formatSize } from './common.js';
-import { openReader, decryptIndex, decryptDoc, indexPath, docPath, PUBLIC_INDEX } from './vault.js';
+import { SITE } from './config.js?v=1.3.0';
+import { init, el, icon, formatDate, formatSize, connectionNotice } from './common.js?v=1.3.0';
+import { openReader, decryptIndex, decryptDoc, indexPath, docPath, PUBLIC_INDEX } from './vault.js?v=1.3.0';
 
 init();
+{ const n = connectionNotice(); if (n) document.getElementById('signin-form').prepend(n); }
 
 const $ = id => document.getElementById(id);
 let session = null;           // { name, email, apps: [{slug, name, key, docs}] }
@@ -53,7 +54,7 @@ $('signin-form').addEventListener('submit', async ev => {
     await openLibrary(grant);
   } catch (e) {
     console.error(e);
-    showError('The library couldn’t be reached. Check your connection and try again.');
+    showError(e.message === 'no-random' ? 'This browser cannot provide secure random numbers. Please use an up-to-date browser.' : 'The library couldn’t be reached. Check your connection and try again.');
   } finally {
     $('signin-btn').disabled = false;
     $('signin-progress').hidden = true;
@@ -62,7 +63,7 @@ $('signin-form').addEventListener('submit', async ev => {
 
 // ---------- library ----------
 async function loadAppMeta() {
-  try { const r = await fetch('assets/data/apps.json', { cache: 'no-cache' }); return (await r.json()).apps || []; }
+  try { const r = await fetch('assets/data/apps.json', { cache: 'no-store' }); return (await r.json()).apps || []; }
   catch (e) { return []; }
 }
 
@@ -145,7 +146,7 @@ function docRow(app, d) {
       tag,
       el('div', { class: 'doc-actions' },
         el('a', { class: 'btn btn-small', href: `view.html?app=${encodeURIComponent(app.slug)}&id=${encodeURIComponent(d.id)}`, target: '_blank', rel: 'noopener', 'aria-label': 'Read ' + d.title, text: 'Read' }),
-        el('a', { class: 'btn btn-ghost btn-small', href: d.path, download: d.original || '', 'aria-label': 'Download ' + d.title, text: 'Download' })));
+        el('a', { class: 'btn btn-ghost btn-small', href: d.path + '?t=' + encodeURIComponent(d.date || ''), download: d.original || '', 'aria-label': 'Download ' + d.title, text: 'Download' })));
   }
   return el('div', { class: 'doc-row' },
     el('span', { class: 'type' + (d.ext === 'pdf' ? ' pdf' : ''), text: (d.ext || 'file').toUpperCase().slice(0, 4) }),

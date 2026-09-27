@@ -1,15 +1,14 @@
 // Cuberoot Publish — the admin page. Encrypts documents in this browser and commits
 // only encrypted files to the GitHub repository. Nothing readable ever leaves the device.
-import { SITE } from './config.js';
-import { el, icon, hydrateIcons, formatDate, formatSize } from './common.js';
-import { GitHubRepo } from './github.js';
-import * as V from './vault.js';
+import { SITE } from './config.js?v=1.3.0';
+import { el, icon, hydrateIcons, formatDate, formatSize, connectionNotice } from './common.js?v=1.3.0';
+import { GitHubRepo } from './github.js?v=1.3.0';
+import * as V from './vault.js?v=1.3.0';
 
 hydrateIcons();
 const root = document.getElementById('admin-root');
 document.getElementById('version').textContent = 'Cuberoot Publish · version ' + SITE.version;
 
-const TOKEN_KEY = 'cuberoot.admin.token.v1';
 const ADMIN_PATH = 'vault/admin.json';
 const READERS_PATH = 'vault/readers.json';
 
@@ -44,6 +43,7 @@ function errorText(e) {
   if (e && e.status === 401) return 'GitHub did not accept the access token. It may have expired — create a new one in Settings.';
   if (e && e.status === 403) return 'GitHub refused the request. Check that the token can read and write Contents on the Cuberoot repository.';
   if (e && e.status === 404) return 'GitHub could not find the repository. Check the token has access to ' + SITE.owner + '/' + SITE.repo + '.';
+  if (e && e.message === 'no-random') return 'This browser cannot provide secure random numbers, so it cannot encrypt. Please use an up-to-date Safari, Chrome, Edge or Firefox.';
   if (e && e.message === 'conflict') return 'The library was changed from another device or tab. Reload this page, then try again.';
   return (e && e.message) ? 'Something went wrong: ' + e.message : 'Something went wrong.';
 }
@@ -86,20 +86,12 @@ function showSecret(record, pass, isNew) {
     el('div', { class: 'dialog-actions' }, shareBtn, copyBtn, el('button', { class: 'btn btn-ghost', type: 'button', text: 'Done', onclick: () => close() }))));
 }
 
-// ---------------- token storage (encrypted with the admin key) ----------------
-async function saveToken(token) {
-  repo.token = token;
-  try { localStorage.setItem(TOKEN_KEY, JSON.stringify({ salt: adminFile.kdf.salt, box: await V.encryptJSON(kek, { token }, 'gh-token') })); }
-  catch (e) { /* storage unavailable — token stays in memory for this visit */ }
-}
-async function loadToken() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(TOKEN_KEY) || 'null');
-    if (!saved || saved.salt !== adminFile.kdf.salt) return null;
-    return (await V.decryptJSON(kek, saved.box, 'gh-token')).token;
-  } catch (e) { return null; }
-}
-function forgetToken() { try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ } repo.token = ''; }
+// ---------------- GitHub token ----------------
+// The token is kept inside the encrypted admin state in the repository itself — never in
+// the browser's storage — so every device and every web address finds it after unlock.
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+function savedToken() { return state && state.github && state.github.token ? state.github.token : null; }
+function setToken(token) { state.github = { token, saved: new Date().toISOString() }; repo.token = token; }
 
 async function checkToken(token) {
   const test = new GitHubRepo({ owner: SITE.owner, repo: SITE.repo, token });
@@ -111,7 +103,7 @@ async function checkToken(token) {
 
 // ---------------- loading ----------------
 async function loadSiteApps() {
-  try { siteApps = (await (await fetch('../assets/data/apps.json', { cache: 'no-cache' })).json()).apps || []; }
+  try { siteApps = (await (await fetch('../assets/data/apps.json', { cache: 'no-store' })).json()).apps || []; }
   catch (e) { siteApps = []; }
 }
 async function fetchAdminFile() {
@@ -149,13 +141,45 @@ async function readersFile() {
 
 // Commit the admin state and reader list along with any other changes.
 async function save(extra, onProgress) {
+  await commitAdmin(await V.resealAdmin(adminFile, kek, state), extra, 'Update library (encrypted)', onProgress);
+}
+// One commit with a new admin.json. adminFile only changes once GitHub has accepted it.
+async function commitAdmin(newAdmin, extra = [], message = 'Update library (encrypted)', onProgress) {
   await assertFresh();
-  const newAdmin = await V.resealAdmin(adminFile, kek, state);
   const changes = [...extra,
     { path: ADMIN_PATH, bytes: JSON.stringify(newAdmin, null, 1) },
     { path: READERS_PATH, bytes: JSON.stringify(await readersFile(), null, 1) }];
-  knownHead = await repo.commit('Update library (encrypted)', changes, onProgress);
+  knownHead = await repo.commit(message, changes, onProgress);
   adminFile = newAdmin;
+}
+
+// ---------------- recovery code ----------------
+// Shown once, right after it has been saved to GitHub. The dialog cannot be closed until
+// Willy confirms he has written it down.
+function showRecoveryCode(code, isNew) {
+  return new Promise(resolve => {
+    const copyBtn = el('button', { class: 'btn btn-ghost', type: 'button', text: 'Copy' });
+    copyBtn.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(code); copyBtn.textContent = 'Copied'; } catch (e) { copyBtn.textContent = 'Select the code and copy it'; }
+    });
+    const tick = el('input', { type: 'checkbox', id: 'rc-ok' });
+    const done = el('button', { class: 'btn', type: 'button', text: 'Done', disabled: true });
+    tick.addEventListener('change', () => { done.disabled = !tick.checked; });
+    dialog(close => {
+      done.addEventListener('click', () => resolve(close(true)));
+      return el('div', { class: 'dialog-body' },
+        el('h2', { text: isNew ? 'Your new recovery code' : 'Your recovery code' }),
+        el('p', {}, 'If you ever forget your admin passphrase, this code lets you choose a new one. ', el('b', { text: 'This is the only time it is shown.' })),
+        el('div', { class: 'secret', text: code }),
+        el('p', { class: 'hint', text: 'Write it on paper and keep it with your important papers, away from this device. Anyone who has this code can open Publish, so do not email it or keep it in the same place as your passphrase. Capitals and dashes don’t matter.' }),
+        isNew === 'replaced' ? el('p', { class: 'hint', text: 'Your previous recovery code no longer works.' }) : null,
+        el('label', { class: 'check-row', for: 'rc-ok' }, tick, el('span', { text: 'I have written down my recovery code' })),
+        el('div', { class: 'dialog-actions' }, copyBtn, done));
+    }, { locked: true });
+  });
+}
+function recoveryInfo() {
+  return adminFile && adminFile.recovery ? adminFile.recovery : null;
 }
 
 // ---------------- screens ----------------
@@ -177,7 +201,7 @@ function setupScreen() {
   const token = passField('token', 'GitHub access token', { hint: 'A fine-grained token for ' + SITE.owner + '/' + SITE.repo + ' with Contents: Read and write. The setup guide shows how to make one.' });
   const name = textField('name', 'Your name');
   const email = textField('email', 'Your email', 'email', 'You will sign in to the library with this email and the admin passphrase.');
-  const p1 = passField('p1', 'Admin passphrase', { autocomplete: 'new-password', hint: 'At least 14 characters. Four or five random words work well. There is no way to recover it, so keep a copy somewhere safe.' });
+  const p1 = passField('p1', 'Admin passphrase', { autocomplete: 'new-password', hint: 'At least 14 characters. Four or five random words work well. You will also get a recovery code, in case you ever forget it.' });
   const p2 = passField('p2', 'Repeat the admin passphrase', { autocomplete: 'new-password' });
   const err = el('div', { hidden: true });
   const btn = el('button', { class: 'btn btn-block', type: 'submit', text: 'Set up the library' });
@@ -200,21 +224,24 @@ function setupScreen() {
         scope: 'all', rkey: V.newKeyB64(), norm: 'text', admin: true, created: new Date().toISOString() };
       me.lock = await V.wrapReaderKey(me, p1.input.value);
       state = { v: 1, apps: {}, readers: [me], created: new Date().toISOString() };
-      const sealed = await V.sealAdmin(state, p1.input.value);
+      setToken(repo.token);
+      const rc = V.generateRecoveryCode();
+      const sealed = await V.sealAdmin(state, p1.input.value, rc);
       adminFile = sealed.file; kek = sealed.kek;
       b.set('Saving to GitHub…');
       knownHead = await repo.commit('Set up the library (encrypted)', [
         { path: ADMIN_PATH, bytes: JSON.stringify(adminFile, null, 1) },
         { path: READERS_PATH, bytes: JSON.stringify(await readersFile(), null, 1) }]);
-      await saveToken(repo.token);
       b.done();
+      await showRecoveryCode(rc);
       flash('ok', 'The library is set up. Choose an app and add your first documents.');
       mainScreen();
+      startIdleLock();
     } catch (e) { b.done(); btn.disabled = false; fail(errorText(e)); }
   });
   root.replaceChildren(el('div', { class: 'center-page' },
     el('div', { class: 'eyebrow', text: 'First-time setup' }), el('h1', { text: 'Set up the library' }),
-    el('p', { class: 'muted', text: 'This runs once. It creates your admin key and saves it, encrypted, to the Cuberoot repository.' }), form));
+    el('p', { class: 'muted', text: 'This runs once. It creates your admin key and saves it, with your GitHub token, encrypted in the Cuberoot repository.' }), form));
 }
 
 function unlockScreen() {
@@ -229,40 +256,42 @@ function unlockScreen() {
     try {
       const opened = await V.openAdmin(adminFile, p.input.value);
       state = opened.state; kek = opened.kek;
-      const token = await loadToken();
+      const token = savedToken();
       if (token) {
         repo.token = token;
         try { await afterToken(p.input.value); return; }
-        catch (e) { if (e.status === 401) { forgetToken(); tokenScreen(p.input.value, 'The saved GitHub token no longer works. Please paste a new one.'); return; } throw e; }
+        catch (e) { if (e.status === 401) { tokenScreen(p.input.value, 'Your passphrase is correct, but GitHub no longer accepts the saved token (it may have expired). Paste a new token once; it replaces the old one for every device.'); return; } throw e; }
       }
-      tokenScreen(p.input.value);
+      tokenScreen(p.input.value, 'Your passphrase is correct. Paste your GitHub token once. It is then kept, encrypted with your admin passphrase, inside the library itself, so every device and every web address will find it.');
     } catch (e) {
       err.replaceChildren(alertBox('error', e.message === 'wrong-passphrase' ? 'That passphrase is not right. Try again.' : errorText(e)));
       err.hidden = false;
     } finally { btn.disabled = false; note.hidden = true; }
   });
+  const forgot = el('button', { class: 'link-btn', type: 'button', text: 'Forgot your passphrase? Use your recovery code', onclick: () => recoveryScreen() });
   root.replaceChildren(el('div', { class: 'center-page' },
-    el('div', { class: 'eyebrow', text: 'Admin · Willy only' }), el('h1', { text: 'Unlock Publish' }), form,
+    el('div', { class: 'eyebrow', text: 'Admin · Willy only' }), el('h1', { text: 'Unlock Publish' }), connectionNotice(), form,
+    el('p', {}, forgot),
     el('p', { class: 'hint', text: 'Your passphrase never leaves this device.' })));
   p.input.focus();
 }
 
 function tokenScreen(passphrase, message) {
-  const t = passField('tk', 'GitHub access token', { hint: 'Fine-grained token for ' + SITE.owner + '/' + SITE.repo + ' with Contents: Read and write. It is saved on this device, encrypted with your admin key.' });
+  const t = passField('tk', 'GitHub access token', { hint: 'Fine-grained token for ' + SITE.owner + '/' + SITE.repo + ' with Contents: Read and write. It is saved in the library, encrypted.' });
   const err = el('div', { hidden: true });
   const btn = el('button', { class: 'btn btn-block', type: 'submit', text: 'Connect GitHub' });
   const form = el('form', { class: 'stack-lg', novalidate: true }, message ? alertBox('info', message) : null, t.node, err, btn);
   form.addEventListener('submit', async ev => {
     ev.preventDefault();
     btn.disabled = true; err.hidden = true;
-    try { await checkToken(t.input.value.trim()); await saveToken(repo.token); await afterToken(passphrase); }
+    try { await checkToken(t.input.value.trim()); await afterToken(passphrase, repo.token); }
     catch (e) { err.replaceChildren(alertBox('error', errorText(e))); err.hidden = false; }
     finally { btn.disabled = false; }
   });
   root.replaceChildren(el('div', { class: 'center-page' }, el('div', { class: 'eyebrow', text: 'This device' }), el('h1', { text: 'Connect GitHub' }), form));
 }
 
-async function afterToken(passphrase) {
+async function afterToken(passphrase, newToken) {
   const b = busy('Loading the library…');
   try {
     await repo.info();
@@ -270,13 +299,127 @@ async function afterToken(passphrase) {
     knownHead = await repo.head();
     const fresh = await repo.readJSON(ADMIN_PATH, knownHead);
     if (fresh && fresh.state.data !== adminFile.state.data) {
-      const opened = fresh.kdf.salt === adminFile.kdf.salt ? { state: await V.decryptJSON(kek, fresh.state, 'admin-state'), kek } : await V.openAdmin(fresh, passphrase);
+      let opened;
+      try { opened = { state: await V.decryptJSON(kek, fresh.state, 'admin-state'), kek }; }
+      catch (e) { opened = await V.openAdmin(fresh, passphrase); }
       state = opened.state; kek = opened.kek; adminFile = fresh;
     }
     await loadIndexes();
+    if (newToken) {
+      b.set('Saving the token, encrypted, to the library…');
+      const snapshot = JSON.stringify(state);
+      try { setToken(newToken); await save([]); }
+      catch (e) { state = JSON.parse(snapshot); repo.token = newToken; flash('error', 'The token works, but it could not be saved yet, so you will be asked again next time. ' + errorText(e)); }
+    }
   } finally { b.done(); }
-  mainScreen();
   startIdleLock();
+  if (!recoveryInfo()) return upgradeScreen(passphrase);
+  mainScreen();
+}
+
+// Libraries made before version 1.3.0 have no recovery code yet. Add one now.
+function upgradeScreen(passphrase) {
+  document.getElementById('admin-tools').hidden = true;
+  const err = el('div', { hidden: true });
+  const btn = el('button', { class: 'btn btn-block', type: 'button', text: 'Create my recovery code' });
+  btn.addEventListener('click', async () => {
+    btn.disabled = true; err.hidden = true;
+    const b = busy('Creating your recovery code…');
+    try {
+      const rc = V.generateRecoveryCode();
+      // A new master key; the state is the same. Nothing counts until GitHub accepts the commit.
+      const sealed = await V.sealAdmin(state, passphrase, rc);
+      b.set('Saving to GitHub…');
+      await commitAdmin(sealed.file, [], 'Add admin recovery code (encrypted)');
+      kek = sealed.kek;
+      b.done();
+      await showRecoveryCode(rc);
+      flash('ok', 'Your recovery code is saved. You can make a new one at any time in Settings.');
+      mainScreen();
+    } catch (e) {
+      b.done(); btn.disabled = false;
+      err.replaceChildren(alertBox('error', 'Nothing was changed. ' + errorText(e))); err.hidden = false;
+    }
+  });
+  root.replaceChildren(el('div', { class: 'center-page' },
+    el('div', { class: 'eyebrow', text: 'One more step' }), el('h1', { text: 'Create a recovery code' }),
+    el('p', { class: 'muted', text: 'A recovery code lets you choose a new admin passphrase if you ever forget it. It is created once, shown once, and saved in the library encrypted — just like your passphrase, it is never stored anywhere readable.' }),
+    err, btn,
+    el('p', {}, el('button', { class: 'link-btn', type: 'button', text: 'Not now', onclick: () => { flash('info', 'You have no recovery code yet. Create one in Settings.'); mainScreen(); } }))));
+}
+
+// Forgot the passphrase: recovery code → new passphrase → one commit.
+function recoveryScreen() {
+  const code = passField('rc', 'Recovery code', { hint: 'The code of 24 characters you wrote down, like K7QF-9MXA-2PLD-8RTE-HW3N-4JCB. Capitals and dashes don’t matter.' });
+  const err = el('div', { hidden: true });
+  const btn = el('button', { class: 'btn btn-block', type: 'submit', text: 'Check the code' });
+  const note = el('div', { class: 'progress-note', hidden: true }, el('div', { class: 'spinner' }), 'Checking…');
+  const form = el('form', { class: 'stack-lg', novalidate: true }, code.node, err, btn, note);
+  form.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    err.hidden = true; btn.disabled = true; note.hidden = false;
+    try {
+      const opened = await V.openAdminWithRecovery(adminFile, code.input.value);
+      newPassphraseScreen(opened);
+    } catch (e) {
+      const t = e.message === 'wrong-code' ? 'That recovery code is not right. Check it and try again.'
+        : e.message === 'no-recovery' ? 'This library has no recovery code yet. Recovery codes are created when you unlock Publish with version 1.3.0 or later.'
+        : errorText(e);
+      err.replaceChildren(alertBox('error', t)); err.hidden = false;
+    } finally { btn.disabled = false; note.hidden = true; }
+  });
+  root.replaceChildren(el('div', { class: 'center-page' },
+    el('div', { class: 'eyebrow', text: 'Admin · Willy only' }), el('h1', { text: 'Recover Publish' }), connectionNotice(), form,
+    el('p', {}, el('button', { class: 'link-btn', type: 'button', text: '← Back to the passphrase', onclick: () => unlockScreen() }))));
+  code.input.focus();
+}
+
+function newPassphraseScreen(opened) {
+  const needToken = !(opened.state.github && opened.state.github.token);
+  const t = needToken ? passField('tk3', 'GitHub access token', { hint: 'No working token is saved in the library. Paste one; it is saved with the new passphrase.' }) : null;
+  const p1 = passField('np1', 'New admin passphrase', { autocomplete: 'new-password', hint: 'At least 14 characters. Four or five random words work well.' });
+  const p2 = passField('np2', 'Repeat the new admin passphrase', { autocomplete: 'new-password' });
+  const err = el('div', { hidden: true });
+  const btn = el('button', { class: 'btn btn-block', type: 'submit', text: 'Save the new passphrase' });
+  const form = el('form', { class: 'stack-lg', novalidate: true }, alertBox('ok', 'The recovery code is correct. Choose a new admin passphrase.'), t ? t.node : null, p1.node, p2.node, err, btn);
+  form.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const fail = x => { err.replaceChildren(alertBox('error', x)); err.hidden = false; };
+    err.hidden = true;
+    if (p1.input.value.length < 14) return fail('The new passphrase must be at least 14 characters.');
+    if (p1.input.value !== p2.input.value) return fail('The two passphrases don’t match.');
+    if (t && !t.input.value.trim()) return fail('Please paste your GitHub access token.');
+    btn.disabled = true;
+    const b = busy('Connecting to GitHub…');
+    state = clone(opened.state); kek = opened.kek;
+    try {
+      if (t) { await checkToken(t.input.value.trim()); setToken(repo.token); }
+      else {
+        repo.token = state.github.token;
+        try { await repo.info(); }
+        catch (e) { if (e.status === 401) { b.done(); btn.disabled = false; opened.state.github = null; return newPassphraseScreen(opened); } throw e; }
+      }
+      b.set('Locking the library with the new passphrase…');
+      const pass = p1.input.value;
+      // Your own sign-in to the Library uses the admin passphrase too, so re-lock it as well.
+      for (const r of state.readers) if (r.admin) r.lock = await V.wrapReaderKey(r, pass);
+      let next = await V.relockPassphrase(adminFile, kek, pass);
+      next = await V.resealAdmin(next, kek, state);
+      b.set('Saving to GitHub…');
+      knownHead = null;
+      await commitAdmin(next, [], 'New admin passphrase (encrypted)');
+      b.done();
+      flash('ok', 'Your new admin passphrase is saved. Use it from now on, here and on the Library page. Your recovery code still works; you can make a new one in Settings.');
+      await afterToken(pass);
+    } catch (e) {
+      b.done(); btn.disabled = false;
+      state = null; kek = null;
+      fail('Nothing was changed. ' + errorText(e));
+    }
+  });
+  root.replaceChildren(el('div', { class: 'center-page' },
+    el('div', { class: 'eyebrow', text: 'Recover Publish' }), el('h1', { text: 'Choose a new passphrase' }), form));
+  (t ? t.input : p1.input).focus();
 }
 
 // ---------------- main screen ----------------
@@ -454,8 +597,8 @@ async function publish(current) {
   try {
     const slug = await ensureApp(current);
     const app = state.apps[slug];
-    const index = indexes[slug] ? structuredClone(indexes[slug]) : { v: 1, app: { slug, name: app.name }, docs: [] };
-    const pi = structuredClone(publicIndex);
+    const index = indexes[slug] ? clone(indexes[slug]) : { v: 1, app: { slug, name: app.name }, docs: [] };
+    const pi = clone(publicIndex);
     const taken = takenPaths();
     const changes = [];
     let i = 0, priv = 0;
@@ -501,9 +644,9 @@ async function makePublic(current, d) {
     const data = await repo.read(V.docPath(slug, d.id), knownHead);
     if (!data) throw new Error('the encrypted file could not be found');
     const plain = await V.decryptDoc(app.key, slug, d.id, data);
-    const index = structuredClone(indexes[slug]);
+    const index = clone(indexes[slug]);
     index.docs = index.docs.filter(x => x.id !== d.id);
-    const pi = structuredClone(publicIndex);
+    const pi = clone(publicIndex);
     const { public: _p, ...meta } = d;
     meta.path = V.publicPath(slug, d.title, d.ext, takenPaths());
     withPublicApp(pi, slug, app.name).docs.push(meta);
@@ -524,11 +667,11 @@ async function makePrivate(current, d) {
     const plain = await repo.read(d.path, knownHead);
     if (!plain) throw new Error('the public file could not be found');
     const id = V.randomId();
-    const index = indexes[slug] ? structuredClone(indexes[slug]) : { v: 1, app: { slug, name: app.name }, docs: [] };
+    const index = indexes[slug] ? clone(indexes[slug]) : { v: 1, app: { slug, name: app.name }, docs: [] };
     const { public: _p, path: _path, ...meta } = d;
     meta.id = id;
     index.docs.push(meta);
-    const pi = structuredClone(publicIndex);
+    const pi = clone(publicIndex);
     pi.apps[slug].docs = pi.apps[slug].docs.filter(x => x.id !== d.id);
     if (!pi.apps[slug].docs.length) delete pi.apps[slug];
     await save([{ path: V.docPath(slug, id), bytes: await V.encryptDoc(app.key, slug, id, plain) }, { path: d.path, bytes: null },
@@ -545,13 +688,13 @@ async function removeDoc(current, d) {
   const b = busy('Removing…');
   try {
     if (d.public) {
-      const pi = structuredClone(publicIndex);
+      const pi = clone(publicIndex);
       pi.apps[slug].docs = pi.apps[slug].docs.filter(x => x.id !== d.id);
       if (!pi.apps[slug].docs.length) delete pi.apps[slug];
       await save([{ path: d.path, bytes: null }, publicIndexChange(pi)]);
       publicIndex = pi;
     } else {
-      const index = structuredClone(indexes[slug]);
+      const index = clone(indexes[slug]);
       index.docs = index.docs.filter(x => x.id !== d.id);
       await save([{ path: V.docPath(slug, d.id), bytes: null }, { path: V.indexPath(slug), bytes: JSON.stringify(await V.encryptIndex(app.key, slug, index)) }]);
       indexes[slug] = index;
@@ -570,7 +713,7 @@ async function replaceDoc(current, d, file) {
     const kind = V.fileKind(file.name);
     const upd = { ext: kind.ext, mime: kind.mime, size: bytes.length, date: new Date().toISOString(), original: file.name };
     if (d.public) {
-      const pi = structuredClone(publicIndex);
+      const pi = clone(publicIndex);
       const entry = pi.apps[slug].docs.find(x => x.id === d.id);
       const changes = [];
       let path = d.path;
@@ -583,7 +726,7 @@ async function replaceDoc(current, d, file) {
       publicIndex = pi;
     } else {
       const id = V.randomId();
-      const index = structuredClone(indexes[slug]);
+      const index = clone(indexes[slug]);
       Object.assign(index.docs.find(x => x.id === d.id), upd, { id });
       b.set('Uploading to GitHub…');
       await save([{ path: V.docPath(slug, id), bytes: await V.encryptDoc(app.key, slug, id, bytes) },
@@ -727,7 +870,7 @@ async function rotateApps(slugs) {
     const newIndexes = {};
     for (const slug of slugs) {
       const oldKey = state.apps[slug].key, newKey = V.newKeyB64();
-      const index = structuredClone(indexes[slug] || { v: 1, app: { slug, name: state.apps[slug].name }, docs: [] });
+      const index = clone(indexes[slug] || { v: 1, app: { slug, name: state.apps[slug].name }, docs: [] });
       let i = 0;
       for (const d of index.docs) {
         i++; b.set(`Re-encrypting ${state.apps[slug].name}: ${i} of ${index.docs.length}`);
@@ -756,15 +899,105 @@ function settingsTab() {
     el('div', { class: 'panel form-box' },
       el('div', { class: 'step-title', text: 'GitHub' }),
       el('p', {}, 'Repository: ', el('b', { text: SITE.owner + '/' + SITE.repo }), ' · branch ', el('b', { text: repo.branch })),
-      el('p', { class: 'muted', text: 'The access token is saved on this device only, encrypted with your admin key.' }),
+      el('p', { class: 'muted', text: 'The access token is kept inside the library, encrypted with your admin passphrase. Every device and web address finds it after you unlock. Nothing is stored in the browser.' }),
       el('div', { class: 'dialog-actions' },
-        el('button', { class: 'btn btn-ghost', type: 'button', text: 'Replace the token', onclick: () => { forgetToken(); tokenScreenFromMain(); } }),
-        el('button', { class: 'btn btn-danger', type: 'button', text: 'Forget the token on this device', onclick: async () => {
-          if (await confirmBox({ title: 'Forget the token?', text: 'You will need to paste a token again the next time you publish from this device.', yes: 'Yes, forget it' })) { forgetToken(); location.reload(); }
+        el('button', { class: 'btn btn-ghost', type: 'button', text: 'Replace the token', onclick: () => tokenScreenFromMain() }),
+        el('button', { class: 'btn btn-danger', type: 'button', text: 'Remove the saved token', onclick: async () => {
+          if (!(await confirmBox({ title: 'Remove the saved token?', text: 'You will need to paste a token the next time you unlock Publish, on any device.', yes: 'Yes, remove it' }))) return;
+          const snapshot = JSON.stringify(state);
+          const b = busy('Removing the token…');
+          try { delete state.github; await save([]); b.done(); location.reload(); }
+          catch (e) { state = JSON.parse(snapshot); b.done(); flash('error', 'Nothing was changed. ' + errorText(e)); mainScreen(); }
         } }))),
     el('div', { class: 'panel form-box' },
+      el('div', { class: 'step-title', text: 'Admin passphrase' }),
+      el('p', { class: 'muted', text: 'Used to unlock Publish and to sign in to the Library.' }),
+      el('div', { class: 'dialog-actions' },
+        el('button', { class: 'btn btn-ghost', type: 'button', text: 'Change the admin passphrase', onclick: () => changePassphraseScreen() }))),
+    el('div', { class: 'panel form-box' },
+      el('div', { class: 'step-title', text: 'Recovery code' }),
+      recoveryInfo()
+        ? el('p', {}, 'You have a recovery code, made ', el('b', { text: formatDate(recoveryInfo().created) }), '. If you forget your passphrase, use it on the unlock page.')
+        : alertBox('info', 'You have no recovery code yet. Without one, a forgotten passphrase cannot be recovered.'),
+      el('div', { class: 'dialog-actions' },
+        el('button', { class: 'btn ' + (recoveryInfo() ? 'btn-ghost' : ''), type: 'button', text: recoveryInfo() ? 'Make a new recovery code' : 'Create my recovery code', onclick: () => newRecoveryCode() }))),
+    el('div', { class: 'panel form-box' },
       el('div', { class: 'step-title', text: 'Security' }),
-      el('p', { class: 'muted', text: 'Publish locks itself after ' + SITE.lockMinutes + ' minutes without use. Your admin passphrase cannot be recovered — keep a copy somewhere safe.' })));
+      el('p', { class: 'muted', text: 'Publish locks itself after ' + SITE.lockMinutes + ' minutes without use.' })));
+}
+
+// Settings → Change the admin passphrase (asks for the current one first).
+function changePassphraseScreen() {
+  document.getElementById('admin-tools').hidden = true;
+  const cur = passField('cp0', 'Current admin passphrase', { autocomplete: 'current-password' });
+  const p1 = passField('cp1', 'New admin passphrase', { autocomplete: 'new-password', hint: 'At least 14 characters.' });
+  const p2 = passField('cp2', 'Repeat the new admin passphrase', { autocomplete: 'new-password' });
+  const err = el('div', { hidden: true });
+  const btn = el('button', { class: 'btn btn-block', type: 'submit', text: 'Save the new passphrase' });
+  const form = el('form', { class: 'stack-lg', novalidate: true }, cur.node, p1.node, p2.node, err, btn,
+    el('button', { class: 'btn btn-ghost btn-block', type: 'button', text: 'Cancel', onclick: () => mainScreen() }));
+  form.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const fail = x => { err.replaceChildren(alertBox('error', x)); err.hidden = false; };
+    err.hidden = true;
+    if (p1.input.value.length < 14) return fail('The new passphrase must be at least 14 characters.');
+    if (p1.input.value !== p2.input.value) return fail('The two new passphrases don’t match.');
+    btn.disabled = true;
+    const b = busy('Checking your current passphrase…');
+    const snapshot = JSON.stringify(state);
+    try {
+      try { await V.openAdmin(adminFile, cur.input.value); }
+      catch (e) { b.done(); btn.disabled = false; return fail('The current passphrase is not right.'); }
+      b.set('Locking the library with the new passphrase…');
+      const pass = p1.input.value;
+      for (const r of state.readers) if (r.admin) r.lock = await V.wrapReaderKey(r, pass);
+      let next = adminFile.v === 2 ? await V.relockPassphrase(adminFile, kek, pass) : null;
+      if (!next) throw new Error('Create a recovery code first, then change the passphrase.');
+      next = await V.resealAdmin(next, kek, state);
+      b.set('Saving to GitHub…');
+      await commitAdmin(next, [], 'New admin passphrase (encrypted)');
+      b.done();
+      flash('ok', 'Your new admin passphrase is saved. Use it from now on, here and on the Library page.');
+      mainScreen();
+    } catch (e) { state = JSON.parse(snapshot); b.done(); btn.disabled = false; fail('Nothing was changed. ' + errorText(e)); }
+  });
+  root.replaceChildren(el('div', { class: 'center-page' }, el('h1', { text: 'Change the admin passphrase' }), form));
+  cur.input.focus();
+}
+
+// Settings → Make a new recovery code (the old one stops working).
+async function newRecoveryCode() {
+  if (recoveryInfo() && !(await confirmBox({ title: 'Make a new recovery code?', text: 'Your current recovery code will stop working. The new one is shown once.', yes: 'Yes, make a new one', no: 'No, keep the current one', danger: false }))) return;
+  if (!recoveryInfo()) return adminPassphrasePrompt();
+  const b = busy('Creating a new recovery code…');
+  try {
+    const rc = V.generateRecoveryCode();
+    const next = await V.relockRecovery(adminFile, kek, rc);
+    b.set('Saving to GitHub…');
+    await commitAdmin(next, [], 'New admin recovery code (encrypted)');
+    b.done();
+    await showRecoveryCode(rc, 'replaced');
+    flash('ok', 'Your new recovery code is saved. The old one no longer works.');
+  } catch (e) { b.done(); flash('error', 'Nothing was changed. ' + errorText(e)); }
+  mainScreen();
+}
+// Older library without a recovery code: needs the passphrase once to add it.
+function adminPassphrasePrompt() {
+  document.getElementById('admin-tools').hidden = true;
+  const cur = passField('up0', 'Admin passphrase', { autocomplete: 'current-password' });
+  const err = el('div', { hidden: true });
+  const form = el('form', { class: 'stack-lg', novalidate: true },
+    el('p', { class: 'muted', text: 'Type your admin passphrase once to create your recovery code.' }), cur.node, err,
+    el('button', { class: 'btn btn-block', type: 'submit', text: 'Continue' }),
+    el('button', { class: 'btn btn-ghost btn-block', type: 'button', text: 'Cancel', onclick: () => mainScreen() }));
+  form.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const b = busy('Checking your passphrase…');
+    try { await V.openAdmin(adminFile, cur.input.value); b.done(); upgradeScreen(cur.input.value); }
+    catch (e) { b.done(); err.replaceChildren(alertBox('error', 'That passphrase is not right.')); err.hidden = false; }
+  });
+  root.replaceChildren(el('div', { class: 'center-page' }, el('h1', { text: 'Create a recovery code' }), form));
+  cur.input.focus();
 }
 function tokenScreenFromMain() {
   document.getElementById('admin-tools').hidden = true;
@@ -773,8 +1006,10 @@ function tokenScreenFromMain() {
   const form = el('form', { class: 'stack-lg', novalidate: true }, t.node, err, el('button', { class: 'btn btn-block', type: 'submit', text: 'Save the new token' }));
   form.addEventListener('submit', async ev => {
     ev.preventDefault();
-    try { await checkToken(t.input.value.trim()); await saveToken(repo.token); flash('ok', 'New token saved.'); mainScreen(); }
-    catch (e) { err.replaceChildren(alertBox('error', errorText(e))); err.hidden = false; }
+    const snapshot = JSON.stringify(state);
+    const oldToken = repo.token;
+    try { await checkToken(t.input.value.trim()); setToken(repo.token); await save([]); flash('ok', 'New token saved, encrypted, in the library.'); mainScreen(); }
+    catch (e) { state = JSON.parse(snapshot); repo.token = oldToken; err.replaceChildren(alertBox('error', 'Nothing was changed. ' + errorText(e))); err.hidden = false; }
   });
   root.replaceChildren(el('div', { class: 'center-page' }, el('h1', { text: 'Replace the token' }), form));
 }

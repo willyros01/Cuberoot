@@ -1,14 +1,14 @@
 // Public documents page: docs.html?app=<slug>
 // Shows only public documents. Everything else needs a sign-in to the library.
-import { init, el, icon, formatDate } from './common.js';
-import { PUBLIC_INDEX } from './vault.js';
+import { init, el, icon, formatDate } from './common.js?v=1.3.0';
+import { PUBLIC_INDEX } from './vault.js?v=1.3.0';
 
 init();
 const root = document.getElementById('docs-root');
 
 async function getJSON(path, fallback) {
   try {
-    const res = await fetch(path, { cache: 'no-cache' });
+    const res = await fetch(path, { cache: 'no-store' });
     if (res.status === 404) return fallback;
     if (!res.ok) throw new Error('status ' + res.status);
     return await res.json();

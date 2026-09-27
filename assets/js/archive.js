@@ -1,4 +1,4 @@
-import { init } from './common.js';
+import { init } from './common.js?v=1.3.0';
 init();
 
 const buttons = [...document.querySelectorAll('.retro-menu button')];
