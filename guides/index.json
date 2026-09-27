@@ -38,6 +38,16 @@
      "date": "2026-09-25T02:54:22.114Z",
      "original": "scorecard-quick-start 5.pdf",
      "path": "guides/the-scorecard/scorecard-quick-start-5.pdf"
+    },
+    {
+     "id": "0a7fb5a8a0a9c59722be2dd8c28928cf",
+     "title": "scorecard setup guide",
+     "ext": "pdf",
+     "mime": "application/pdf",
+     "size": 157545,
+     "date": "2026-09-25T02:54:22.113Z",
+     "original": "scorecard-setup-guide.pdf",
+     "path": "guides/the-scorecard/scorecard-setup-guide.pdf"
     }
    ]
   }
