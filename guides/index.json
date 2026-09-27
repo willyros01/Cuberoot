@@ -75,6 +75,21 @@
      "path": "guides/wire/admin-guide-v0-17-54.pdf"
     }
    ]
+  },
+  "expense-ledger": {
+   "name": "Expense Ledger",
+   "docs": [
+    {
+     "id": "f1bce04ae40a3a6ec10cfe65b7b2c165",
+     "title": "— User Guide",
+     "ext": "pdf",
+     "mime": "application/pdf",
+     "size": 805420,
+     "date": "2026-09-25T14:12:37.163Z",
+     "original": "Expense Ledger — User Guide.pdf",
+     "path": "guides/expense-ledger/user-guide.pdf"
+    }
+   ]
   }
  }
 }
