@@ -25,6 +25,21 @@
      "path": "guides/fidunio/v1-1-54a-user-guide-addendum.pdf"
     }
    ]
+  },
+  "the-scorecard": {
+   "name": "The Scorecard",
+   "docs": [
+    {
+     "id": "cd72e4dceb06640f06f454a212b3ebeb",
+     "title": "scorecard quick start 5",
+     "ext": "pdf",
+     "mime": "application/pdf",
+     "size": 50083,
+     "date": "2026-09-25T02:54:22.114Z",
+     "original": "scorecard-quick-start 5.pdf",
+     "path": "guides/the-scorecard/scorecard-quick-start-5.pdf"
+    }
+   ]
   }
  }
 }
