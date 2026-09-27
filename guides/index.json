@@ -60,6 +60,21 @@
      "path": "guides/the-scorecard/scorecard-getting-started-5.pdf"
     }
    ]
+  },
+  "wire": {
+   "name": "Wire",
+   "docs": [
+    {
+     "id": "7bfc2fd2195759ed5cd240d404647598",
+     "title": "admin guide v0 17 54",
+     "ext": "pdf",
+     "mime": "application/pdf",
+     "size": 90898,
+     "date": "2026-09-25T02:56:09.914Z",
+     "original": "wire.admin-guide.v0.17.54.pdf",
+     "path": "guides/wire/admin-guide-v0-17-54.pdf"
+    }
+   ]
   }
  }
 }
