@@ -12,7 +12,7 @@ async function loadApps() {
       el('div', {},
         el('h3', { text: a.name }),
         el('p', { text: a.description }),
-        el('div', { class: 'avail' }, (av.now || 'Web app now') + ' · ', el('span', { text: av.soon || 'iOS & Android soon' }))),
+        el('div', { class: 'avail', text: a.availability || ((av.now || 'Web app now') + ' · ' + (av.soon || 'iOS & Android soon')) })),
       el('a', { class: 'docs', href: 'docs.html?app=' + encodeURIComponent(a.slug), 'aria-label': 'Documentation for ' + a.name, text: 'Docs →' }))));
   } catch (e) {
     box.replaceChildren(el('p', { class: 'muted', text: 'The app list could not be loaded. Please refresh the page.' }));
