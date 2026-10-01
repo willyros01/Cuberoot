@@ -96,21 +96,21 @@
    "docs": [
     {
      "id": "05b5fc8b85e01238626351c401a6ca58",
-     "title": "Fairpot User Guide 0.5.1",
+     "title": "Fairpot User Guide 0.5.2",
      "ext": "pdf",
      "mime": "application/pdf",
-     "size": 2137450,
-     "date": "2026-10-01T18:58:03.000Z",
+     "size": 2137096,
+     "date": "2026-10-01T19:56:21.000Z",
      "original": "fairpot-user-guide.pdf",
      "path": "guides/split-it/fairpot-user-guide.pdf"
     },
     {
      "id": "f82a41bda3341137881d1797652c6821",
-     "title": "Fairpot Quick Start 0.5.1",
+     "title": "Fairpot Quick Start 0.5.2",
      "ext": "pdf",
      "mime": "application/pdf",
-     "size": 916517,
-     "date": "2026-10-01T18:58:03.000Z",
+     "size": 916519,
+     "date": "2026-10-01T19:56:21.000Z",
      "original": "fairpot-quick-start.pdf",
      "path": "guides/split-it/fairpot-quick-start.pdf"
     }
