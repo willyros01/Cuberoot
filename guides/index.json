@@ -90,6 +90,31 @@
      "path": "guides/expense-ledger/user-guide.pdf"
     }
    ]
+  },
+  "split-it": {
+   "name": "Fairpot",
+   "docs": [
+    {
+     "id": "05b5fc8b85e01238626351c401a6ca58",
+     "title": "Fairpot User Guide 0.5.1",
+     "ext": "pdf",
+     "mime": "application/pdf",
+     "size": 2137450,
+     "date": "2026-10-01T18:58:03.000Z",
+     "original": "fairpot-user-guide.pdf",
+     "path": "guides/split-it/fairpot-user-guide.pdf"
+    },
+    {
+     "id": "f82a41bda3341137881d1797652c6821",
+     "title": "Fairpot Quick Start 0.5.1",
+     "ext": "pdf",
+     "mime": "application/pdf",
+     "size": 916517,
+     "date": "2026-10-01T18:58:03.000Z",
+     "original": "fairpot-quick-start.pdf",
+     "path": "guides/split-it/fairpot-quick-start.pdf"
+    }
+   ]
   }
  }
 }
