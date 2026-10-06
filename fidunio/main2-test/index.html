@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow,noarchive"><title>FIDUNIO main2 — Device Test Checklist</title>
+<style>
+:root{--bg:#f6f8fb;--card:#fff;--ink:#111827;--muted:#475467;--line:#98a2b3;--blue:#0756b9;--green:#087443;--red:#b42318;--amber:#8a4b08}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:24px;line-height:1.45}main{max-width:960px;margin:auto;padding:22px 16px 140px}h1{font-size:42px;line-height:1.08}h2{font-size:31px}h3{font-size:25px}.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:20px;margin:16px 0}.hidden{display:none!important}label{display:block;font-weight:800;margin:14px 0 6px}input,textarea,button,select{font:inherit}input,textarea,select{width:100%;padding:13px;border:2px solid #667085;border-radius:12px}textarea{min-height:110px}button{border:0;border-radius:14px;padding:15px;font-weight:800;min-height:62px}.primary{background:var(--blue);color:#fff}.secondary{background:#e6eefc;color:#123b79}.pass{background:#d1fadf;color:#05603a}.fail{background:#fee4e2;color:#912018}.blocked{background:#fef0c7;color:#7a4100}.na{background:#eaecf0;color:#344054}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1}.progress{height:18px;background:#d0d5dd;border-radius:12px;overflow:hidden}.progress div{height:100%;background:var(--blue)}.nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:2px solid var(--line);padding:12px 16px max(12px,env(safe-area-inset-bottom));z-index:5}.nav .row{max-width:960px;margin:auto}.small{font-size:18px;color:var(--muted)}.result{border:2px solid var(--line);border-radius:12px;padding:10px;margin:8px 0}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}@media(max-width:600px){body{font-size:22px}h1{font-size:36px}.grid{grid-template-columns:1fr}.row{display:block}.row>*{width:100%;margin:5px 0}}@media print{.nav,#login,#lock,.noprint{display:none!important}body{font-size:14pt;background:#fff}main{max-width:none;padding:0}.card{break-inside:avoid}}
+</style></head><body><main>
+<section id="login" class="card"><h1>FIDUNIO main2<br>Device Test Checklist</h1><p>This checklist is not linked from the public Cuberoot site and is marked not to be indexed by search engines.</p><label for="code">Access code</label><input id="code" type="password" autocomplete="current-password"><button class="primary" id="open">Open checklist</button><p id="msg"></p><p class="small">The access code is only a privacy screen on this static site; do not store secrets or personal information here.</p></section>
+<section id="app" class="hidden"><div class="top"><h1>FIDUNIO main2 tests</h1><button id="lock" class="secondary">Lock</button></div>
+<div class="card"><div class="row"><div><label>Build / version</label><input id="build"></div><div><label>Device</label><input id="device" placeholder="iPhone / iPad"></div></div><div class="row"><div><label>OS / browser</label><input id="os"></div><div><label>Tester</label><input id="tester"></div></div><p id="counter"></p><div class="progress"><div id="bar"></div></div></div>
+<div id="test" class="card"><h2 id="title"></h2><h3>Test</h3><p id="steps"></p><h3>Expected result</h3><p id="expected"></p><div class="grid"><button class="pass" data-r="PASS">PASS</button><button class="fail" data-r="FAIL">FAIL</button><button class="blocked" data-r="BLOCKED">BLOCKED</button><button class="na" data-r="NOT APPLICABLE">NOT APPLICABLE</button></div><div class="row"><div><label>Date</label><input id="date" type="date"></div><div><label>Time</label><input id="time" type="time"></div></div><label>Notes / evidence</label><textarea id="notes" placeholder="Use dictation if easier."></textarea><p id="saved"></p></div>
+<div id="summary" class="card hidden"><h2>Acceptance summary</h2><div id="counts"></div><p><strong>Release rule:</strong> Do not accept a build with a critical messaging, group, attachment, notification, unlock, routing, security, or data-integrity failure or with those critical areas untested.</p><div id="report"></div><div class="row noprint"><button class="primary" id="print">Print / Save PDF</button><button class="secondary" id="download">Download results</button></div></div></section></main>
+<div id="nav" class="nav hidden"><div class="row"><button class="secondary" id="back">Back</button><button class="primary" id="next">Next</button><button class="secondary" id="sum">Summary</button></div></div>
+<script>
+const TESTS=[
+["Startup / cold launch","Close FIDUNIO completely, then launch it.","App opens normally without blank, frozen, or wrong screen."],
+["Existing-session launch","Launch with an existing signed-in session.","Correct account and expected conversation state are restored."],
+["Email/password login","Sign out, then sign in with a valid account.","Login succeeds and the correct account opens."],
+["PIN unlock","Lock the app; test correct PIN, blank PIN, and wrong PIN.","Correct PIN unlocks. Blank or wrong PIN shows an error and never hangs."],
+["Biometric unlock","With biometrics enabled, open a locked app.","Biometric prompt is primary; PIN appears only as fallback when appropriate."],
+["Background → foreground lock","Background the app long enough to require locking, then return.","Privacy lock appears and unlock returns to the prior safe location."],
+["Direct text send","Send a text message in a direct conversation.","Message sends once and reaches the intended recipient."],
+["Direct text receive","Receive a direct message on the other device.","Message appears once, in the correct conversation."],
+["Direct Sent → Read","Open a received direct message on the recipient device.","Sender changes from Sent to Read without requiring conversation exit/re-entry."],
+["Direct reply / reaction","Reply or react to a direct message.","Action appears correctly on both devices."],
+["Block user","Block a test user, then attempt messaging behavior covered by the app.","Blocked-user behavior matches the product rule and does not leak messages."],
+["Group text send","Send a text in an existing group.","Message sends normally; no epoch/creator-identity error appears."],
+["Group Sent → Read","Have another member open the group message.","Read state updates correctly."],
+["Add group member","Add a test member.","Member gains only intended group access."],
+["Remove group member","Remove the test member.","Member loses intended access without damaging the group."],
+["Re-add member","Re-add the previously removed member.","Member rejoins successfully under current-history rules."],
+["Share earlier history","Use the admin control to grant earlier history where permitted.","Only intended earlier history becomes available."],
+["Leave group","Have a non-owner member leave a test group.","Conversation/access is removed as designed without permission errors."],
+["Photo attachment","Send and open a photo.","Photo uploads, downloads, decrypts, opens, and zooms correctly."],
+["Video attachment","Send and open a video.","Video uploads, downloads, decrypts, plays, and zooms correctly."],
+["Audio attachment","Send and play an audio attachment.","Audio uploads, downloads, decrypts, and plays correctly."],
+["File / document attachment","Send and open a supported file/document.","File downloads/decrypts and opens correctly."],
+["Existing attachment history","Open older photo/video/audio/file attachments.","Existing attachments remain readable."],
+["Attachment retry / poor network","Interrupt an attachment transfer, restore network, then retry.","Retry recovers safely without duplicate/corrupt attachment."],
+["Notification capability / enable","Open notification settings on the supported installed platform.","Capability is correctly detected and Enable Notifications is usable where platform supports it."],
+["Foreground notification","Receive a message while FIDUNIO is foregrounded.","Behavior matches notification policy without duplicate alerts."],
+["Background notification","Background FIDUNIO and receive a message.","Notification arrives with correct privacy behavior."],
+["Cold-start notification","Fully close FIDUNIO, receive a notification, then tap it.","App launches and routes correctly."],
+["Notification → exact direct message","Tap a direct-message notification.","Correct direct conversation/message opens."],
+["Notification → exact group message","Tap a group-message notification.","Correct group conversation/message opens."],
+["Notification privacy","Inspect lock-screen/banner notification content.","Notification exposes no content beyond the configured privacy policy."],
+["Disappearing setting isolation","Enable disappearing messages in one conversation only.","Setting does not become enabled in unrelated conversations."],
+["Disappearing text expiry","Send a disposable text and wait for configured expiry.","Text disappears according to policy on both devices."],
+["Disappearing attachment expiry","Send a disposable attachment and wait for expiry.","Attachment becomes unavailable according to policy."],
+["Delete for me","Delete a test message/conversation item for this user only.","It disappears only for the current user as designed."],
+["Delete for everyone","Sender deletes an eligible test message for everyone.","Message is removed for all intended participants."],
+["Mass delete","Use owner/admin mass-delete on disposable test data only.","Only intended disposable data is removed."],
+["Archive / restore conversation","Archive a test conversation, then restore it.","Archive and restore work without losing messages."],
+["Report abuse","Submit a harmless test report.","Report completes successfully without breaking conversation state."],
+["Offline text queue","Go offline, send a text, then reconnect.","Message queues once, sends after reconnect, and converges correctly."],
+["Offline attachment queue","Go offline, attempt supported attachment send, then reconnect.","Transfer follows product rule and recovers without corruption/duplication."],
+["Reconnect convergence","Create safe offline activity on two devices, reconnect both.","State converges without duplicate/lost messages."],
+["Restart with queued work","Queue safe work offline, restart app, then reconnect.","Queued work survives/reconciles according to product policy."],
+["iPad portrait","Run representative messaging/settings flows in portrait.","All controls remain visible and usable."],
+["iPad landscape two-pane","Rotate to landscape and use conversation list/detail.","Two-pane layout is stable and correct."],
+["Rotate during use","Rotate portrait↔landscape during a safe active flow.","No lost state, overlap, or unreachable controls."],
+["Attachment zoom","Open photo/video and zoom in/out.","Zoom returns to normal size and controls remain usable."],
+["Large text / accessibility","Test A, A+, A++ and normal accessibility navigation.","Text remains readable without clipped or unreachable controls."],
+["Installed PWA launch","Launch installed main2 PWA from Home Screen.","Correct main2 app launches with expected standalone behavior."],
+["Safari-tab behavior","Open main2 directly in Safari.","Browser-specific limitations are correctly reported; app remains usable."],
+["TestFlight native adapters","Run login, lock, notification, attachment, and routing checks in iOS TestFlight.","Native adapters behave consistently with shared app rules."],
+["Web vs iOS parity","Compare representative direct/group messaging, attachments, privacy, and settings.","Shared functionality behaves equivalently except documented platform differences."]
+];
+const KEY="fidunio-main2-device-tests-v1";let a=JSON.parse(localStorage.getItem(KEY)||"{}"),i=0;const $=x=>document.getElementById(x);
+function save(){localStorage.setItem(KEY,JSON.stringify(a))}
+function meta(){["build","device","os","tester"].forEach(k=>{a[k]=$(k).value});save()}
+function render(){const t=TESTS[i],r=(a.results||{})[i]||{};$("counter").textContent="Test "+(i+1)+" of "+TESTS.length;$("bar").style.width=((i+1)/TESTS.length*100)+"%";$("title").textContent=(i+1)+". "+t[0];$("steps").textContent=t[1];$("expected").textContent=t[2];$("date").value=r.date||new Date().toISOString().slice(0,10);$("time").value=r.time||new Date().toTimeString().slice(0,5);$("notes").value=r.notes||"";$("saved").textContent=r.result?"Saved: "+r.result:"";$("test").classList.remove("hidden");$("summary").classList.add("hidden")}
+function result(v){a.results=a.results||{};a.results[i]={result:v,date:$("date").value,time:$("time").value,notes:$("notes").value};meta();render()}
+function showSummary(){meta();let c={PASS:0,FAIL:0,BLOCKED:0,"NOT APPLICABLE":0,"NOT RUN":0};TESTS.forEach((t,n)=>c[((a.results||{})[n]||{}).result||"NOT RUN"]++);$("counts").innerHTML=Object.entries(c).map(x=>"<p><strong>"+x[0]+": "+x[1]+"</strong></p>").join("");$("report").innerHTML=TESTS.map((t,n)=>{let r=((a.results||{})[n]||{});return "<div class='result'><strong>"+(n+1)+". "+t[0]+"</strong><br>"+(r.result||"NOT RUN")+" — "+(r.date||"")+" "+(r.time||"")+"<br>"+(r.notes||"")+"</div>"}).join("");$("test").classList.add("hidden");$("summary").classList.remove("hidden")}
+function exportText(){return "FIDUNIO main2 Device Test Results\nBuild: "+(a.build||"")+"\nDevice: "+(a.device||"")+"\nOS/browser: "+(a.os||"")+"\nTester: "+(a.tester||"")+"\n\n"+TESTS.map((t,n)=>{let r=((a.results||{})[n]||{});return (n+1)+" | "+t[0]+" | "+(r.result||"NOT RUN")+" | "+(r.date||"")+" "+(r.time||"")+" | "+(r.notes||"")}).join("\n")}
+const gate=()=>{let s=0;for(const ch of $("code").value)s=(s*31+ch.charCodeAt(0))>>>0;return s===1981064977};
+$("open").onclick=()=>{if(!gate()){$("msg").textContent="Access code is not correct.";return}sessionStorage.setItem("fidunio-test-open","1");$("login").classList.add("hidden");$("app").classList.remove("hidden");$("nav").classList.remove("hidden");["build","device","os","tester"].forEach(k=>$(k).value=a[k]||"");render()};
+$("lock").onclick=()=>{sessionStorage.removeItem("fidunio-test-open");location.reload()};document.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>result(b.dataset.r));$("back").onclick=()=>{if(i>0){i--;render()}};$("next").onclick=()=>{if(i<TESTS.length-1){i++;render()}else showSummary()};$("sum").onclick=showSummary;$("print").onclick=()=>window.print();$("download").onclick=()=>{let x=document.createElement("a");x.href=URL.createObjectURL(new Blob([exportText()],{type:"text/plain"}));x.download="fidunio-main2-test-results.txt";x.click()};["build","device","os","tester"].forEach(k=>$(k).onchange=meta);
+</script></body></html>
