@@ -74,7 +74,7 @@ async function render() {
       meta.description ? el('p', { class: 'muted' }, meta.description + ' ', el('b', { text: meta.availability || 'See app page for availability' })) : null),
     el('section', { class: 'stack' },
       el('div', { class: 'section-head' }, el('h2', { text: 'Public documents' }), el('span', { class: 'muted', text: 'Open to everyone — no sign-in needed' })),
-      meta.slug === 'the-scorecard' ? el('div', { class: 'panel' }, el('a', { class: 'doc-link', href: 'scorecard/quick-start/' }, el('div', { class: 'grow' }, el('div', { class: 'title', text: 'Quick Start Guide — large print' }), el('div', { class: 'meta', text: 'Public HTML · October 2026' })), badge(), el('span', { class: 'go', text: 'Open →' })), el('a', { class: 'doc-link', href: 'scorecard/guide/' }, el('div', { class: 'grow' }, el('div', { class: 'title', text: 'Full User Guide' })), badge(), el('span', { class: 'go', text: 'Open →' })), ) : docs.length ? el('div', { class: 'panel' }, docs.map(d => docLink(meta.slug, d)))
+      meta.slug === 'the-scorecard' ? el('div', { class: 'panel' }, el('a', { class: 'doc-link', href: 'scorecard/quick-start/' }, el('div', { class: 'grow' }, el('div', { class: 'title', text: 'Quick Start Guide — large print' }), el('div', { class: 'meta', text: 'Public HTML · October 2026' })), badge(), el('span', { class: 'go', text: 'Open →' })), el('a', { class: 'doc-link', href: 'scorecard/guide/' }, el('div', { class: 'grow' }, el('div', { class: 'title', text: 'Full User Guide' })), badge(), el('span', { class: 'go', text: 'Open →' }))) : docs.length ? el('div', { class: 'panel' }, docs.map(d => docLink(meta.slug, d)))
         : el('div', { class: 'empty', text: 'No public documents yet.' })),
     moreBox(meta.slug, meta.name));
 }
