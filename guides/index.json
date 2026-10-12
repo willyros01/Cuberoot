@@ -58,6 +58,16 @@
           "date": "2026-09-25T02:54:22.101Z",
           "original": "scorecard-getting-started 5.pdf",
           "path": "guides/the-scorecard/scorecard-getting-started-5.pdf"
+        },
+        {
+          "id": "4a93e75dd8144f9cb0832cd7806bf7e0",
+          "title": "The Scorecard — Android Quick Start (Fire HD 8)",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 6653,
+          "date": "2026-10-12",
+          "original": "scorecard-android-quick-start.html",
+          "path": "guides/the-scorecard/android-quick-start.html"
         }
       ]
     },
