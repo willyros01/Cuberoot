@@ -28,6 +28,29 @@ async function addFairpotDownload(box) {
   }
 }
 
+
+async function addCloudFilesDownload(box) {
+  try {
+    const metaRes = await fetch('downloads/cloud-files-build.json', { cache: 'no-store' });
+    if (!metaRes.ok) return;
+    const meta = await metaRes.json();
+    if (!Number.isSafeInteger(meta.run_id) || meta.run_id < 1) return;
+    const url = 'downloads/cloud-files.apk?build=' + meta.run_id;
+    const head = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+    if (!head.ok) return;
+    const row = [...box.querySelectorAll('.app-row')].find(node =>
+      node.querySelector('h3')?.textContent === 'Cloud Files');
+    if (!row) return;
+    const details = row.querySelector('h3')?.parentElement;
+    if (!details) return;
+    details.appendChild(el('div', { class: 'actions' },
+      el('a', { class: 'btn app-open', href: url, download: 'cloud-files-' + meta.run_id + '.apk',
+        'aria-label': 'Download Cloud Files Android APK', text: 'Download Android APK ↓' })));
+  } catch (_) {
+    // The download button appears only when the exact APK has been published.
+  }
+}
+
 async function loadApps() {
   const box = document.getElementById('app-list');
   try {
@@ -44,6 +67,7 @@ async function loadApps() {
         el('div', { class: 'avail', text: a.availability || ((av.now || 'Web app now') + ' · ' + (av.soon || 'iOS & Android soon')) })),
       el('a', { class: 'docs', href: 'docs.html?app=' + encodeURIComponent(a.slug), 'aria-label': 'Documentation for ' + a.name, text: 'Docs →' }))));
     await addFairpotDownload(box);
+    await addCloudFilesDownload(box);
   } catch (e) {
     box.replaceChildren(el('p', { class: 'muted', text: 'The app list could not be loaded. Please refresh the page.' }));
   }
