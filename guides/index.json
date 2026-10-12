@@ -1,120 +1,135 @@
 {
- "v": 1,
- "apps": {
-  "fidunio": {
-   "name": "FIDUNIO",
-   "docs": [
-    {
-     "id": "32c75af4df6ee9144820692363cbc7b6",
-     "title": "v1 1 54a user guide",
-     "ext": "pdf",
-     "mime": "application/pdf",
-     "size": 472668,
-     "date": "2026-09-25T14:02:14.278Z",
-     "original": "fidunio.v1.1.54a.user.guide.pdf",
-     "path": "guides/fidunio/v1-1-54a-user-guide.pdf"
+  "v": 1,
+  "apps": {
+    "fidunio": {
+      "name": "FIDUNIO",
+      "docs": [
+        {
+          "id": "32c75af4df6ee9144820692363cbc7b6",
+          "title": "v1 1 54a user guide",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 472668,
+          "date": "2026-09-25T14:02:14.278Z",
+          "original": "fidunio.v1.1.54a.user.guide.pdf",
+          "path": "guides/fidunio/v1-1-54a-user-guide.pdf"
+        },
+        {
+          "id": "3fcc792773932b7e9c1ae0003142ca5d",
+          "title": "v1 1 54a user guide addendum",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 970343,
+          "date": "2026-09-25T14:02:14.276Z",
+          "original": "fidunio.v1.1.54a.user.guide.addendum.pdf",
+          "path": "guides/fidunio/v1-1-54a-user-guide-addendum.pdf"
+        }
+      ]
     },
-    {
-     "id": "3fcc792773932b7e9c1ae0003142ca5d",
-     "title": "v1 1 54a user guide addendum",
-     "ext": "pdf",
-     "mime": "application/pdf",
-     "size": 970343,
-     "date": "2026-09-25T14:02:14.276Z",
-     "original": "fidunio.v1.1.54a.user.guide.addendum.pdf",
-     "path": "guides/fidunio/v1-1-54a-user-guide-addendum.pdf"
-    }
-   ]
-  },
-  "the-scorecard": {
-   "name": "The Scorecard",
-   "docs": [
-    {
-     "id": "cd72e4dceb06640f06f454a212b3ebeb",
-     "title": "scorecard quick start 5",
-     "ext": "pdf",
-     "mime": "application/pdf",
-     "size": 50083,
-     "date": "2026-09-25T02:54:22.114Z",
-     "original": "scorecard-quick-start 5.pdf",
-     "path": "guides/the-scorecard/scorecard-quick-start-5.pdf"
+    "the-scorecard": {
+      "name": "The Scorecard",
+      "docs": [
+        {
+          "id": "cd72e4dceb06640f06f454a212b3ebeb",
+          "title": "scorecard quick start 5",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 50083,
+          "date": "2026-09-25T02:54:22.114Z",
+          "original": "scorecard-quick-start 5.pdf",
+          "path": "guides/the-scorecard/scorecard-quick-start-5.pdf"
+        },
+        {
+          "id": "0a7fb5a8a0a9c59722be2dd8c28928cf",
+          "title": "scorecard setup guide",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 157545,
+          "date": "2026-09-25T02:54:22.113Z",
+          "original": "scorecard-setup-guide.pdf",
+          "path": "guides/the-scorecard/scorecard-setup-guide.pdf"
+        },
+        {
+          "id": "e423e423b236e2a23e9c936c49b8e855",
+          "title": "scorecard getting started 5",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 130509,
+          "date": "2026-09-25T02:54:22.101Z",
+          "original": "scorecard-getting-started 5.pdf",
+          "path": "guides/the-scorecard/scorecard-getting-started-5.pdf"
+        }
+      ]
     },
-    {
-     "id": "0a7fb5a8a0a9c59722be2dd8c28928cf",
-     "title": "scorecard setup guide",
-     "ext": "pdf",
-     "mime": "application/pdf",
-     "size": 157545,
-     "date": "2026-09-25T02:54:22.113Z",
-     "original": "scorecard-setup-guide.pdf",
-     "path": "guides/the-scorecard/scorecard-setup-guide.pdf"
+    "wire": {
+      "name": "Wire",
+      "docs": [
+        {
+          "id": "7bfc2fd2195759ed5cd240d404647598",
+          "title": "admin guide v0 17 54",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 90898,
+          "date": "2026-09-25T02:56:09.914Z",
+          "original": "wire.admin-guide.v0.17.54.pdf",
+          "path": "guides/wire/admin-guide-v0-17-54.pdf"
+        }
+      ]
     },
-    {
-     "id": "e423e423b236e2a23e9c936c49b8e855",
-     "title": "scorecard getting started 5",
-     "ext": "pdf",
-     "mime": "application/pdf",
-     "size": 130509,
-     "date": "2026-09-25T02:54:22.101Z",
-     "original": "scorecard-getting-started 5.pdf",
-     "path": "guides/the-scorecard/scorecard-getting-started-5.pdf"
-    }
-   ]
-  },
-  "wire": {
-   "name": "Wire",
-   "docs": [
-    {
-     "id": "7bfc2fd2195759ed5cd240d404647598",
-     "title": "admin guide v0 17 54",
-     "ext": "pdf",
-     "mime": "application/pdf",
-     "size": 90898,
-     "date": "2026-09-25T02:56:09.914Z",
-     "original": "wire.admin-guide.v0.17.54.pdf",
-     "path": "guides/wire/admin-guide-v0-17-54.pdf"
-    }
-   ]
-  },
-  "expense-ledger": {
-   "name": "Expense Ledger",
-   "docs": [
-    {
-     "id": "f1bce04ae40a3a6ec10cfe65b7b2c165",
-     "title": "— User Guide",
-     "ext": "pdf",
-     "mime": "application/pdf",
-     "size": 805420,
-     "date": "2026-09-25T14:12:37.163Z",
-     "original": "Expense Ledger — User Guide.pdf",
-     "path": "guides/expense-ledger/user-guide.pdf"
-    }
-   ]
-  },
-  "split-it": {
-   "name": "Fairpot",
-   "docs": [
-    {
-     "id": "05b5fc8b85e01238626351c401a6ca58",
-     "title": "Fairpot User Guide 0.5.2",
-     "ext": "pdf",
-     "mime": "application/pdf",
-     "size": 2137096,
-     "date": "2026-10-01T19:56:21.000Z",
-     "original": "fairpot-user-guide.pdf",
-     "path": "guides/split-it/fairpot-user-guide.pdf"
+    "expense-ledger": {
+      "name": "Expense Ledger",
+      "docs": [
+        {
+          "id": "f1bce04ae40a3a6ec10cfe65b7b2c165",
+          "title": "— User Guide",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 805420,
+          "date": "2026-09-25T14:12:37.163Z",
+          "original": "Expense Ledger — User Guide.pdf",
+          "path": "guides/expense-ledger/user-guide.pdf"
+        }
+      ]
     },
-    {
-     "id": "f82a41bda3341137881d1797652c6821",
-     "title": "Fairpot Quick Start 0.5.2",
-     "ext": "pdf",
-     "mime": "application/pdf",
-     "size": 916519,
-     "date": "2026-10-01T19:56:21.000Z",
-     "original": "fairpot-quick-start.pdf",
-     "path": "guides/split-it/fairpot-quick-start.pdf"
+    "split-it": {
+      "name": "Fairpot",
+      "docs": [
+        {
+          "id": "05b5fc8b85e01238626351c401a6ca58",
+          "title": "Fairpot User Guide 0.5.2",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 2137096,
+          "date": "2026-10-01T19:56:21.000Z",
+          "original": "fairpot-user-guide.pdf",
+          "path": "guides/split-it/fairpot-user-guide.pdf"
+        },
+        {
+          "id": "f82a41bda3341137881d1797652c6821",
+          "title": "Fairpot Quick Start 0.5.2",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 916519,
+          "date": "2026-10-01T19:56:21.000Z",
+          "original": "fairpot-quick-start.pdf",
+          "path": "guides/split-it/fairpot-quick-start.pdf"
+        }
+      ]
+    },
+    "cloud-files": {
+      "name": "Cloud Files",
+      "docs": [
+        {
+          "id": "c10df11e5a1a4c92b874d2010e12f963",
+          "title": "Cloud Files — Quick Start Guide (Fire HD 8)",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 6275,
+          "date": "2026-10-12",
+          "original": "cloud-files-quick-start.html",
+          "path": "guides/cloud-files/quick-start.html"
+        }
+      ]
     }
-   ]
   }
- }
 }
