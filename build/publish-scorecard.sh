@@ -3,7 +3,8 @@
 # Copies ONLY the exact successful APK artifact; never re-signs/rebuilds.
 # A missing artifact is an error: keep the current APK rather than publish drift.
 # Scorecard publication starts only after signing secrets and the successful APK build.
-# Publish verified Scorecard Android APK from GitHub Actions; configured polling also handles future builds.
+# Publish verified Scorecard Android APK from GitHub Actions; automatic polling handles all future builds.
+# Confirm Android backup repair release 38320762144 through the normal artifact verification publisher.
 set -euo pipefail
 
 TMP="$(mktemp -d)"
