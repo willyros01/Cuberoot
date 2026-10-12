@@ -2,7 +2,7 @@
 # Publish the latest SUCCESSFUL Cloud Files Android APK on Cuberoot.
 # Copies ONLY the exact successful APK artifact; never re-signs/rebuilds.
 # A missing artifact is an error: keep the current APK rather than publish drift.
-# On-demand publication check for corrected native Android Downloads backup.
+# Cloud Files publication starts only after signing secrets and the successful APK build.
 set -euo pipefail
 
 TMP="$(mktemp -d)"
