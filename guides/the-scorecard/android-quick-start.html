@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'">
+<title>The Scorecard — Android Quick Start | Cuberoot</title>
+<meta name="description" content="Large-print quick start guide for The Scorecard Android app on Fire tablets.">
+<style>
+:root{color-scheme:light;--ink:#14261f;--pine:#1f5641;--card:#fbf7ee;--line:#ddd2bb;--pale:#ecf4ef}
+*{box-sizing:border-box}
+html{font-size:20px;-webkit-text-size-adjust:100%}
+body{margin:0;font-family:system-ui,-apple-system,sans-serif;line-height:1.55;color:var(--ink);background:#f7f5f0}
+main{width:min(100% - 24px,820px);margin:20px auto 50px;padding:clamp(18px,5vw,52px);background:white;border:1px solid var(--line);border-radius:18px}
+h1{font-size:clamp(2rem,7vw,2.8rem);line-height:1.1;margin:10px 0}h2{font-size:1.4rem;line-height:1.2;color:var(--pine)}
+p{margin:12px 0}section{border-top:1px solid var(--line);padding:22px 0}
+ol{padding-left:1.6em}li{margin-bottom:14px}
+small,.muted{color:#42544b;font-size:.9rem}
+strong{font-weight:750}
+.nav{display:inline-block;padding:12px 17px;background:var(--pine);color:white;border-radius:10px;text-decoration:none;font-weight:750}
+.tip{padding:16px 18px;background:var(--pale);border-left:5px solid var(--pine);border-radius:10px}
+a{color:#126547;font-weight:750;text-underline-offset:4px}
+footer{border-top:1px solid var(--line);padding-top:20px}
+@media print{body{background:white}main{border:0;width:100%;margin:0;padding:0}.nav{display:none}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<a class="nav" href="../../docs.html?app=the-scorecard">← Scorecard documents</a>
+<p class="muted">Cuberoot Systems · Public user documentation</p>
+<h1>The Scorecard</h1>
+<p><strong>Android Quick Start — Amazon Fire HD 8 and Android tablets</strong></p>
+<p class="muted">Based on Scorecard v2.30.0 · Android test edition · October 2026</p>
+<p>The Scorecard tracks golf rounds, handicaps, games, and rankings for groups of golfers.</p>
+</header>
+<section>
+<h2>1. Install The Scorecard</h2>
+<ol>
+<li>On your Fire or Android tablet, visit <strong>www.cuberoot-systems.com</strong> and find <strong>The Scorecard</strong> under Apps.</li>
+<li>When the Android test APK is available, choose <strong>Download Android APK</strong>.</li>
+<li>Open the downloaded file. If Fire OS asks permission to install from your browser, allow it and continue.</li>
+<li>Tap <strong>Open</strong> when installation finishes.</li>
+</ol>
+<div class="tip"><strong>Important:</strong> Future updates should install over the existing app. Do not uninstall first; keep any exported backup files safe. This is a test build, not a Google Play Store release.</div>
+</section>
+<section>
+<h2>2. Sign in or request access</h2>
+<ol>
+<li>Sign in with your existing Scorecard <strong>email and password</strong>.</li>
+<li>If you are new, use the application or invitation process shown on the sign-in screen.</li>
+<li>For an invited private group, use the <strong>one-time invitation link</strong>. Create your account or sign in, then complete joining.</li>
+<li>A consumed invitation cannot be used again. Do not send personal invitation links to others.</li>
+</ol>
+<div class="tip"><strong>Privacy:</strong> Regular golfers have access to their own detailed rounds and relevant group rankings. Admins and owners have additional group-management features.</div>
+</section>
+<section>
+<h2>3. Record a golf round</h2>
+<ol>
+<li>Open <strong>Enter</strong> and select the golfer, course, tee, and date as requested.</li>
+<li>Enter the gross score and any other required details.</li>
+<li>Check the information and tap the button to post the round.</li>
+<li>Open <strong>History</strong> to verify that the round appears correctly.</li>
+</ol>
+<p>The app has an offline queue. If you are disconnected, let it reconnect and confirm the operation has been sent; do not repeatedly post the same round.</p>
+</section>
+<section>
+<h2>4. View handicaps, games, and rankings</h2>
+<ol>
+<li>Use the available tabs to view your handicap information and recent rounds.</li>
+<li>Open a group game to see its results or leaderboard.</li>
+<li>Open group rankings to compare members' indexes as permitted by your role.</li>
+</ol>
+</section>
+<section>
+<h2>5. Make the text larger</h2>
+<ol>
+<li>Tap the <strong>A</strong> text-size button in the app header.</li>
+<li>Choose <strong>A+</strong> or <strong>A++</strong> for easier reading.</li>
+<li>The Appearance button cycles through automatic, light, and dark styles.</li>
+</ol>
+</section>
+<section>
+<h2>6. Save a backup</h2>
+<ol>
+<li>In Scorecard, open its backup/export option where available to your role.</li>
+<li>Choose to save the backup file.</li>
+<li>On the Android app, the backup should be saved directly in your tablet's <strong>Downloads</strong> folder.</li>
+<li>Confirm the file exists and copy it somewhere safe outside the tablet.</li>
+</ol>
+<div class="tip">A file export does not replace the normal Firebase synchronization. Before deleting or reinstalling the app, confirm the backup is accessible and that online data is current.</div>
+</section>
+<section>
+<h2>7. Invitations and external links</h2>
+<p>Invitation links use Cuberoot's Scorecard join address. With Android App Links correctly verified, an invitation can open the installed Scorecard app. Otherwise, it may open in the browser. Follow the instructions displayed and keep one-use invitations private.</p>
+<p>Support, privacy, and guide links open in a Fire OS browser rather than inside Scorecard.</p>
+</section>
+<section>
+<h2>8. Troubleshooting</h2>
+<p><strong>Sign-in fails:</strong> Check Internet access, email/password, and any pending account approval. Do not create duplicate accounts to work around a sign-in problem.</p>
+<p><strong>Round not visible:</strong> Check connection and queue status, then refresh History before attempting to post again.</p>
+<p><strong>External website does not open:</strong> Ensure Silk or another browser is installed, then retry. Do not uninstall the Scorecard app.</p>
+<p><strong>Backup missing:</strong> Check Downloads in the Fire file manager. If the app reported an error, the backup was not confirmed.</p>
+</section>
+<footer>
+<p><strong>Android acceptance testing:</strong> the release must be checked on a real Fire HD 8 before full Android parity is claimed.</p>
+<a href="../../docs.html?app=the-scorecard">← Return to Scorecard documents</a>
+</footer>
+</main>
+</body></html>
