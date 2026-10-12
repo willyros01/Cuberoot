@@ -73,7 +73,7 @@ test -n "$SDK"
 SIGNER="$(find "$SDK/build-tools" -name apksigner -type f | sort -V | tail -1)"
 test -n "$SIGNER"
 "$SIGNER" verify --verbose "$TMP/app-debug.apk" >/dev/null
-SIGNER_SHA="$("$SIGNER" verify --print-certs "$TMP/app-debug.apk" | sed -n 's/^Signer #1 certificate SHA-256 digest: *//p' | head -1 | tr 'A-F' 'a-f')"
+SIGNER_SHA="$("$SIGNER" verify --print-certs "$TMP/app-debug.apk" | sed -n 's/^.*certificate SHA-256 digest: *//p' | head -1 | tr 'A-F' 'a-f')"
 test -n "$SIGNER_SHA"
 # New permanent-key APKs must keep the identical signer across publications.
 if [ -f downloads/fairpot-build.json ]; then
