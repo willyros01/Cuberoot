@@ -3,7 +3,7 @@
 # Copies ONLY the exact successful APK artifact; never re-signs/rebuilds.
 # A missing artifact is an error: keep the current APK rather than publish drift.
 # Cloud Files publication starts only after signing secrets and the successful APK build.
-# Dispatch publication now for verified Android run 38312727937.
+# Dispatch publication for Fire HD 8 browser-launch fix, Android run 38314654572.
 set -euo pipefail
 
 TMP="$(mktemp -d)"
