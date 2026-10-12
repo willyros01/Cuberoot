@@ -1,12 +1,12 @@
 name: Publish Fairpot Android APK
 
 # Every successful Fairpot/android build writes android-last-run.json.
-# This workflow polls that verified result and publishes only successful APKs.
+# This workflow polls that verified result every 5 minutes and publishes only successful APKs.
 # Schedule is required because repository GitHub tokens cannot write to another repo.
 on:
   workflow_dispatch:
   schedule:
-    - cron: '7,17,27,37,47,57 * * * *'
+    - cron: '*/5 * * * *'
   push:
     branches: [main]
     paths:
