@@ -18,7 +18,7 @@ async function getJSON(path, fallback) {
 function badge() { return el('span', { class: 'badge public' }, icon('globe'), 'Public'); }
 
 function docLink(slug, d) {
-  return el('a', { class: 'doc-link', href: `view.html?app=${encodeURIComponent(slug)}&id=${encodeURIComponent(d.id)}` },
+  return el('a', { class: 'doc-link', href: d.ext === 'html' ? d.path : `view.html?app=${encodeURIComponent(slug)}&id=${encodeURIComponent(d.id)}` },
     el('span', { class: 'type' + (d.ext === 'pdf' ? ' pdf' : ''), text: (d.ext || 'file').toUpperCase().slice(0, 4) }),
     el('div', { class: 'grow' }, el('div', { class: 'title', text: d.title }), el('div', { class: 'meta', text: 'Updated ' + formatDate(d.date) })),
     badge(),
