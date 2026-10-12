@@ -4,8 +4,15 @@ init();
 // Show a same-origin Android download only after the APK is actually hosted.
 // This avoids exposing repository URLs or advertising an unavailable file.
 async function addFairpotDownload(box) {
-  const url = 'downloads/fairpot.apk';
+  const base = 'downloads/fairpot.apk';
   try {
+    const metaRes = await fetch('downloads/fairpot-build.json', { cache: 'no-store' });
+    if (!metaRes.ok) return;
+    const meta = await metaRes.json();
+    if (!Number.isSafeInteger(meta.run_id) || meta.run_id < 1) return;
+    // A distinct URL and filename for each build stops Fire/Silk from
+    // reusing an older cached generic-icon APK.
+    const url = base + '?build=' + meta.run_id;
     const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
     if (!res.ok) return;
     const row = [...box.querySelectorAll('.app-row')].find(node =>
@@ -14,7 +21,7 @@ async function addFairpotDownload(box) {
     const details = row.querySelector('h3')?.parentElement;
     if (!details) return;
     details.appendChild(el('div', { class: 'actions' },
-      el('a', { class: 'btn app-open', href: url, download: 'fairpot.apk',
+      el('a', { class: 'btn app-open', href: url, download: 'fairpot-' + meta.run_id + '.apk',
         'aria-label': 'Download Fairpot Android APK', text: 'Download Android APK ↓' })));
   } catch (_) {
     // Absence of a release is expected; do not show a broken link.
