@@ -1,0 +1,12 @@
+{
+  "app": "The Scorecard",
+  "channel": "android-debug-test",
+  "source_sha": "cafc8ed3d5053f1190672d7575180a6ce0bc08da",
+  "run_id": 38316868374,
+  "artifact_id": 11776788439,
+  "origin": "github-actions-artifact",
+  "apk_sha256": "3eff653c3cc7ce0c7e10b4e17aff58274a4a986e7b5d7915d4dbfddddabe3a3b",
+  "signer_sha256": "40744e5063932de66831717aeb3deea647e681d96e11f7c96434c30cdfef5386",
+  "apk_bytes": 4591775,
+  "published_at": "2026-10-12T22:43:40.554Z"
+}
