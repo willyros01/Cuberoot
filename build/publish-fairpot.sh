@@ -123,6 +123,24 @@ if git diff --cached --quiet; then
   echo "Identical APK already published."
 else
   git commit -m "publish: Fairpot Android successful run $RUN_ID [skip ci]"
-  git push origin HEAD:main
+  if ! git push origin HEAD:main; then
+    echo "::warning title=Git push conflict::Cuberoot changed while publishing; safely retrying once"
+    git fetch origin main
+    # Never overwrite an equal or newer published run after a concurrent update.
+    REMOTE_RUN="$(git show origin/main:downloads/fairpot-build.json 2>/dev/null | node -e '
+let data = "";
+process.stdin.on("data", x => data += x);
+process.stdin.on("end", () => {
+  try { process.stdout.write(String(JSON.parse(data).run_id || 0)); }
+  catch (_) { process.stdout.write("0"); }
+});
+' )"
+    if [ "$REMOTE_RUN" -ge "$RUN_ID" ]; then
+      echo "An equal or newer APK build is already published."
+      exit 0
+    fi
+    git rebase origin/main
+    git push origin HEAD:main
+  fi
   echo "Published Fairpot Android APK to /downloads/fairpot.apk"
 fi
