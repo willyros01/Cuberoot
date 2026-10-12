@@ -455,3 +455,6 @@ dialog::backdrop { background: rgba(42,50,66,.45); }
 .check-row { display: flex; align-items: center; gap: 14px; font-size: 19px; font-weight: 700; margin: 18px 0 6px; cursor: pointer; }
 .check-row input { width: 28px; height: 28px; flex: none; accent-color: var(--ink); }
 .dialog-actions .btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+/* Large launch button in the home-page app section. */
+.app-row .app-open { font-size: 28px; min-height: 60px; margin: 12px 0; }

@@ -25,7 +25,8 @@
       "name": "Wire",
       "slug": "wire",
       "icon": "news",
-      "description": "Philippine and world news in one calm reader."
+      "description": "Philippine and world news in one calm reader.",
+      "url": "https://willyros01.github.io/balita/"
     },
     {
       "name": "Expense Ledger",

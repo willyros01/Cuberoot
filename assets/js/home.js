@@ -12,6 +12,8 @@ async function loadApps() {
       el('div', {},
         el('h3', { text: a.name }),
         el('p', { text: a.description }),
+        a.url ? el('div', { class: 'actions' },
+          el('a', { class: 'btn app-open', href: a.url, 'aria-label': 'Open ' + a.name, text: 'Open ' + a.name + ' →' })) : null,
         el('div', { class: 'avail', text: a.availability || ((av.now || 'Web app now') + ' · ' + (av.soon || 'iOS & Android soon')) })),
       el('a', { class: 'docs', href: 'docs.html?app=' + encodeURIComponent(a.slug), 'aria-label': 'Documentation for ' + a.name, text: 'Docs →' }))));
   } catch (e) {
