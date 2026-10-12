@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Publish the latest SUCCESSFUL Fairpot Android APK on Cuberoot.
-# Uses the APK from the finished Actions run when authorized; otherwise
-# rebuilds exactly that successful source commit. Never publish a failed build.
+# Copies the exact APK from a successful Fairpot Actions run.
+# If download fails, leave the existing site version and retry later.
 set -euo pipefail
 
 TMP="$(mktemp -d)"
@@ -52,29 +52,16 @@ fi
 
 mkdir -p downloads
 ORIGIN='github-actions-artifact'
-echo "Fetching APK from successful run $RUN_ID, artifact $ARTIFACT_ID."
-if curl -fsSL --retry 2 --retry-delay 2 \
-    -H "Authorization: Bearer $GITHUB_TOKEN" \
-    -H 'Accept: application/vnd.github+json' \
-    -H 'X-GitHub-Api-Version: 2022-11-28' \
-    "https://api.github.com/repos/willyros01/fairpot/actions/artifacts/$ARTIFACT_ID/zip" \
-    -o "$TMP/artifact.zip" \
-   && unzip -tqq "$TMP/artifact.zip" \
-   && unzip -Z1 "$TMP/artifact.zip" | grep -Fx 'app-debug.apk' >/dev/null; then
-  unzip -p "$TMP/artifact.zip" app-debug.apk > "$TMP/app-debug.apk"
-else
-  echo "::warning title=Artifact unavailable::Rebuilding exact successful Fairpot commit $SHA."
-  ORIGIN='rebuild-of-successful-source'
-  git clone --depth 1 --branch android https://github.com/willyros01/fairpot.git "$TMP/fairpot"
-  (
-    cd "$TMP/fairpot"
-    git fetch --depth 1 origin "$SHA"
-    git checkout --detach "$SHA"
-    test "$(git rev-parse HEAD)" = "$SHA"
-    bash build/android-build.sh
-  )
-  cp "$TMP/fairpot/android/app/build/outputs/apk/debug/app-debug.apk" "$TMP/app-debug.apk"
-fi
+echo "Downloading the EXACT APK from successful run $RUN_ID, artifact $ARTIFACT_ID."
+curl -fsSL --retry 3 --retry-delay 3 \
+  -H "Authorization: Bearer $GITHUB_TOKEN" \
+  -H 'Accept: application/vnd.github+json' \
+  -H 'X-GitHub-Api-Version: 2022-11-28' \
+  "https://api.github.com/repos/willyros01/fairpot/actions/artifacts/$ARTIFACT_ID/zip" \
+  -o "$TMP/artifact.zip"
+unzip -tqq "$TMP/artifact.zip"
+unzip -Z1 "$TMP/artifact.zip" | grep -Fx 'app-debug.apk' >/dev/null
+unzip -p "$TMP/artifact.zip" app-debug.apk > "$TMP/app-debug.apk"
 
 test -s "$TMP/app-debug.apk"
 test "$(stat -c%s "$TMP/app-debug.apk")" -gt 1000000
