@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" id="themeMeta" content="#f6f9fd">
+<title>Cloud Files</title>
+<style>
+:root{
+  --bg:#f6f9fd;--panel:#fff;--soft:#f2f6fb;--text:#10224a;--muted:#66758f;
+  --line:#d9e4f2;--blue:#1769e0;--green:#1d9b55;--navy:#0f2e63;
+  --shadow:0 8px 24px rgba(30,55,90,.11)
+}
+body.night{
+  --bg:#0b1730;--panel:#12213d;--soft:#182945;--text:#f5f8ff;--muted:#b6c2d6;
+  --line:#2b3f62;--blue:#6fb2ff;--green:#63d58e;--navy:#dce9ff;
+  --shadow:0 8px 26px rgba(0,0,0,.28)
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+body{transition:background .25s,color .25s}
+button{font:inherit}
+.app{max-width:900px;margin:auto;min-height:100vh}
+header{
+  height:58px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;
+  background:var(--panel);border-bottom:1px solid var(--line)
+}
+.brand{display:flex;align-items:center;gap:9px}
+.brandLogo{font-size:28px;line-height:1}
+.brandTitle{font-size:19px;font-weight:800;color:var(--navy)}
+.brandSub{font-size:10px;color:var(--muted);margin-top:1px}
+.themeBtn{
+  border:1px solid var(--line);background:var(--soft);color:var(--text);
+  border-radius:11px;padding:8px 10px;font-weight:700;min-width:72px
+}
+main{padding:7px 9px 60px}
+.page{display:none}
+.page.active{display:block}
+.homeIntro{margin:2px 0 9px}
+.homeIntro h1{font-size:18px;margin:0 0 2px;color:var(--navy)}
+.homeIntro p{font-size:11px;margin:0;color:var(--muted)}
+/* IMPORTANT: NEVER STACK THESE TWO CARDS ON FIRE. */
+.homeCards{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+  gap:7px;
+}
+.homeCard{
+  min-width:0;min-height:218px;border:1px solid var(--line);border-radius:18px;padding:9px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  box-shadow:var(--shadow);overflow:hidden
+}
+.icloudCard{background:linear-gradient(160deg,rgba(23,105,224,.13),var(--panel))}
+.localCard{background:linear-gradient(160deg,rgba(29,155,85,.13),var(--panel))}
+.bigIcon{font-size:44px;line-height:1;margin-bottom:7px}
+.homeCard h2{font-size:17px;margin:0 0 4px}
+.homeCard p{font-size:10px;line-height:1.3;color:var(--muted);margin:0 0 10px;max-width:240px}
+.cardBtn{
+  width:94%;min-height:40px;border:0;border-radius:11px;color:#fff;font-size:12px;font-weight:800;padding:9px 8px
+}
+.blue{background:#1769e0}.green{background:#1d9b55}
+.tip{
+  width:94%;margin-top:6px;padding:7px 8px;border-radius:10px;background:var(--soft);
+  border:1px solid var(--line);font-size:9px;color:var(--muted);line-height:1.25
+}
+.tip strong{color:var(--text)}
+
+
+
+
+
+
+.fileName{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fileMeta{font-size:10px;color:var(--muted)}
+.pageHeader{display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.backBtn{
+  border:1px solid var(--line);background:var(--panel);color:var(--blue);
+  border-radius:11px;padding:9px 12px;font-size:15px;font-weight:800;box-shadow:var(--shadow)
+}
+.pageHeader h2{margin:0;font-size:17px;color:var(--navy)}
+.contentCard{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow)}
+.center{text-align:center}
+.pageIcon{font-size:62px;line-height:1;margin:7px 0}
+.contentCard h3{margin:4px 0 7px;font-size:19px}
+.contentCard p{font-size:13px;line-height:1.45;color:var(--muted)}
+.primaryBtn{
+  border:0;border-radius:12px;color:#fff;font-size:15px;font-weight:800;padding:9px 14px;min-height:45px;width:100%;
+  background:#1769e0
+}
+.localBtn{background:#1d9b55}
+.steps{text-align:left;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:12px}
+.steps h4{margin:0 0 5px;font-size:13px}
+.steps ol{margin:0;padding-left:20px;color:var(--muted);font-size:11px;line-height:1.5}
+.layoutBar{display:flex;justify-content:flex-end;gap:6px;margin:10px 0}
+.layoutBtn{border:1px solid var(--line);background:var(--soft);color:var(--text);border-radius:9px;padding:7px 10px;font-weight:700}
+.layoutBtn.on{outline:2px solid var(--blue)}
+.fileArea.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fileArea.list{display:block}
+.fileTile{background:var(--soft);border:1px solid var(--line);border-radius:11px;padding:9px;min-width:0}
+.grid .fileTile{text-align:center;min-height:100px}
+.grid .fi{font-size:28px;margin-bottom:5px}
+.list .fileTile{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:7px;align-items:center;margin-bottom:6px}
+.fi{font-size:27px}
+.version{font-size:10px;color:var(--muted);text-align:center;margin:9px 0 0;font-weight:600}
+.bottomNav{
+  position:fixed;bottom:0;left:0;right:0;height:54px;background:var(--panel);border-top:1px solid var(--line);z-index:20
+}
+.navInner{width:min(900px,100%);height:100%;margin:auto;display:grid;grid-template-columns:repeat(2,1fr)}
+.navBtn{border:0;background:transparent;color:var(--muted);font-size:10px;font-weight:700}
+.navBtn b{display:block;font-size:19px;margin-bottom:1px}.navBtn.active{color:var(--blue)}
+/* Fire HD 8 portrait: keep 2 columns even if Silk reports a narrow CSS viewport. */
+@media(max-width:620px){
+  .homeCards{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important}
+  .homeCard{min-height:245px;padding:9px}
+  .bigIcon{font-size:48px}
+  .homeCard h2{font-size:17px}
+  .homeCard p{font-size:9px}
+  .cardBtn{font-size:12.5px;padding:8px 5px}
+  .tip{font-size:9.5px}
+  .fileArea.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-height:700px){
+  header{height:58px}
+  main{padding-top:7px}
+  .homeIntro{margin-bottom:6px}
+  .homeCard{min-height:210px}
+  .bigIcon{font-size:43px}
+  .tip{margin-top:6px}
+  
+}
+
+html,body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
+body{min-width:0}
+main{overflow:visible}
+.homeCards{align-items:stretch}
+.homeCard{height:auto}
+@media (max-width:620px){
+  header{height:54px}
+  .brandLogo{font-size:25px}
+  .brandTitle{font-size:17px}
+  .brandSub{font-size:9px}
+  .themeBtn{padding:6px 7px;min-width:62px;font-size:11px}
+  main{padding:6px 7px 58px}
+  .homeIntro h1{font-size:16px}
+  .homeIntro p{font-size:10px}
+  .homeCards{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px}
+  .homeCard{min-height:205px;padding:7px;border-radius:14px}
+  .bigIcon{font-size:40px;margin-bottom:4px}
+  .homeCard h2{font-size:15px}
+  .homeCard p{font-size:9px;line-height:1.2;margin-bottom:7px}
+  .cardBtn{min-height:38px;font-size:11px;padding:6px 4px}
+  .tip{font-size:8.5px;line-height:1.18;padding:5px 6px;margin-top:5px}
+  
+  
+  
+  .fileName{font-size:11px}
+  .fileMeta{font-size:9px}
+  .version{font-size:9px;margin-top:6px}
+}
+@media (max-height:700px){
+  .homeIntro{margin-bottom:4px}
+  .homeCard{min-height:190px}
+  .bigIcon{font-size:36px}
+  .tip{display:block}
+}
+
+/* v1.6 iCloud-centered Fire HD 8 home */
+.icloudPrimary{
+  display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;align-items:center;
+  background:linear-gradient(145deg,rgba(23,105,224,.18),var(--panel));
+  border:1px solid rgba(23,105,224,.28);border-radius:18px;padding:15px 16px;
+  box-shadow:var(--shadow);min-height:235px
+}
+.primaryCloud{font-size:78px;text-align:center;line-height:1}
+.primaryCopy{min-width:0}
+.eyebrow{font-size:9px;letter-spacing:1.2px;font-weight:900;color:var(--blue);margin-bottom:3px}
+.primaryCopy h2{font-size:25px;margin:0 0 3px;color:var(--navy)}
+.primaryCopy .lead{font-size:15px;font-weight:800;color:var(--text);margin:0 0 6px}
+.primaryCopy .explain{font-size:11px;line-height:1.35;color:var(--muted);margin:0 0 11px}
+.primaryHomeBtn{
+  width:100%;border:0;border-radius:11px;background:#1769e0;color:white;
+  min-height:43px;font-weight:850;font-size:13px;padding:8px 10px
+}
+
+
+
+
+.localMini{
+  width:100%;margin-top:7px;border:1px solid var(--line);background:var(--panel);color:var(--text);
+  border-radius:12px;padding:7px 10px;display:grid;grid-template-columns:27px minmax(0,1fr) 18px;
+  gap:7px;align-items:center;text-align:left;box-shadow:none
+}
+.miniIcon{font-size:21px}.miniCopy{min-width:0}
+.miniCopy strong{display:block;font-size:11.5px;color:var(--navy)}
+.miniCopy small{display:block;font-size:8.5px;color:var(--muted);line-height:1.2;margin-top:1px}
+.chev{font-size:20px;color:var(--green);font-weight:900;text-align:right}
+@media(max-width:620px){
+  .icloudPrimary{grid-template-columns:72px minmax(0,1fr);min-height:210px;padding:11px 10px;gap:8px}
+  .primaryCloud{font-size:57px}
+  .primaryCopy h2{font-size:20px}
+  .primaryCopy .lead{font-size:12px}
+  .primaryCopy .explain{font-size:9.5px;line-height:1.25;margin-bottom:8px}
+  .primaryHomeBtn{min-height:39px;font-size:11.5px}
+  
+  
+  
+  
+  .localMini{margin-top:5px;padding:5px 7px;grid-template-columns:23px minmax(0,1fr) 15px}
+  .miniIcon{font-size:18px}.miniCopy strong{font-size:10.5px}.miniCopy small{font-size:7.8px}
+}
+@media(max-height:700px){
+  .icloudPrimary{min-height:190px}
+  .primaryCloud{font-size:50px}
+}
+
+.icloudActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.icloudAction{
+  border:0;border-radius:11px;background:#1769e0;color:#fff;min-height:48px;
+  font-size:13px;font-weight:850;padding:8px 6px;display:flex;align-items:center;
+  justify-content:center;gap:6px
+}
+.actionIcon{font-size:18px;line-height:1}
+@media(max-width:620px){
+  .icloudActions{gap:6px;margin-top:6px}
+  .icloudAction{min-height:42px;font-size:11px;padding:6px 4px}
+  .actionIcon{font-size:15px}
+}
+
+.transferOpen{margin-top:10px}
+.externalNote{font-size:10px!important;margin:8px 0 0!important}
+@media(max-width:620px){
+  .pageHeader{margin-bottom:7px}
+  .pageHeader h2{font-size:17px}
+  .backBtn{padding:7px 9px;font-size:12px}
+  .contentCard{padding:10px}
+  .pageIcon{font-size:42px;margin:3px 0}
+  .contentCard h3{font-size:16px}
+  .contentCard p{font-size:10.5px}
+  .steps{padding:7px 9px;margin-top:8px}
+  .steps h4{font-size:11px}
+  .steps ol{font-size:10px;line-height:1.4}
+  .transferOpen{min-height:39px;font-size:12px}
+}
+
+.downloadReturnNote{
+  background:rgba(29,155,85,.10);border:1px solid rgba(29,155,85,.28);
+  border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:10px;
+  line-height:1.3;color:var(--text)
+}
+
+.greeting{margin:4px 2px 12px;font-size:clamp(16px,3vw,20px);font-weight:700;opacity:1}.homeGreeting{display:block}
+.downloadNote{margin:8px 4px 2px;font-size:12px;line-height:1.35;opacity:.72}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand">
+    <div class="brandLogo">☁️</div>
+    <div><div class="brandTitle">Cloud Files</div><div class="brandSub">iCloud + Fire local files</div></div>
+  </div>
+  <button class="themeBtn" id="themeBtn">☀ Auto</button>
+</header>
+
+<main>
+<section id="homePage" class="page active">
+<p class="greeting homeGreeting" id="greeting">Welcome to Cloud Files</p>
+
+  <div class="homeIntro">
+    <h1>iCloud File Utility</h1>
+<p>Upload and download through iCloud Drive. Local Files is only a supporting browser.</p>
+  </div>
+
+  <div class="icloudPrimary">
+    <div class="primaryCloud">☁️</div>
+    <div class="primaryCopy">
+      <div class="eyebrow">PRIMARY FILE UTILITY</div>
+      <h2>iCloud Drive</h2>
+      <p class="lead">Upload and download files from here.</p>
+      <p class="explain"><strong>Use iCloud Drive to upload and download your files.</strong></p>
+      <div class="icloudActions">
+        <button class="icloudAction" data-page="uploadPage"><span class="actionIcon">⬆️</span><span>Upload</span></button>
+        <button class="icloudAction" data-page="downloadPage"><span class="actionIcon">⬇️</span><span>Download</span></button>
+      </div>
+<p class="downloadNote">After downloading, find your file in the browser Downloads area or your device Downloads/Files area.</p>
+    </div>
+  </div>
+
+  <button class="localMini" data-page="localPage">
+    <span class="miniIcon">📁</span>
+    <span class="miniCopy"><strong>Browse Local Files</strong><small>Check files stored on this Fire. Uploads are started from iCloud Drive.</small></span>
+    <span class="chev">›</span>
+  </button>
+
+  <div class="version">Cloud Files v1.7.3</div>
+</section>
+
+<section id="uploadPage" class="page">
+  <div class="pageHeader"><button class="backBtn" data-page="homePage">‹ Back</button><h2>Upload to iCloud</h2></div>
+  <div class="contentCard center">
+    <div class="pageIcon">⬆️</div>
+    <h3>Upload a Fire File</h3>
+    <p>Uploads are started inside Apple's iCloud Drive.</p>
+    <div class="steps">
+      <h4>Upload</h4>
+      <ol>
+        <li>Tap <strong>Open iCloud Drive</strong> below.</li>
+        <li>Open the iCloud folder where you want the file saved.</li>
+        <li>Tap Apple's <strong>Upload</strong> control.</li>
+        <li>Choose <strong>Choose Files</strong>.</li>
+        <li>Select the file from your Fire.</li>
+      </ol>
+    </div>
+    <button class="primaryBtn transferOpen" id="openUploadIcloud">Open iCloud Drive</button>
+    <p class="externalNote">iCloud opens in a separate Silk tab so Cloud Files stays open. Switch back to the Cloud Files tab when finished.</p>
+  </div>
+  <div class="version">Cloud Files v1.7.3</div>
+</section>
+
+
+
+<section id="downloadPage" class="page">
+  <div class="pageHead">
+    <button class="backBtn" data-page="homePage">← Back</button>
+    <h2>Download from iCloud</h2>
+  </div>
+  <div class="guideCard">
+    <div class="guideIcon">⬇️</div>
+    <h3>Download a file to this device</h3>
+    <ol class="steps">
+      <li>Tap <strong>Open iCloud Drive</strong> below.</li>
+      <li>Find the file you want to download.</li>
+      <li>Select the file, then use Apple’s <strong>Download</strong> control.</li>
+      <li>After the download, find the file in your browser’s <strong>Downloads</strong> area or the device <strong>Downloads / Files</strong> area.</li>
+    </ol>
+    <p class="smallNote">Cloud Files does not control the screen shown after Apple completes the download.</p>
+    <button class="primaryBtn icloudBtn" id="openDownloadIcloud">Open iCloud Drive</button>
+  </div>
+</section>
+
+<section id="localPage" class="page">
+  <div class="pageHeader"><button class="backBtn" data-page="homePage">‹ Back</button><h2>Local Files</h2></div>
+  <div class="contentCard">
+    <p>Local Files uses the Fire's native file picker. Use Browse Local Files to locate or confirm a downloaded file, normally in Downloads.</p>
+    <button class="primaryBtn localBtn" id="pickBtn">📁 Browse Local Files</button>
+    <div class="layoutBar">
+      <button class="layoutBtn on" id="gridBtn">▦ Grid</button>
+      <button class="layoutBtn" id="listBtn">☷ List</button>
+    </div>
+    <div id="fileArea" class="fileArea grid"></div>
+  </div>
+  <div class="version">Cloud Files v1.7.3</div>
+</section>
+
+
+<section id="aboutPage" class="page">
+  <div class="pageHeader"><button class="backBtn" data-page="homePage">‹ Back</button><h2>About</h2></div>
+  <div class="contentCard center">
+    <div class="pageIcon">☁️</div><h3>Cloud Files</h3>
+    <p><strong>Version 1.7.3</strong></p>
+    <p>Simple access to iCloud Drive and Fire local files.</p>
+    <p id="sunInfo">Automatic day/night mode uses local sunrise and sunset when location permission is available.</p>
+    <p><a href="privacy.html">Privacy Policy</a></p>
+  </div>
+</section>
+</main>
+</div>
+
+<nav class="bottomNav"><div class="navInner">
+  <button class="navBtn active" data-page="homePage"><b>⌂</b>Home</button>
+  <button class="navBtn" data-page="aboutPage"><b>ⓘ</b>About</button>
+</div></nav>
+
+<script>
+const $=id=>document.getElementById(id);
+const layoutKey='cloudFilesLayout',themeKey='cloudFilesThemeMode';
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $(id).classList.add('active');
+  document.querySelectorAll('.navBtn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+
+
+$('openUploadIcloud').onclick=()=>{
+  window.open('https://www.icloud.com/iclouddrive/','_blank');
+};
+function esc(t){const d=document.createElement('div');d.textContent=String(t);return d.innerHTML}
+function bytes(n){if(n===0)return'0 Bytes';const u=['Bytes','KB','MB','GB'];const i=Math.min(Math.floor(Math.log(n)/Math.log(1024)),3);return +(n/Math.pow(1024,i)).toFixed(1)+' '+u[i]}
+function icon(n,t){n=(n||'').toLowerCase();if((t||'').startsWith('image/'))return'🖼️';if(n.endsWith('.pdf'))return'📕';if(n.endsWith('.doc')||n.endsWith('.docx'))return'📘';if(n.endsWith('.xls')||n.endsWith('.xlsx')||n.endsWith('.csv'))return'📊';if(n.endsWith('.txt'))return'📝';return'📄'}
+
+function showSelectedFile(f){
+  const area=$('fileArea');
+  if(!f){area.innerHTML='<div class="fileTile"><div class="fi">📄</div><div class="fileName">No file selected</div></div>';return}
+  area.innerHTML=`<div class="fileTile"><div class="fi">${icon(f.name,f.type)}</div><div><div class="fileName">${esc(f.name)}</div><div class="fileMeta">${esc(f.type||'File')}</div></div><div class="fileMeta">${bytes(f.size)}</div></div>`;
+}
+
+$('pickBtn').onclick=()=>{
+  const input=document.createElement('input');input.type='file';input.accept='*/*';
+  input.onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)showSelectedFile(f)};
+  input.click();
+};
+function setLayout(x){
+  x=x==='list'?'list':'grid';
+  $('fileArea').className='fileArea '+x;
+  $('gridBtn').classList.toggle('on',x==='grid');
+  $('listBtn').classList.toggle('on',x==='list');
+  localStorage.setItem(layoutKey,x);
+}
+$('gridBtn').onclick=()=>setLayout('grid');$('listBtn').onclick=()=>setLayout('list');
+
+function doy(d){return Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(d.getFullYear(),0,0))/86400000)}
+function n360(x){x%=360;return x<0?x+360:x} function n24(x){x%=24;return x<0?x+24:x}
+function sun(date,lat,lon,rise){
+ const N=doy(date),lh=lon/15,t=N+(((rise?6:18)-lh)/24),M=.9856*t-3.289;
+ let L=n360(M+1.916*Math.sin(M*Math.PI/180)+.020*Math.sin(2*M*Math.PI/180)+282.634);
+ let RA=n360(Math.atan(.91764*Math.tan(L*Math.PI/180))*180/Math.PI),Lq=Math.floor(L/90)*90,Rq=Math.floor(RA/90)*90;RA=(RA+Lq-Rq)/15;
+ const sd=.39782*Math.sin(L*Math.PI/180),cd=Math.cos(Math.asin(sd)),ch=(Math.cos(90.833*Math.PI/180)-sd*Math.sin(lat*Math.PI/180))/(cd*Math.cos(lat*Math.PI/180));
+ if(ch>1||ch<-1)return null;
+ let H=(rise?360-Math.acos(ch)*180/Math.PI:Math.acos(ch)*180/Math.PI)/15,T=H+RA-.06571*t-6.622,UT=n24(T-lh);
+ return new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())+UT*3600000)
+}
+let sc={rise:null,set:null};
+function applyTheme(mode){
+ const now=new Date();let night;
+ if(mode==='day')night=false;else if(mode==='night')night=true;else if(sc.rise&&sc.set)night=now<sc.rise||now>=sc.set;else night=now.getHours()<7||now.getHours()>=19;
+ document.body.classList.toggle('night',night);$('themeMeta').content=night?'#0b1730':'#f6f9fd';
+ $('themeBtn').textContent=(night?'🌙 ':'☀ ')+(mode==='auto'?'Auto':mode[0].toUpperCase()+mode.slice(1));
+}
+function updateTheme(){
+ let mode=localStorage.getItem(themeKey)||'auto';
+ if(mode!=='auto'){applyTheme(mode);return}
+ if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>{
+   const d=new Date();sc.rise=sun(d,p.coords.latitude,p.coords.longitude,true);sc.set=sun(d,p.coords.latitude,p.coords.longitude,false);
+   if(sc.rise&&sc.set)$('sunInfo').textContent='Today: sunrise '+sc.rise.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' · sunset '+sc.set.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+   applyTheme('auto');
+ },()=>applyTheme('auto'),{timeout:5000,maximumAge:86400000});else applyTheme('auto');
+}
+$('themeBtn').onclick=()=>{let m=localStorage.getItem(themeKey)||'auto',n=m==='auto'?'day':m==='day'?'night':'auto';localStorage.setItem(themeKey,n);updateTheme()};
+
+
+try{localStorage.removeItem('cloudFilesRecent')}catch(e){}
+
+
+setLayout(localStorage.getItem(layoutKey)||'grid');
+
+
+
+showSelectedFile(null);updateTheme();
+setInterval(()=>applyTheme(localStorage.getItem(themeKey)||'auto'),60000);
+
+function updateGreeting(){
+  const el=document.getElementById('greeting');
+  if(!el) return;
+  const h=new Date().getHours();
+  const part=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+  el.textContent=part+' — welcome to Cloud Files';
+}
+updateGreeting();
+window.addEventListener('pageshow',updateGreeting);
+
+const downloadOpen=document.getElementById('openDownloadIcloud');
+if(downloadOpen){
+  downloadOpen.onclick=()=>window.open('https://www.icloud.com/iclouddrive/','_blank');
+}
+
+
+
+</script>
+</body>
+</html>
