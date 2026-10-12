@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.willyros01.scorecard",
+      "sha256_cert_fingerprints": [
+        "40:74:4E:50:63:93:2D:E6:68:31:71:7A:EB:3D:EE:A6:47:E6:81:D9:6E:11:F7:C9:64:34:C3:0C:DF:EF:53:86"
+      ]
+    }
+  }
+]
