@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Publish the latest SUCCESSFUL Fairpot Android APK on Cuberoot.
-# Copies the successful run artifact if authorized, otherwise rebuilds EXACT
-# successful source commit (not current HEAD or a stale pinned SHA).
+# Copies ONLY the exact successful APK artifact; never re-signs/rebuilds.
+# A missing artifact is an error: keep the current APK rather than publish drift.
 set -euo pipefail
 
 TMP="$(mktemp -d)"
@@ -52,38 +52,38 @@ fi
 
 mkdir -p downloads
 ORIGIN='github-actions-artifact'
-echo "Fetching APK from successful Fairpot run $RUN_ID (artifact $ARTIFACT_ID)."
-if curl -fsSL --retry 2 --retry-delay 2 \
-    -H "Authorization: Bearer $GITHUB_TOKEN" \
-    -H 'Accept: application/vnd.github+json' \
-    -H 'X-GitHub-Api-Version: 2022-11-28' \
-    "https://api.github.com/repos/willyros01/fairpot/actions/artifacts/$ARTIFACT_ID/zip" \
-    -o "$TMP/artifact.zip" \
-  && unzip -tqq "$TMP/artifact.zip" \
-  && unzip -Z1 "$TMP/artifact.zip" | grep -Fx 'app-debug.apk' >/dev/null; then
-  unzip -p "$TMP/artifact.zip" app-debug.apk > "$TMP/app-debug.apk"
-  echo "Retrieved the exact successful build artifact."
-else
-  # GitHub's default GITHUB_TOKEN is scoped to Cuberoot, not Fairpot.
-  # If artifact access is unavailable, rebuild *only* the SHA already verified
-  # by the Fairpot successful-run report. Never build HEAD or a pinned old SHA.
-  echo "::warning title=Cross-repo artifact unavailable::Rebuilding successful commit $SHA"
-  ORIGIN='rebuild-of-successful-source'
-  git clone --depth 1 --branch android https://github.com/willyros01/fairpot.git "$TMP/fairpot"
-  (
-    cd "$TMP/fairpot"
-    git fetch --depth 1 origin "$SHA"
-    git checkout --detach "$SHA"
-    test "$(git rev-parse HEAD)" = "$SHA"
-    bash build/android-build.sh
-  )
-  cp "$TMP/fairpot/android/app/build/outputs/apk/debug/app-debug.apk" "$TMP/app-debug.apk"
-fi
+echo "Downloading the EXACT signed APK from successful Fairpot run $RUN_ID, artifact $ARTIFACT_ID."
+# Never rebuild in Cuberoot: rebuilding could sign with a different key.
+curl -fsSL --retry 3 --retry-delay 3 \
+  -H "Authorization: Bearer $GITHUB_TOKEN" \
+  -H 'Accept: application/vnd.github+json' \
+  -H 'X-GitHub-Api-Version: 2022-11-28' \
+  "https://api.github.com/repos/willyros01/fairpot/actions/artifacts/$ARTIFACT_ID/zip" \
+  -o "$TMP/artifact.zip"
+unzip -tqq "$TMP/artifact.zip"
+unzip -Z1 "$TMP/artifact.zip" | grep -Fx 'app-debug.apk' >/dev/null
+unzip -p "$TMP/artifact.zip" app-debug.apk > "$TMP/app-debug.apk"
 
 test -s "$TMP/app-debug.apk"
 test "$(stat -c%s "$TMP/app-debug.apk")" -gt 1000000
 unzip -tqq "$TMP/app-debug.apk"
 unzip -Z1 "$TMP/app-debug.apk" | grep -Fx 'AndroidManifest.xml' >/dev/null
+SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+test -n "$SDK"
+SIGNER="$(find "$SDK/build-tools" -name apksigner -type f | sort -V | tail -1)"
+test -n "$SIGNER"
+"$SIGNER" verify --verbose "$TMP/app-debug.apk" >/dev/null
+SIGNER_SHA="$("$SIGNER" verify --print-certs "$TMP/app-debug.apk" | sed -n 's/^Signer #1 certificate SHA-256 digest: *//p' | head -1 | tr 'A-F' 'a-f')"
+test -n "$SIGNER_SHA"
+# New permanent-key APKs must keep the identical signer across publications.
+if [ -f downloads/fairpot-build.json ]; then
+  PREV_SIGNER="$(node -p "require('./downloads/fairpot-build.json').signer_sha256 || ''")"
+  if [ -n "$PREV_SIGNER" ] && [ "$PREV_SIGNER" != "$SIGNER_SHA" ]; then
+    echo "::error title=Signing key changed::Refusing to publish APK with mismatched certificate"
+    exit 1
+  fi
+fi
+echo "Verified published APK signer: $SIGNER_SHA"
 
 # Do not overwrite the new release with an older build while this job runs.
 curl -fsSL --retry 2 -H 'Cache-Control: no-cache' \
@@ -97,7 +97,7 @@ fi
 
 install -m 0644 "$TMP/app-debug.apk" downloads/fairpot.apk
 sha256sum downloads/fairpot.apk > downloads/fairpot.apk.sha256
-RUN_ID="$RUN_ID" SHA="$SHA" ARTIFACT_ID="$ARTIFACT_ID" ORIGIN="$ORIGIN" node <<'JS'
+RUN_ID="$RUN_ID" SHA="$SHA" ARTIFACT_ID="$ARTIFACT_ID" ORIGIN="$ORIGIN" SIGNER_SHA="$SIGNER_SHA" node <<'JS'
 const fs = require('fs');
 const crypto = require('crypto');
 const apk = fs.readFileSync('downloads/fairpot.apk');
@@ -109,6 +109,7 @@ const release = {
   artifact_id: Number(process.env.ARTIFACT_ID),
   origin: process.env.ORIGIN,
   apk_sha256: crypto.createHash('sha256').update(apk).digest('hex'),
+  signer_sha256: process.env.SIGNER_SHA,
   apk_bytes: apk.length,
   published_at: new Date().toISOString()
 };
