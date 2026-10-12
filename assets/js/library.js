@@ -145,7 +145,7 @@ function docRow(app, d) {
       el('div', { class: 'grow' }, el('div', { class: 'title', text: d.title }), el('div', { class: 'meta', text: meta })),
       tag,
       el('div', { class: 'doc-actions' },
-        el('a', { class: 'btn btn-small', href: `view.html?app=${encodeURIComponent(app.slug)}&id=${encodeURIComponent(d.id)}`, target: '_blank', rel: 'noopener', 'aria-label': 'Read ' + d.title, text: 'Read' }),
+        el('a', { class: 'btn btn-small', href: d.ext === 'html' ? d.path : `view.html?app=${encodeURIComponent(app.slug)}&id=${encodeURIComponent(d.id)}`, target: '_blank', rel: 'noopener', 'aria-label': 'Read ' + d.title, text: 'Read' }),
         el('a', { class: 'btn btn-ghost btn-small', href: d.path + '?t=' + encodeURIComponent(d.date || ''), download: d.original || '', 'aria-label': 'Download ' + d.title, text: 'Download' })));
   }
   return el('div', { class: 'doc-row' },
