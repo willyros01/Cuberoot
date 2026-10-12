@@ -1,11 +1,17 @@
-name: Publish Fairpot Android test APK
+name: Publish Fairpot Android APK
 
+# Every successful Fairpot/android build writes android-last-run.json.
+# This workflow polls that verified result and publishes only successful APKs.
+# Schedule is required because repository GitHub tokens cannot write to another repo.
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '7,17,27,37,47,57 * * * *'
   push:
     branches: [main]
     paths:
       - '.github/workflows/publish-fairpot-apk.yml'
+      - 'build/publish-fairpot.sh'
 
 permissions:
   contents: write
@@ -17,18 +23,11 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
-      - name: Check out Cuberoot site
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           persist-credentials: true
-      - name: Get verified Fairpot Android source
-        run: |
-          git clone --depth 1 --branch android https://github.com/willyros01/fairpot.git /tmp/fairpot
-          cd /tmp/fairpot
-          git fetch --depth 1 origin 4cf28232e16df311d5b209fe5ae8c4de708b8d15
-          git checkout --detach 4cf28232e16df311d5b209fe5ae8c4de708b8d15
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -36,25 +35,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Verify Android SDK
+      - name: Check available Android SDK for fallback rebuild
         run: |
           test -n "${ANDROID_HOME:-}"
           test -d "$ANDROID_HOME/platforms"
-      - name: Build same Android test version
-        working-directory: /tmp/fairpot
-        run: bash build/android-build.sh
-      - name: Publish APK on Cuberoot domain
-        run: |
-          set -euo pipefail
-          install -D -m 0644 /tmp/fairpot/android/app/build/outputs/apk/debug/app-debug.apk downloads/fairpot.apk
-          test -s downloads/fairpot.apk
-          sha256sum downloads/fairpot.apk | tee downloads/fairpot.apk.sha256
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add downloads/fairpot.apk downloads/fairpot.apk.sha256
-          if git diff --cached --quiet; then
-            echo "Same APK already published"
-          else
-            git commit -m "publish: Fairpot Android debug test APK"
-            git push origin HEAD:main
-          fi
+      - name: Publish latest successful Fairpot Android APK
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bash build/publish-fairpot.sh
