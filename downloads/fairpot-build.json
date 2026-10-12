@@ -1,11 +1,12 @@
 {
   "app": "Fairpot",
   "channel": "android-debug-test",
-  "source_sha": "730bf543e5c538c191f8c94f78dfba92633bb7ca",
-  "run_id": 38296922424,
-  "artifact_id": 11768784351,
+  "source_sha": "c545b6056551f0e582be3d3508377b352021a7e1",
+  "run_id": 38307131967,
+  "artifact_id": 11773295548,
   "origin": "github-actions-artifact",
-  "apk_sha256": "5f48996ec3d7cf70a51a876d280bf209a6128cfc8d6f6950f8540ad748250edd",
+  "apk_sha256": "db038393f5066e74314ff68507bb8140d5d80714554e5a87323144e98ac30ca1",
+  "signer_sha256": "b740db9061c90f02a42f781aa53809e88871327c5b7c89eef02b550ea539d126",
   "apk_bytes": 17141591,
-  "published_at": "2026-10-12T19:46:40.715Z"
+  "published_at": "2026-10-12T20:59:13.684Z"
 }
