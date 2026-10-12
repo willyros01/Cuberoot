@@ -3,7 +3,7 @@
 # Copies ONLY the exact successful APK artifact; never re-signs/rebuilds.
 # A missing artifact is an error: keep the current APK rather than publish drift.
 # Scorecard publication starts only after signing secrets and the successful APK build.
-# Dispatch publication for Fire HD 8 browser-launch fix, Android run 38314654572.
+# Publish verified Scorecard Android APK from GitHub Actions; configured polling also handles future builds.
 set -euo pipefail
 
 TMP="$(mktemp -d)"
