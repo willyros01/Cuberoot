@@ -19,8 +19,7 @@
       "slug": "cloud-files",
       "icon": "doc",
       "description": "Open Apple iCloud Drive from your Fire tablet to upload or download files, and browse files stored on your device. Simple file access with automatic day/night appearance.",
-      "url": "cloud-files/",
-      "availability": "Web app available · Android APK in preparation"
+      "availability": "Android test APK in preparation"
     },
     {
       "name": "The Scorecard",
