@@ -60,7 +60,7 @@ if curl -fsSL --retry 2 --retry-delay 2 \
     "https://api.github.com/repos/willyros01/fairpot/actions/artifacts/$ARTIFACT_ID/zip" \
     -o "$TMP/artifact.zip" \
    && unzip -tqq "$TMP/artifact.zip" \
-   && unzip -Z1 "$TMP/artifact.zip" | grep -Fxq 'app-debug.apk'; then
+   && unzip -Z1 "$TMP/artifact.zip" | grep -Fx 'app-debug.apk' >/dev/null; then
   unzip -p "$TMP/artifact.zip" app-debug.apk > "$TMP/app-debug.apk"
 else
   echo "::warning title=Artifact unavailable::Rebuilding exact successful Fairpot commit $SHA."
@@ -79,7 +79,7 @@ fi
 test -s "$TMP/app-debug.apk"
 test "$(stat -c%s "$TMP/app-debug.apk")" -gt 1000000
 unzip -tqq "$TMP/app-debug.apk"
-unzip -Z1 "$TMP/app-debug.apk" | grep -Fxq 'AndroidManifest.xml'
+unzip -Z1 "$TMP/app-debug.apk" | grep -Fx 'AndroidManifest.xml' >/dev/null
 
 # Do not overwrite the new release with an older build while this job runs.
 curl -fsSL --retry 2 -H 'Cache-Control: no-cache' \
