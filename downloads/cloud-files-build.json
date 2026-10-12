@@ -1,12 +1,12 @@
 {
   "app": "Cloud Files",
   "channel": "android-debug-test",
-  "source_sha": "2c542284b1a3351fa523614a5d2f9ee041d454df",
-  "run_id": 38312727937,
-  "artifact_id": 11775852111,
+  "source_sha": "cbc17ae2ed63d7b093fee6ffce5d75e1b64c5484",
+  "run_id": 38314654572,
+  "artifact_id": 11775558560,
   "origin": "github-actions-artifact",
-  "apk_sha256": "7533ef1c094b1e806d91b47edc8b16465f0cab0038b8137cc33c3e9e86f453f6",
+  "apk_sha256": "8061eb092bdd0746c2b6054047e7c0657ee87d28cf5ec1c5736bbeb641f48e6e",
   "signer_sha256": "4ac4eb9b55e91582b0b02820498e1f6ee7208a4d63eca73a2c1bf68c766002ea",
-  "apk_bytes": 4059670,
-  "published_at": "2026-10-12T21:59:00.183Z"
+  "apk_bytes": 4059542,
+  "published_at": "2026-10-12T22:08:38.004Z"
 }
