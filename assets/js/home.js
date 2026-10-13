@@ -3,6 +3,26 @@ init();
 
 // Show a same-origin Android download only after the APK is actually hosted.
 // This avoids exposing repository URLs or advertising an unavailable file.
+// Fairpot's published App Store Connect ID; use Apple's official, unmodified badge.
+function addFairpotAppStore(box) {
+  const row=[...box.querySelectorAll('.app-row')].find(node =>
+    node.querySelector('h3')?.textContent === 'Fairpot');
+  const details=row?.querySelector('h3')?.parentElement;
+  if(!details)return;
+  const actions=details.querySelector('.actions') || details.appendChild(el('div',{class:'actions fairpot-store-actions'}));
+  actions.appendChild(el('a',{
+    class:'app-store-badge',
+    href:'https://apps.apple.com/app/id6816560336',
+    target:'_blank',
+    rel:'noopener noreferrer',
+    'aria-label':'Download Fairpot on the Apple App Store'
+  },el('img',{
+    src:'https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=180x60',
+    alt:'Download on the App Store',
+    width:'165',height:'55',loading:'lazy'
+  })));
+}
+
 async function addFairpotDownload(box) {
   const base = 'downloads/fairpot.apk';
   try {
@@ -20,9 +40,9 @@ async function addFairpotDownload(box) {
     if (!row) return;
     const details = row.querySelector('h3')?.parentElement;
     if (!details) return;
-    details.appendChild(el('div', { class: 'actions' },
-      el('a', { class: 'btn app-open', href: url, download: 'fairpot-' + meta.run_id + '.apk',
-        'aria-label': 'Download Fairpot Android APK', text: 'Download Android APK ↓' })));
+    const actions=details.querySelector('.actions') || details.appendChild(el('div',{class:'actions fairpot-store-actions'}));
+    actions.appendChild(el('a', { class: 'btn app-open', href: url, download: 'fairpot-' + meta.run_id + '.apk',
+        'aria-label': 'Download Fairpot Android APK', text: 'Download Android APK ↓' }));
   } catch (_) {
     // Absence of a release is expected; do not show a broken link.
   }
@@ -144,6 +164,7 @@ async function loadApps() {
           el('a', { class: 'btn app-open', href: a.url, 'aria-label': 'Open ' + a.name, text: 'Open ' + a.name + ' →' })) : null,
         el('div', { class: 'avail', text: a.availability || ((av.now || 'Web app now') + ' · ' + (av.soon || 'iOS & Android soon')) })),
       el('a', { class: 'docs', href: 'docs.html?app=' + encodeURIComponent(a.slug), 'aria-label': 'Documentation for ' + a.name, text: 'Docs →' }))));
+    addFairpotAppStore(box);
     await addFairpotDownload(box);
     await addCloudFilesDownload(box);
     await addScorecardDownload(box);
