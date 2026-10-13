@@ -141,7 +141,18 @@ process.stdin.on("end", () => {
       echo "An equal or newer APK build is already published."
       exit 0
     fi
-    git rebase origin/main
+    # Rebase cannot replay the first APK/add-add binary files safely.
+    # Preserve ONLY verified release assets, fast-forward to latest main and
+    # re-commit those assets without disturbing any other site changes.
+    install -m 0644 downloads/spendrecorder.apk "$TMP/retry.apk"
+    cp downloads/spendrecorder.apk.sha256 "$TMP/retry.apk.sha256"
+    cp downloads/spendrecorder-build.json "$TMP/retry-build.json"
+    git reset --hard origin/main
+    install -m 0644 "$TMP/retry.apk" downloads/spendrecorder.apk
+    cp "$TMP/retry.apk.sha256" downloads/spendrecorder.apk.sha256
+    cp "$TMP/retry-build.json" downloads/spendrecorder-build.json
+    git add downloads/spendrecorder.apk downloads/spendrecorder.apk.sha256 downloads/spendrecorder-build.json
+    git commit -m "publish: SpendRecorder Android successful run $RUN_ID [skip ci]"
     git push origin HEAD:main
   fi
   echo "Published SpendRecorder Android APK to /downloads/spendrecorder.apk"
