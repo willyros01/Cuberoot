@@ -99,8 +99,8 @@ async function addSpendRecorderDownload(box) {
   }
 }
 
-// Show Wire Android reader beta only after Cuberoot has published the verified APK.
-// Native FCM/ADM notifications are NOT enabled in this version.
+// Show verified Wire Android APK only after matching Cuberoot metadata.
+// FCM is enabled for Google Play Android; Amazon ADM is pending.
 async function addWireDownload(box) {
   try {
     const metaRes = await fetch('downloads/wire-build.json', { cache: 'no-store' });
@@ -108,7 +108,7 @@ async function addWireDownload(box) {
     const meta = await metaRes.json();
     if (!Number.isSafeInteger(meta.run_id) || meta.run_id < 1 ||
         !meta.apk_sha256 || !meta.signer_sha256 ||
-        meta.channel !== 'android-reader-beta-no-native-push') return;
+        meta.channel !== 'android-google-fcm-beta') return;
     const url = 'downloads/wire.apk?build=' + meta.run_id;
     const check = await fetch(url, { method: 'HEAD', cache: 'no-store' });
     if (!check.ok) return;
@@ -120,10 +120,10 @@ async function addWireDownload(box) {
     details.appendChild(el('div', { class: 'actions' },
       el('a', { class: 'btn app-open', href: url,
         download: 'wire-' + meta.run_id + '.apk',
-        'aria-label': 'Download Wire Android beta with on-screen breaking alerts',
+        'aria-label': 'Download Wire Android beta with native Google FCM support',
         text: 'Download Android Beta ↓' })));
     const avail = row.querySelector('.avail');
-    if (avail) avail.textContent = 'Android beta available · On-screen alerts while Wire is open · Native push pending';
+    if (avail) avail.textContent = 'Android beta available · Google Android FCM testing · Amazon ADM pending';
   } catch (_) {
     // Never advertise or link an unpublished Wire release.
   }

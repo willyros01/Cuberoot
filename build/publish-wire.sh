@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Foreground Android beta publisher kickoff for commit 02cf9e343de64b132e75cdb8b3890db3ed66f94a.
+# Google Android FCM beta publisher kickoff; verify artifact and permanent signing identity.
 # Publish the latest SUCCESSFUL Wire Android APK on Cuberoot.
 
 # Verified Android Back-fix artifact source: 67b7e6eb76bcd56855d250ca70984cd3b1056485; publisher must validate exact successful run, certificate and checksum.
@@ -11,7 +11,7 @@ set -euo pipefail
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
-echo "Checking latest successful Wire Android reader APK workflow..."
+echo "Checking latest successful Wire Android signed APK workflow..."
 API='https://api.github.com/repos/willyros01/balita'
 curl -fsSL --retry 3 --retry-delay 2 \
   -H "Authorization: Bearer $GITHUB_TOKEN" \
@@ -143,7 +143,7 @@ const crypto = require('crypto');
 const apk = fs.readFileSync('downloads/wire.apk');
 const release = {
   app: 'Wire',
-  channel: 'android-reader-beta-no-native-push',
+  channel: 'android-google-fcm-beta',
   source_sha: process.env.SHA,
   run_id: Number(process.env.RUN_ID),
   artifact_id: Number(process.env.ARTIFACT_ID),
