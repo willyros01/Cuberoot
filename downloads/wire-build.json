@@ -1,12 +1,12 @@
 {
   "app": "Wire",
   "channel": "android-reader-beta-no-native-push",
-  "source_sha": "c716430298967b7a545d69f41acd8cdd63aa8056",
-  "run_id": 38335679403,
-  "artifact_id": 11784669728,
+  "source_sha": "67b7e6eb76bcd56855d250ca70984cd3b1056485",
+  "run_id": 38340060586,
+  "artifact_id": 11786628798,
   "origin": "github-actions-artifact",
-  "apk_sha256": "bf78a5eb0e79cb74199ac688c17702a7982cedc9e5670ea298d82eeb42d3b4e2",
+  "apk_sha256": "0191ff2cd50246121e84cb83175503be70247f99832077a6a81d705423bd4267",
   "signer_sha256": "662478ca576fec4f6914e7e446d017f359353970e76bfd4ec8d1318d2bb04866",
-  "apk_bytes": 4230178,
-  "published_at": "2026-10-13T02:45:33.659Z"
+  "apk_bytes": 4238244,
+  "published_at": "2026-10-13T03:10:24.269Z"
 }
