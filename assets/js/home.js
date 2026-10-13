@@ -120,10 +120,10 @@ async function addWireDownload(box) {
     details.appendChild(el('div', { class: 'actions' },
       el('a', { class: 'btn app-open', href: url,
         download: 'wire-' + meta.run_id + '.apk',
-        'aria-label': 'Download Wire Android reader beta APK',
-        text: 'Download Android Reader Beta ↓' })));
+        'aria-label': 'Download Wire Android beta with on-screen breaking alerts',
+        text: 'Download Android Beta ↓' })));
     const avail = row.querySelector('.avail');
-    if (avail) avail.textContent = 'Android reader beta available · Native notifications pending';
+    if (avail) avail.textContent = 'Android beta available · On-screen alerts while Wire is open · Native push pending';
   } catch (_) {
     // Never advertise or link an unpublished Wire release.
   }

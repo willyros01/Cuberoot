@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Foreground Android beta publisher kickoff for commit 02cf9e343de64b132e75cdb8b3890db3ed66f94a.
 # Publish the latest SUCCESSFUL Wire Android APK on Cuberoot.
 
 # Verified Android Back-fix artifact source: 67b7e6eb76bcd56855d250ca70984cd3b1056485; publisher must validate exact successful run, certificate and checksum.
