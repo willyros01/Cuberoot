@@ -35,6 +35,13 @@
       "description": "Philippine and world news in one calm reader."
     },
     {
+      "name": "SpendRecorder",
+      "slug": "spendrecorder",
+      "icon": "receipt",
+      "description": "Personal expense tracking, multiple currencies and receipt photos, with your records stored privately on your device.",
+      "availability": "Android signed APK in preparation · iOS TestFlight"
+    },
+    {
       "name": "Expense Ledger",
       "slug": "expense-ledger",
       "icon": "receipt",
