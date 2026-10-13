@@ -42,12 +42,6 @@
       "availability": "Android signed APK in preparation · iOS TestFlight"
     },
     {
-      "name": "Expense Ledger",
-      "slug": "expense-ledger",
-      "icon": "receipt",
-      "description": "Personal expenses in any currency, summarised by month and category."
-    },
-    {
       "name": "Cipher",
       "slug": "cipher",
       "icon": "chat",

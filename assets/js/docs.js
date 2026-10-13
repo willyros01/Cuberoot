@@ -44,7 +44,8 @@ async function render() {
   }
   const list = apps.apps || [];
   const pubApps = pub.apps || {};
-  const slug = new URLSearchParams(location.search).get('app');
+  const requestedSlug = new URLSearchParams(location.search).get('app');
+  const slug = requestedSlug === 'expense-ledger' ? 'spendrecorder' : requestedSlug;
   const meta = list.find(a => a.slug === slug) || (pubApps[slug] ? { slug, name: pubApps[slug].name, icon: 'doc' } : null);
 
   if (!meta) {

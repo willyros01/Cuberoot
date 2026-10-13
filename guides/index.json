@@ -86,21 +86,6 @@
         }
       ]
     },
-    "expense-ledger": {
-      "name": "Expense Ledger",
-      "docs": [
-        {
-          "id": "f1bce04ae40a3a6ec10cfe65b7b2c165",
-          "title": "— User Guide",
-          "ext": "pdf",
-          "mime": "application/pdf",
-          "size": 805420,
-          "date": "2026-09-25T14:12:37.163Z",
-          "original": "Expense Ledger — User Guide.pdf",
-          "path": "guides/expense-ledger/user-guide.pdf"
-        }
-      ]
-    },
     "split-it": {
       "name": "Fairpot",
       "docs": [
@@ -138,6 +123,21 @@
           "date": "2026-10-12",
           "original": "cloud-files-quick-start.html",
           "path": "guides/cloud-files/quick-start.html"
+        }
+      ]
+    },
+    "spendrecorder": {
+      "name": "SpendRecorder",
+      "docs": [
+        {
+          "id": "f1bce04ae40a3a6ec10cfe65b7b2c165",
+          "title": "Legacy Expense Ledger — User Guide (archived)",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 805420,
+          "date": "2026-09-25T14:12:37.163Z",
+          "original": "Expense Ledger — User Guide.pdf",
+          "path": "guides/spendrecorder/expense-ledger-user-guide.pdf"
         }
       ]
     }

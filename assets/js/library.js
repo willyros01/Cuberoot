@@ -97,6 +97,27 @@ async function openLibrary(grant) {
       return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
     });
   } catch (e) { console.error(e); failed++; }
+  // The old encrypted Expense Ledger items remain bound cryptographically to
+  // 'expense-ledger'. Group them under SpendRecorder in the UI only, retaining
+  // their original key and slug for decryption. No new reader access is granted.
+  const legacy = apps.find(a => a.slug === 'expense-ledger');
+  if (legacy) {
+    let current = apps.find(a => a.slug === 'spendrecorder');
+    if (!current) {
+      current = { slug: 'spendrecorder', name: 'SpendRecorder',
+        icon: iconFor('spendrecorder'), docs: [] };
+      apps.push(current);
+    }
+    current.docs.push(...legacy.docs.map(d => ({
+      ...d, title: 'Legacy Expense Ledger — ' + d.title,
+      legacySource: legacy
+    })));
+    apps.splice(apps.indexOf(legacy), 1);
+    apps.sort((a, b) => {
+      const ia = order.indexOf(a.slug), ib = order.indexOf(b.slug);
+      return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+    });
+  }
   session = { name: grant.name, email: grant.email, apps };
   $('who').textContent = 'Unlocked · ' + (grant.email || grant.name || 'reader');
   $('signin-view').hidden = true;
@@ -153,8 +174,8 @@ function docRow(app, d) {
     el('div', { class: 'grow' }, el('div', { class: 'title', text: d.title }), el('div', { class: 'meta', text: meta })),
     tag,
     el('div', { class: 'doc-actions' },
-      el('button', { class: 'btn btn-small', type: 'button', onclick: e => openDoc(app, d, e.currentTarget, false), 'aria-label': 'Read ' + d.title, text: 'Read' }),
-      el('button', { class: 'btn btn-ghost btn-small', type: 'button', onclick: e => openDoc(app, d, e.currentTarget, true), 'aria-label': 'Download ' + d.title, text: 'Download' })));
+      el('button', { class: 'btn btn-small', type: 'button', onclick: e => openDoc(d.legacySource || app, d, e.currentTarget, false), 'aria-label': 'Read ' + d.title, text: 'Read' }),
+      el('button', { class: 'btn btn-ghost btn-small', type: 'button', onclick: e => openDoc(d.legacySource || app, d, e.currentTarget, true), 'aria-label': 'Download ' + d.title, text: 'Download' })));
 }
 
 async function openDoc(app, d, btn, download) {

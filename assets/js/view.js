@@ -6,7 +6,9 @@ import { PUBLIC_INDEX } from './vault.js?v=1.3.0';
 hydrateIcons();
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
-const slug = params.get('app') || '';
+// Keep old public document links working after the Expense Ledger rename.
+const requestedSlug = params.get('app') || '';
+const slug = requestedSlug === 'expense-ledger' ? 'spendrecorder' : requestedSlug;
 const id = params.get('id') || '';
 const body = $('doc-body');
 
