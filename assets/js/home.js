@@ -99,6 +99,36 @@ async function addSpendRecorderDownload(box) {
   }
 }
 
+// Show Wire Android reader beta only after Cuberoot has published the verified APK.
+// Native FCM/ADM notifications are NOT enabled in this version.
+async function addWireDownload(box) {
+  try {
+    const metaRes = await fetch('downloads/wire-build.json', { cache: 'no-store' });
+    if (!metaRes.ok) return;
+    const meta = await metaRes.json();
+    if (!Number.isSafeInteger(meta.run_id) || meta.run_id < 1 ||
+        !meta.apk_sha256 || !meta.signer_sha256 ||
+        meta.channel !== 'android-reader-beta-no-native-push') return;
+    const url = 'downloads/wire.apk?build=' + meta.run_id;
+    const check = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+    if (!check.ok) return;
+    const row = [...box.querySelectorAll('.app-row')].find(node =>
+      node.querySelector('h3')?.textContent === 'Wire');
+    if (!row) return;
+    const details = row.querySelector('h3')?.parentElement;
+    if (!details) return;
+    details.appendChild(el('div', { class: 'actions' },
+      el('a', { class: 'btn app-open', href: url,
+        download: 'wire-' + meta.run_id + '.apk',
+        'aria-label': 'Download Wire Android reader beta APK',
+        text: 'Download Android Reader Beta ↓' })));
+    const avail = row.querySelector('.avail');
+    if (avail) avail.textContent = 'Android reader beta available · Native notifications pending';
+  } catch (_) {
+    // Never advertise or link an unpublished Wire release.
+  }
+}
+
 async function loadApps() {
   const box = document.getElementById('app-list');
   try {
@@ -118,6 +148,7 @@ async function loadApps() {
     await addCloudFilesDownload(box);
     await addScorecardDownload(box);
     await addSpendRecorderDownload(box);
+    await addWireDownload(box);
   } catch (e) {
     box.replaceChildren(el('p', { class: 'muted', text: 'The app list could not be loaded. Please refresh the page.' }));
   }

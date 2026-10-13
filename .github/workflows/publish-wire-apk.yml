@@ -1,0 +1,45 @@
+name: Publish Wire Android APK
+
+# Every successful Wire/android build writes android-last-run.json.
+# This workflow polls that verified result every 10 minutes and publishes only successful APKs.
+# Schedule is required because repository GitHub tokens cannot write to another repo.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/10 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-wire-apk.yml'
+      - 'build/publish-wire.sh'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cuberoot-wire-apk
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Verify Android SDK for APK signature validation
+        run: |
+          test -n "${ANDROID_HOME:-}"
+          test -d "$ANDROID_HOME/platforms"
+      - name: Publish latest successful Wire Android APK
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bash build/publish-wire.sh
