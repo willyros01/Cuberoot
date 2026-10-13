@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Publish the latest SUCCESSFUL Wire Android APK on Cuberoot.
+
+# Verified Android Back-fix artifact source: 67b7e6eb76bcd56855d250ca70984cd3b1056485; publisher must validate exact successful run, certificate and checksum.
 # Copies ONLY the exact successful APK artifact; never re-signs/rebuilds.
 # A missing artifact is an error: keep the current APK rather than publish drift.
 # On-demand publication check for corrected native Android Downloads backup.
