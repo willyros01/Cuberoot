@@ -73,6 +73,32 @@ async function addScorecardDownload(box) {
   }
 }
 
+
+// Show SpendRecorder only when Cuberoot actually hosts the verified APK.
+async function addSpendRecorderDownload(box) {
+  try {
+    const metaRes = await fetch('downloads/spendrecorder-build.json', { cache: 'no-store' });
+    if (!metaRes.ok) return;
+    const meta = await metaRes.json();
+    if (!Number.isSafeInteger(meta.run_id) || meta.run_id < 1 || !meta.apk_sha256 || !meta.signer_sha256) return;
+    const url = 'downloads/spendrecorder.apk?build=' + meta.run_id;
+    const head = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+    if (!head.ok) return;
+    const row = [...box.querySelectorAll('.app-row')].find(node =>
+      node.querySelector('h3')?.textContent === 'SpendRecorder');
+    if (!row) return;
+    const details = row.querySelector('h3')?.parentElement;
+    if (!details) return;
+    details.appendChild(el('div', { class: 'actions' },
+      el('a', { class: 'btn app-open', href: url, download: 'spendrecorder-' + meta.run_id + '.apk',
+        'aria-label': 'Download SpendRecorder Android APK', text: 'Download Android APK ↓' })));
+    const avail = row.querySelector('.avail');
+    if (avail) avail.textContent = 'Signed Android test APK available · iOS TestFlight';
+  } catch (_) {
+    // Do not show a broken download or advertise an unpublished APK.
+  }
+}
+
 async function loadApps() {
   const box = document.getElementById('app-list');
   try {
@@ -91,6 +117,7 @@ async function loadApps() {
     await addFairpotDownload(box);
     await addCloudFilesDownload(box);
     await addScorecardDownload(box);
+    await addSpendRecorderDownload(box);
   } catch (e) {
     box.replaceChildren(el('p', { class: 'muted', text: 'The app list could not be loaded. Please refresh the page.' }));
   }
