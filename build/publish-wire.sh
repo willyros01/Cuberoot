@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Google Android FCM beta publisher kickoff; verify artifact and permanent signing identity.
+# Amazon ADM/Google FCM beta: publish exact permanently signed tested APK only.
 # Publish the latest SUCCESSFUL Wire Android APK on Cuberoot.
 
 # Verified Android Back-fix artifact source: 67b7e6eb76bcd56855d250ca70984cd3b1056485; publisher must validate exact successful run, certificate and checksum.
@@ -143,7 +143,7 @@ const crypto = require('crypto');
 const apk = fs.readFileSync('downloads/wire.apk');
 const release = {
   app: 'Wire',
-  channel: 'android-google-fcm-beta',
+  channel: 'android-adm-fcm-beta',
   source_sha: process.env.SHA,
   run_id: Number(process.env.RUN_ID),
   artifact_id: Number(process.env.ARTIFACT_ID),

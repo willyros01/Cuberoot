@@ -108,7 +108,7 @@ async function addWireDownload(box) {
     const meta = await metaRes.json();
     if (!Number.isSafeInteger(meta.run_id) || meta.run_id < 1 ||
         !meta.apk_sha256 || !meta.signer_sha256 ||
-        meta.channel !== 'android-google-fcm-beta') return;
+        meta.channel !== 'android-adm-fcm-beta') return;
     const url = 'downloads/wire.apk?build=' + meta.run_id;
     const check = await fetch(url, { method: 'HEAD', cache: 'no-store' });
     if (!check.ok) return;
@@ -120,10 +120,10 @@ async function addWireDownload(box) {
     details.appendChild(el('div', { class: 'actions' },
       el('a', { class: 'btn app-open', href: url,
         download: 'wire-' + meta.run_id + '.apk',
-        'aria-label': 'Download Wire Android beta with native Google FCM support',
+        'aria-label': 'Download Wire Android beta with Amazon ADM and Google FCM support',
         text: 'Download Android Beta ↓' })));
     const avail = row.querySelector('.avail');
-    if (avail) avail.textContent = 'Android beta available · Google Android FCM testing · Amazon ADM pending';
+    if (avail) avail.textContent = 'Android beta available · Amazon Fire ADM and Google FCM testing';
   } catch (_) {
     // Never advertise or link an unpublished Wire release.
   }
