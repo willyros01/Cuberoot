@@ -6,6 +6,7 @@
 # Copies ONLY the exact successful APK artifact; never re-signs/rebuilds.
 # A missing artifact is an error: keep the current APK rather than publish drift.
 # On-demand publication check for corrected native Android Downloads backup.
+# Trigger validated Wire Android 0.17.58 APK publication: run 38481158044, source bcbb9d2ce78e0f16cc8d87b93367eaa65c5a62cd.
 set -euo pipefail
 
 TMP="$(mktemp -d)"
