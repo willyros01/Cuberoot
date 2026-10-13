@@ -129,7 +129,7 @@ else
     echo "::warning title=Git push conflict::Cuberoot changed while publishing; safely retrying once"
     git fetch origin main
     # Never overwrite an equal or newer published run after a concurrent update.
-    REMOTE_RUN="$(git show origin/main:downloads/spendrecorder-build.json 2>/dev/null | node -e '
+    REMOTE_RUN="$({ git show origin/main:downloads/spendrecorder-build.json 2>/dev/null || true; } | node -e '
 let data = "";
 process.stdin.on("data", x => data += x);
 process.stdin.on("end", () => {
