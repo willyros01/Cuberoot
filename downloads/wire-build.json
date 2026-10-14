@@ -1,12 +1,12 @@
 {
   "app": "Wire",
   "channel": "android-adm-fcm-beta",
-  "source_sha": "6d24391db5cd2b1dcda0ad12dbfff60b6a8f68af",
-  "run_id": 38485663797,
-  "artifact_id": 11859098306,
+  "source_sha": "3f64c9482dddb6c404c6218098a9c20d933bb683",
+  "run_id": 38489747266,
+  "artifact_id": 11861690830,
   "origin": "github-actions-artifact",
-  "apk_sha256": "7aa03fda9e5a4b22295a99469832b2735073cd219569ca99f073a70b78cb3562",
+  "apk_sha256": "b33c996e285a000dc973741a6c9ae79582e8522a2dd79a758afa0a889eb5fbce",
   "signer_sha256": "662478ca576fec4f6914e7e446d017f359353970e76bfd4ec8d1318d2bb04866",
-  "apk_bytes": 4625800,
-  "published_at": "2026-10-13T23:45:45.489Z"
+  "apk_bytes": 4626148,
+  "published_at": "2026-10-14T00:26:36.826Z"
 }
