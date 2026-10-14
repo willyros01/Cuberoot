@@ -1,12 +1,14 @@
 name: Publish Wire Android APK
 
-# Every successful Wire/android build writes android-last-run.json.
-# This workflow polls that verified result every 10 minutes and publishes only successful APKs.
-# Schedule is required because repository GitHub tokens cannot write to another repo.
+# Wire Android CI signs/uploads the APK and verifies the artifact. This
+# Cuberoot-side workflow retrieves the newest SUCCESSFUL build and publishes
+# only the verified, permanently signed APK at /downloads/wire.apk.
+# Runs automatically every five minutes; no cross-repository token is needed.
+# GitHub scheduled jobs may be delayed, so five minutes is an interval, not an SLA.
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/5 * * * *'
   push:
     branches: [main]
     paths:
