@@ -10,11 +10,46 @@ trap 'rm -rf "$TMP"' EXIT
 
 echo "Checking latest successful FIDUNIO Android signed APK workflow..."
 API='https://api.github.com/repos/willyros01/hermes'
-curl -fsSL --retry 3 --retry-delay 2 \
-  -H "Authorization: Bearer $GITHUB_TOKEN" \
-  -H 'Accept: application/vnd.github+json' \
-  "$API/actions/workflows/android-apk.yml/runs?branch=Android&status=success&per_page=10" \
-  -o "$TMP/runs.json"
+# A direct dispatch carries the exact Hermes build ID. Wait for its entire
+# workflow to finish successfully before publishing its signed artifact.
+# Scheduled fallback continues to select the latest successful build.
+if [ -n "${FIDUNIO_SOURCE_RUN_ID:-}" ]; then
+  case "$FIDUNIO_SOURCE_RUN_ID" in *[!0-9]*|'') echo "Invalid source run ID"; exit 1;; esac
+  ready=0
+  for n in $(seq 1 45); do
+    curl -fsSL --retry 3 --retry-delay 2 \
+      -H "Authorization: Bearer $GITHUB_TOKEN" \
+      -H 'Accept: application/vnd.github+json' \
+      "$API/actions/runs/$FIDUNIO_SOURCE_RUN_ID" -o "$TMP/source-run.json"
+    read -r state result < <(node - "$TMP/source-run.json" "$FIDUNIO_SOURCE_RUN_ID" <<'JS'
+const fs=require('fs'),r=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+if(r.id!==Number(process.argv[3])||r.name!=='FIDUNIO Android signed APK'||r.head_branch!=='Android')
+  throw Error('Direct publication requested for unexpected Hermes workflow');
+console.log(r.status,r.conclusion||'pending');
+JS
+)
+    if [ "$state" = completed ]; then
+      if [ "$result" != success ]; then
+        echo "::error::Hermes source workflow did not succeed: $result"
+        exit 1
+      fi
+      ready=1
+      break
+    fi
+    sleep 10
+  done
+  if [ "$ready" -ne 1 ]; then echo "::error::Hermes source workflow did not finish"; exit 1; fi
+  node - "$TMP/source-run.json" > "$TMP/runs.json" <<'JS'
+const fs=require('fs'),r=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+console.log(JSON.stringify({workflow_runs:[r]}));
+JS
+else
+  curl -fsSL --retry 3 --retry-delay 2 \
+    -H "Authorization: Bearer $GITHUB_TOKEN" \
+    -H 'Accept: application/vnd.github+json' \
+    "$API/actions/workflows/android-apk.yml/runs?branch=Android&status=success&per_page=10" \
+    -o "$TMP/runs.json"
+fi
 RUN_ID="$(node - "$TMP/runs.json" <<'JS'
 const fs=require('fs');
 const q=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
