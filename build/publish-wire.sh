@@ -6,7 +6,7 @@
 # Copies ONLY the exact successful APK artifact; never re-signs/rebuilds.
 # A missing artifact is an error: keep the current APK rather than publish drift.
 # On-demand publication check for corrected native Android Downloads backup.
-# Trigger validated Wire Android 0.17.59 Back-button repair APK publication: run 38485663797, source 6d24391db5cd2b1dcda0ad12dbfff60b6a8f68af.
+# Trigger validated Wire Android 0.17.60 Fire Back-touch repair APK publication: run 38489747266, source 3f64c9482dddb6c404c6218098a9c20d933bb683.
 set -euo pipefail
 
 TMP="$(mktemp -d)"
