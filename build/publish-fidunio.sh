@@ -46,7 +46,7 @@ JS
 node - "$TMP/result.json" <<'JS'
 const fs = require('fs');
 const r = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-if (r.workflow !== 'FIDUNIO Android signed APK' || r.branch !== 'android') {
+if (r.workflow !== 'FIDUNIO Android signed APK' || r.branch !== 'Android') {
   throw Error('Unexpected build report');
 }
 if (r.outcome === 'success' && (
