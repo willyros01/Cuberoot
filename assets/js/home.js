@@ -121,7 +121,7 @@ async function addSpendRecorderDownload(box) {
 }
 
 // Show verified Wire Android APK only after matching Cuberoot metadata.
-// FCM is enabled for Google Play Android; Amazon ADM is pending.
+// Fire HD 8 ADM notifications and in-app Back routing confirmed working on the latest build.
 async function addWireDownload(box) {
   try {
     const metaRes = await fetch('downloads/wire-build.json', { cache: 'no-store' });
@@ -141,10 +141,10 @@ async function addWireDownload(box) {
     details.appendChild(el('div', { class: 'actions' },
       el('a', { class: 'btn app-open', href: url,
         download: 'wire-' + meta.run_id + '.apk',
-        'aria-label': 'Download Wire Android beta with Amazon ADM and Google FCM support',
-        text: 'Download Android Beta ↓' })));
+        'aria-label': 'Download Wire Android APK with Amazon ADM and Google FCM support',
+        text: 'Download Android APK ↓' })));
     const avail = row.querySelector('.avail');
-    if (avail) avail.textContent = 'Android beta available · Amazon Fire ADM and Google FCM testing';
+    if (avail) avail.textContent = 'Android APK available · Amazon Fire ADM and Google FCM support';
   } catch (_) {
     // Never advertise or link an unpublished Wire release.
   }
