@@ -7,6 +7,11 @@ name: Publish FIDUNIO Android APK
 # re-sign on Cuberoot. Preserve the existing APK after any failed source build.
 on:
   workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: 'Exact successful Hermes Android workflow run to publish'
+        required: false
+        type: string
   schedule:
     - cron: '*/5 * * * *'
   push:
@@ -45,6 +50,7 @@ jobs:
       - name: Retrieve and publish exact successful signed FIDUNIO APK
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          FIDUNIO_SOURCE_RUN_ID: ${{ inputs.source_run_id || '' }}
         run: bash build/publish-fidunio.sh
       - name: Validate published release if a signed build exists
         run: |
