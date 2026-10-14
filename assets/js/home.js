@@ -171,10 +171,15 @@ async function addFidunioDownload(box) {
         meta.origin !== 'github-actions-artifact' ||
         !Number.isSafeInteger(meta.run_id) || meta.run_id < 1 ||
         !/^[a-f0-9]{64}$/.test(meta.apk_sha256 || '') ||
-        !/^[a-f0-9]{64}$/.test(meta.signer_sha256 || '')) return;
+        !/^[a-f0-9]{64}$/.test(meta.signer_sha256 || '') ||
+        !/^[a-f0-9]{40}$/.test(meta.source_sha || '') ||
+        !Number.isSafeInteger(meta.artifact_id) || meta.artifact_id < 1 ||
+        !Number.isSafeInteger(meta.apk_bytes) || meta.apk_bytes < 1000000) return;
+    // The publisher writes APK, checksum and manifest in one verified commit.
+    // Safari/Fire Silk HEAD requests can fail despite a valid published APK.
+    // Require the authenticated published manifest, but do not hide a verified
+    // download solely because the browser rejected a redundant HEAD request.
     const url = 'downloads/fidunio.apk?build=' + meta.run_id;
-    const check = await fetch(url, { method: 'HEAD', cache: 'no-store' });
-    if (!check.ok) return;
     const row = [...box.querySelectorAll('.app-row')].find(node =>
       node.querySelector('h3')?.textContent === 'FIDUNIO');
     if (!row) return;
@@ -209,12 +214,13 @@ async function loadApps() {
         el('div', { class: 'avail', text: a.availability || ((av.now || 'Web app now') + ' · ' + (av.soon || 'iOS & Android soon')) })),
       el('a', { class: 'docs', href: 'docs.html?app=' + encodeURIComponent(a.slug), 'aria-label': 'Documentation for ' + a.name, text: 'Docs →' }))));
     addFairpotAppStore(box);
+    // Show FIDUNIO first; do not delay its link behind other APK checks.
+    await addFidunioDownload(box);
     await addFairpotDownload(box);
     await addCloudFilesDownload(box);
     await addScorecardDownload(box);
     await addSpendRecorderDownload(box);
     await addWireDownload(box);
-    await addFidunioDownload(box);
   } catch (e) {
     box.replaceChildren(el('p', { class: 'muted', text: 'The app list could not be loaded. Please refresh the page.' }));
   }
