@@ -17,6 +17,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: cuberoot-fidunio-apk
@@ -75,3 +76,11 @@ jobs:
             echo 'APK, checksum, source revision and certificate verified.'
             echo 'Verify GitHub Pages deployed before announcing public availability.'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Self-test FIDUNIO website notification logic
+        run: node build/notify-fidunio.mjs --self-test
+      - name: Notify owner after website is live
+        if: ${{ success() }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node build/notify-fidunio.mjs
