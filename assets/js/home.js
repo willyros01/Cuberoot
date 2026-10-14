@@ -45,7 +45,7 @@ async function addFairpotDownload(box) {
     actions.appendChild(el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'fairpot-' + meta.run_id + '.apk',
         'aria-label': 'Download Fairpot Android APK' },
       el('span', { class: 'apk-small', text: 'Download' }),
-      el('span', { class: 'apk-large', text: 'Android APK' }) }));
+      el('span', { class: 'apk-large', text: 'Android APK' }) ));
   } catch (_) {
     // Absence of a release is expected; do not show a broken link.
   }
@@ -70,7 +70,7 @@ async function addCloudFilesDownload(box) {
       el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'cloud-files-' + meta.run_id + '.apk',
         'aria-label': 'Download Cloud Files Android APK' },
         el('span', { class: 'apk-small', text: 'Download' }),
-        el('span', { class: 'apk-large', text: 'Android APK' }) })));
+        el('span', { class: 'apk-large', text: 'Android APK' }) )));
   } catch (_) {
     // The download button appears only when the exact APK has been published.
   }
@@ -94,7 +94,7 @@ async function addScorecardDownload(box) {
       el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'scorecard-' + meta.run_id + '.apk',
         'aria-label': 'Download The Scorecard Android APK' },
         el('span', { class: 'apk-small', text: 'Download' }),
-        el('span', { class: 'apk-large', text: 'Android APK' }) })));
+        el('span', { class: 'apk-large', text: 'Android APK' }) )));
   } catch (_) {
     // The download button appears only when the exact APK has been published.
   }
@@ -120,7 +120,7 @@ async function addSpendRecorderDownload(box) {
       el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'spendrecorder-' + meta.run_id + '.apk',
         'aria-label': 'Download SpendRecorder Android APK' },
         el('span', { class: 'apk-small', text: 'Download' }),
-        el('span', { class: 'apk-large', text: 'Android APK' }) })));
+        el('span', { class: 'apk-large', text: 'Android APK' }) )));
     const avail = row.querySelector('.avail');
     if (avail) avail.textContent = 'Signed Android test APK available · iOS TestFlight';
   } catch (_) {
@@ -151,7 +151,7 @@ async function addWireDownload(box) {
         download: 'wire-' + meta.run_id + '.apk',
         'aria-label': 'Download Wire Android APK with Amazon ADM and Google FCM support' },
         el('span', { class: 'apk-small', text: 'Download' }),
-        el('span', { class: 'apk-large', text: 'Android APK' }) })));
+        el('span', { class: 'apk-large', text: 'Android APK' }) )));
     const avail = row.querySelector('.avail');
     if (avail) avail.textContent = 'Android APK available · Amazon Fire ADM and Google FCM support';
   } catch (_) {
