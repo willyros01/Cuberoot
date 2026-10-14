@@ -45,3 +45,30 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: bash build/publish-wire.sh
+      - name: Verify published APK checksum and release manifest
+        run: |
+          set -euo pipefail
+          test -s downloads/wire.apk
+          test -s downloads/wire.apk.sha256
+          test -s downloads/wire-build.json
+          sha256sum -c downloads/wire.apk.sha256
+          node --input-type=commonjs - <<'JS'
+          const fs=require('node:fs'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+          const apk=fs.readFileSync('downloads/wire.apk');
+          const release=JSON.parse(fs.readFileSync('downloads/wire-build.json','utf8'));
+          assert.equal(release.app,'Wire');
+          assert.equal(release.origin,'github-actions-artifact');
+          assert.ok(Number.isSafeInteger(release.run_id)&&release.run_id>0);
+          assert.ok(Number.isSafeInteger(release.artifact_id)&&release.artifact_id>0);
+          assert.match(release.source_sha,/^[a-f0-9]{40}$/);
+          assert.equal(release.apk_bytes,apk.length);
+          assert.equal(release.apk_sha256,crypto.createHash('sha256').update(apk).digest('hex'));
+          assert.equal(release.signer_sha256,'662478ca576fec4f6914e7e446d017f359353970e76bfd4ec8d1318d2bb04866');
+          console.log('PASS Wire Cuberoot release: run',release.run_id,'artifact',release.artifact_id);
+          JS
+          {
+            echo '### Wire Android APK publication'
+            echo 'APK, checksum, source commit and permanent signer verified.'
+            echo 'GitHub Pages deployment must finish before announcing a new public release.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
