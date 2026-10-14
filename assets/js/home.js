@@ -159,6 +159,40 @@ async function addWireDownload(box) {
   }
 }
 
+
+// FIDUNIO Android APK is offered ONLY when the independently verified
+// same-origin signed artifact and its release manifest have been published.
+async function addFidunioDownload(box) {
+  try {
+    const metaRes = await fetch('downloads/fidunio-build.json', { cache: 'no-store' });
+    if (!metaRes.ok) return;
+    const meta = await metaRes.json();
+    if (meta.app !== 'FIDUNIO' || meta.channel !== 'android-fcm-beta' ||
+        meta.origin !== 'github-actions-artifact' ||
+        !Number.isSafeInteger(meta.run_id) || meta.run_id < 1 ||
+        !/^[a-f0-9]{64}$/.test(meta.apk_sha256 || '') ||
+        !/^[a-f0-9]{64}$/.test(meta.signer_sha256 || '')) return;
+    const url = 'downloads/fidunio.apk?build=' + meta.run_id;
+    const check = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+    if (!check.ok) return;
+    const row = [...box.querySelectorAll('.app-row')].find(node =>
+      node.querySelector('h3')?.textContent === 'FIDUNIO');
+    if (!row) return;
+    const details = row.querySelector('h3')?.parentElement;
+    if (!details) return;
+    details.appendChild(el('div', { class: 'actions' },
+      el('a', { class: 'btn app-open android-apk-badge', href: url,
+        download: 'fidunio-' + meta.run_id + '.apk',
+        'aria-label': 'Download signed FIDUNIO Android APK' },
+        el('span', { class: 'apk-small', text: 'Download' }),
+        el('span', { class: 'apk-large', text: 'Android APK' }) )));
+    const avail = row.querySelector('.avail');
+    if (avail) avail.textContent = 'Web app · iPhone TestFlight · Signed Android test APK available';
+  } catch (_) {
+    // Never advertise an absent or unverified FIDUNIO APK.
+  }
+}
+
 async function loadApps() {
   const box = document.getElementById('app-list');
   try {
@@ -180,6 +214,7 @@ async function loadApps() {
     await addScorecardDownload(box);
     await addSpendRecorderDownload(box);
     await addWireDownload(box);
+    await addFidunioDownload(box);
   } catch (e) {
     box.replaceChildren(el('p', { class: 'muted', text: 'The app list could not be loaded. Please refresh the page.' }));
   }
