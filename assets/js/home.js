@@ -42,8 +42,10 @@ async function addFairpotDownload(box) {
     const details = row.querySelector('h3')?.parentElement;
     if (!details) return;
     const actions=details.querySelector('.actions') || details.appendChild(el('div',{class:'actions fairpot-store-actions'}));
-    actions.appendChild(el('a', { class: 'btn app-open', href: url, download: 'fairpot-' + meta.run_id + '.apk',
-        'aria-label': 'Download Fairpot Android APK', text: 'Download Android APK ↓' }));
+    actions.appendChild(el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'fairpot-' + meta.run_id + '.apk',
+        'aria-label': 'Download Fairpot Android APK' },
+      el('span', { class: 'apk-small', text: 'Download' }),
+      el('span', { class: 'apk-large', text: 'Android APK' }) }));
   } catch (_) {
     // Absence of a release is expected; do not show a broken link.
   }
@@ -65,8 +67,10 @@ async function addCloudFilesDownload(box) {
     const details = row.querySelector('h3')?.parentElement;
     if (!details) return;
     details.appendChild(el('div', { class: 'actions' },
-      el('a', { class: 'btn app-open', href: url, download: 'cloud-files-' + meta.run_id + '.apk',
-        'aria-label': 'Download Cloud Files Android APK', text: 'Download Android APK ↓' })));
+      el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'cloud-files-' + meta.run_id + '.apk',
+        'aria-label': 'Download Cloud Files Android APK' },
+        el('span', { class: 'apk-small', text: 'Download' }),
+        el('span', { class: 'apk-large', text: 'Android APK' }) })));
   } catch (_) {
     // The download button appears only when the exact APK has been published.
   }
@@ -87,8 +91,10 @@ async function addScorecardDownload(box) {
     const details = row.querySelector('h3')?.parentElement;
     if (!details) return;
     details.appendChild(el('div', { class: 'actions' },
-      el('a', { class: 'btn app-open', href: url, download: 'scorecard-' + meta.run_id + '.apk',
-        'aria-label': 'Download The Scorecard Android APK', text: 'Download Android APK ↓' })));
+      el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'scorecard-' + meta.run_id + '.apk',
+        'aria-label': 'Download The Scorecard Android APK' },
+        el('span', { class: 'apk-small', text: 'Download' }),
+        el('span', { class: 'apk-large', text: 'Android APK' }) })));
   } catch (_) {
     // The download button appears only when the exact APK has been published.
   }
@@ -111,8 +117,10 @@ async function addSpendRecorderDownload(box) {
     const details = row.querySelector('h3')?.parentElement;
     if (!details) return;
     details.appendChild(el('div', { class: 'actions' },
-      el('a', { class: 'btn app-open', href: url, download: 'spendrecorder-' + meta.run_id + '.apk',
-        'aria-label': 'Download SpendRecorder Android APK', text: 'Download Android APK ↓' })));
+      el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'spendrecorder-' + meta.run_id + '.apk',
+        'aria-label': 'Download SpendRecorder Android APK' },
+        el('span', { class: 'apk-small', text: 'Download' }),
+        el('span', { class: 'apk-large', text: 'Android APK' }) })));
     const avail = row.querySelector('.avail');
     if (avail) avail.textContent = 'Signed Android test APK available · iOS TestFlight';
   } catch (_) {
@@ -139,10 +147,11 @@ async function addWireDownload(box) {
     const details = row.querySelector('h3')?.parentElement;
     if (!details) return;
     details.appendChild(el('div', { class: 'actions' },
-      el('a', { class: 'btn app-open', href: url,
+      el('a', { class: 'btn app-open android-apk-badge', href: url,
         download: 'wire-' + meta.run_id + '.apk',
-        'aria-label': 'Download Wire Android APK with Amazon ADM and Google FCM support',
-        text: 'Download Android APK ↓' })));
+        'aria-label': 'Download Wire Android APK with Amazon ADM and Google FCM support' },
+        el('span', { class: 'apk-small', text: 'Download' }),
+        el('span', { class: 'apk-large', text: 'Android APK' }) })));
     const avail = row.querySelector('.avail');
     if (avail) avail.textContent = 'Android APK available · Amazon Fire ADM and Google FCM support';
   } catch (_) {

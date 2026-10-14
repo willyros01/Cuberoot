@@ -467,3 +467,31 @@ dialog::backdrop { background: rgba(42,50,66,.45); }
 .app-row .app-store-badge img { display: block; width: 165px; height: 55px; max-width: none; }
 .app-row .app-store-badge:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
 .app-row .fairpot-store-actions .app-open { margin: 0; }
+
+
+/* Same 165 × 55 px footprint as Apple's official App Store badge.
+   Two readable lines rather than the former oversized single-line button. */
+.app-row .android-apk-badge {
+  box-sizing: border-box;
+  width: 165px; height: 55px; min-height: 55px;
+  padding: 4px 8px;
+  display: inline-flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+  background: #000; color: #fff;
+  border: 1px solid #a6a6a6; border-radius: 9px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-weight: 400; line-height: 1; letter-spacing: 0;
+  text-align: center; text-decoration: none; white-space: nowrap;
+}
+.app-row .android-apk-badge .apk-small {
+  display: block; font-size: 12px; font-weight: 400; line-height: 1.05;
+}
+.app-row .android-apk-badge .apk-large {
+  display: block; font-size: 19px; font-weight: 600; line-height: 1.05;
+}
+.app-row .android-apk-badge:hover {
+  background: #242424; color: #fff;
+}
+.app-row .android-apk-badge:focus-visible {
+  outline: 3px solid var(--blue); outline-offset: 4px;
+}
