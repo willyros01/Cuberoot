@@ -1,0 +1,74 @@
+name: Publish FIDUNIO Android APK
+
+# Read the newest successful hermes/Android workflow artifact. Never build or
+# re-sign on Cuberoot. Preserve the existing APK after any failed source build.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-fidunio-apk.yml'
+      - 'build/publish-fidunio.sh'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cuberoot-fidunio-apk
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Require Android signature validator
+        run: |
+          test -n "${ANDROID_HOME:-}"
+          test -d "$ANDROID_HOME/build-tools"
+      - name: Retrieve and publish exact successful signed FIDUNIO APK
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bash build/publish-fidunio.sh
+      - name: Validate published release if a signed build exists
+        run: |
+          set -euo pipefail
+          if [ ! -e downloads/fidunio.apk ]; then
+            echo 'No signed FIDUNIO Android build has been published yet.'
+            exit 0
+          fi
+          test -s downloads/fidunio.apk.sha256
+          test -s downloads/fidunio-build.json
+          sha256sum -c downloads/fidunio.apk.sha256
+          node --input-type=commonjs - <<'JS'
+          const fs=require('node:fs'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+          const apk=fs.readFileSync('downloads/fidunio.apk');
+          const meta=JSON.parse(fs.readFileSync('downloads/fidunio-build.json','utf8'));
+          assert.equal(meta.app,'FIDUNIO');
+          assert.equal(meta.channel,'android-fcm-beta');
+          assert.equal(meta.origin,'github-actions-artifact');
+          assert.ok(Number.isSafeInteger(meta.run_id)&&meta.run_id>0);
+          assert.ok(Number.isSafeInteger(meta.artifact_id)&&meta.artifact_id>0);
+          assert.match(meta.source_sha,/^[a-f0-9]{40}$/);
+          assert.match(meta.signer_sha256,/^[a-f0-9]{64}$/);
+          assert.equal(meta.apk_bytes,apk.length);
+          assert.equal(meta.apk_sha256,crypto.createHash('sha256').update(apk).digest('hex'));
+          console.log('PASS: FIDUNIO Android APK publication',meta.run_id,meta.signer_sha256);
+          JS
+          {
+            echo '### FIDUNIO Android APK publication'
+            echo 'APK, checksum, source revision and certificate verified.'
+            echo 'Verify GitHub Pages deployed before announcing public availability.'
+          } >> "$GITHUB_STEP_SUMMARY"
