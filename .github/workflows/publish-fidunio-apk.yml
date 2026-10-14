@@ -1,8 +1,8 @@
 name: Publish FIDUNIO Android APK
 
-# Publish handoff retry: GitHub scheduled checks have not executed since the signed
-# Hermes Android run 38596933723. This comments-only update invokes the existing
-# push-triggered publisher; no binary, website, or signing logic is modified.
+# Publication catch-up for Hermes Android signed run 38602612272 (attempt 2).
+# Comment-only push triggers the existing Cuberoot publisher because scheduled
+# checks lagged. No website, binary, signing, or publication logic is modified.
 # Read the newest successful hermes/Android workflow artifact. Never build or
 # re-sign on Cuberoot. Preserve the existing APK after any failed source build.
 on:
