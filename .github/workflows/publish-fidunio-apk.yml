@@ -1,6 +1,6 @@
 name: Publish FIDUNIO Android APK
 
-# Publication catch-up for Hermes Android signed run 38602612272 (attempt 2).
+# Publication catch-up for successful Hermes Android run 38668803728 (provider fix).
 # Comment-only push triggers the existing Cuberoot publisher because scheduled
 # checks lagged. No website, binary, signing, or publication logic is modified.
 # Read the newest successful hermes/Android workflow artifact. Never build or
