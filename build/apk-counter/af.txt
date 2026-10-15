@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+# Cuberoot APK counter "fast-track preflight" -- READ ONLY.
+# No Firebase writes, no deployment, no billing, no rule modification.
+set -euo pipefail
+umask 077
+command -v gcloud >/dev/null || { echo "ERROR: Use Google Cloud Shell."; exit 1; }
+python3 - <<'PY'
+import datetime as dt
+import hashlib
+import json
+import pathlib
+import re
+import subprocess
+import sys
+import urllib.error
+import urllib.request
+
+PROJECT = "split-it-44dea"
+NUMBER = "153404639150"
+OWNER = "EJoRDnKQiGcDgw8RP1RRtkyei8K2"
+OUT = pathlib.Path("af-out.txt")
+report = {"purpose":"Cuberoot APK counter preflight, no cloud changes",
+          "projectId":PROJECT,"projectNumber":NUMBER,"cloudChanges":0,
+          "at":dt.datetime.now(dt.timezone.utc).isoformat(), "status":"FAIL"}
+
+# Expected source from the owner's 2026-10-15 read-only audit.
+# Whitespace differences are tolerated for validation only. The actual
+# downloaded original is preserved byte-for-byte in the backup.
+BASELINE = """rules_version = '2';
+\tservice cloud.firestore {
+\t\tmatch /databases/{database}/documents {
+\t\tmatch /households/{code}/{document=**} {
+\t\tallow read, write: if true;
+    }
+  }
+}"""
+
+BLOCK = """
+    // APK reporting staging only: owner reads, NO public writes.
+    match /cuberoot_apk_clicks_v1/{app}/events/{eventId} {
+      function isOwner() {
+        return request.auth != null && request.auth.uid == 'EJoRDnKQiGcDgw8RP1RRtkyei8K2';
+      }
+      allow get, list: if isOwner();
+      allow create, update, delete: if false;
+    }
+"""
+def run(*args):
+    return subprocess.check_output(args, text=True, stderr=subprocess.DEVNULL).strip()
+
+def get(path, token):
+    req = urllib.request.Request("https://firebaserules.googleapis.com/v1/" + path,
+          headers={"Authorization":"Bearer "+token})
+    with urllib.request.urlopen(req, timeout=40) as res:
+        return json.load(res)
+
+def sha(value):
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+def normalized(value):
+    return re.sub(r"\s+", "", value)
+
+def save_report():
+    OUT.write_text(json.dumps(report, indent=2)+"\n", encoding="utf-8")
+
+try:
+    p = json.loads(run("gcloud","projects","describe",PROJECT,"--format=json"))
+    if p.get("projectId") != PROJECT or str(p.get("projectNumber")) != NUMBER or p.get("lifecycleState") != "ACTIVE":
+        raise ValueError("STOP: project ID/number/status mismatch")
+    token = run("gcloud","auth","print-access-token")
+    if not token:
+        raise ValueError("STOP: no authenticated Cloud Shell token")
+    release = get("projects/"+PROJECT+"/releases/cloud.firestore",token)
+    release_name = "projects/"+PROJECT+"/releases/cloud.firestore"
+    if release.get("name") != release_name:
+        raise ValueError("STOP: unexpected Firestore release")
+    ruleset_name=release.get("rulesetName","")
+    if not re.fullmatch(r"projects/split-it-44dea/rulesets/[A-Za-z0-9_-]+",ruleset_name):
+        raise ValueError("STOP: unrecognized ruleset name")
+    ruleset = get(ruleset_name, token)
+    files = ruleset.get("source",{}).get("files",[])
+    if len(files)!=1 or files[0].get("name")!="firestore.rules" or not isinstance(files[0].get("content"),str):
+        raise ValueError("STOP: Firestore has different or multiple source files")
+    live = files[0]["content"]
+    report.update({"activeRuleset":ruleset_name,"liveRulesSha256":sha(live),
+                   "baselineMatched":normalized(live)==normalized(BASELINE)})
+    stamp=dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d-%H%M%S")
+    backup=pathlib.Path("af-backup-"+stamp+".txt")
+    # Do not overwrite an existing rules backup.
+    with backup.open("x",encoding="utf-8") as f:
+        f.write(live)
+    report["originalBackup"]=str(backup)
+    if not report["baselineMatched"]:
+        raise ValueError("STOP: live rules differ from the original audit. No proposed deployment.")
+    # This baseline has three braces: household, database, service.
+    # Insert only before the database closing brace.
+    closings=[m.start() for m in re.finditer(r"}",live)]
+    if len(closings)!=3 or "cuberoot_apk_clicks_v1" in live:
+        raise ValueError("STOP: unexpected source structure or pre-existing counter")
+    idx=closings[-2]
+    proposal=live[:idx].rstrip()+"\n"+BLOCK+"\n"+live[idx:]
+    if normalized(live) not in normalized(proposal):
+        # Original must be preserved as a coherent prefix/suffix, not replaced.
+        raise ValueError("STOP: cannot preserve existing rules exactly")
+    if proposal.count("allow read, write: if true;")!=1 or "allow create, update, delete: if false;" not in proposal:
+        raise ValueError("STOP: proposed rules do not match safe plan")
+    candidate=pathlib.Path("af-proposal-"+stamp+".txt")
+    with candidate.open("x", encoding="utf-8") as f:
+        f.write(proposal)
+    report.update({"status":"PASS","proposal":str(candidate),
+                   "proposalSha256":sha(proposal),
+                   "publicCounterWrites":"DENIED",
+                   "householdSemantics":"PRESERVED",
+                   "next":"Return af-out.txt. Proposal has NOT been deployed."})
+except Exception as e:
+    report["error"]=str(e)[:350]
+finally:
+    save_report()
+
+print("APK PREFLIGHT",report["status"],"- NO CLOUD CHANGES")
+print("Report:", OUT)
+if report.get("originalBackup"):
+    print("Original rules backup:",report["originalBackup"])
+if report.get("proposal"):
+    print("Separate staged proposal:",report["proposal"])
+if report["status"]!="PASS":
+    print("STOP:",report.get("error","Unknown failure"))
+    sys.exit(1)
+PY
