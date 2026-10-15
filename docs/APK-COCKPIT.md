@@ -51,6 +51,13 @@ Firestore Standard free allowance is 20,000 document writes/day, 50,000 document
 - **Remaining functional acceptance:** Owner opens `https://www.cuberoot-systems.com/`, taps exactly one Android APK download button, then visits `https://www.cuberoot-systems.com/admin/`, unlocks Publish, selects **APK downloads**, signs in with Google and taps Refresh. Confirm that the app's click count increased; do not count a completed installation as necessary. If report fails, diagnose that first rather than claiming success.
 - Threat limit: this free-tier public CREATE endpoint permits forged click records and can consume the same Spark quota as split-it. Accepted for a low-volume trial by owner. No App Check enforcement; do not enable it globally without app compatibility testing.
 
+## Daily email activation retry — 15 October 2026
+
+- Owner ran the original `mail1234.txt` setup on Google Cloud Shell. Report status **FAIL**, error `Setup: Command failed: gh auth status. Check Cloud Shell authorization.`. Owner supplied `firebaseRulesChanged: false`, `scheduleEnabled: false`, `realTestEmailSent: false`; no production change occurred on this attempt.
+- `mailfix.txt` is a corrective attachment prepared for Cloud Shell. It replaces the brittle `gh auth status` check with a direct authenticated GitHub `gh api user` call and account identity verification before any writes; returns actionable authentication instructions if GitHub access is missing. It prints the short status directly on-screen and still saves a safe `mail-out.txt`.
+- Bash/Python syntax checks and a mocked end-to-end test passed. **No actual setup rerun has yet been verified.** User must complete manual GitHub CLI authorization if no usable token is available in Cloud Shell; do not request any credentials or tokens in chat. GitHub connector cannot set Actions secrets through its exposed commands.
+- Keep `APK_COUNTER_DAILY_EMAIL_ENABLED` false unless actual Cloud Shell report confirms `PASS: DAILY EMAIL ENABLED` and a genuine summary was sent.
+
 ## Daily email activation — 15 October 2026
 
 - User confirmed the APK download cockpit is working. Daily report activation is requested for **9:17 AM America/Toronto**, with previous local calendar day and lifetime counts for six apps.
