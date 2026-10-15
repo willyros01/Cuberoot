@@ -63,21 +63,28 @@ export async function loadOwnerReport(){
  const {auth,db}=setup();
  if(auth.currentUser?.uid!==OWNER_UID)throw new Error('Please sign in as the cockpit owner.');
  const since=Timestamp.fromDate(startOfTorontoDay());
- const counts={},events=[];
- for(const app of APPS){
+ // Query all six apps concurrently instead of waiting for each app in turn.
+ // Promise.all preserves APPS order and fails the whole report on any query error.
+ const results=await Promise.all(APPS.map(async app=>{
   const records=collection(db,'cuberoot_apk_clicks_v1',app,'events');
   const [total,today,recent]=await Promise.all([
    getCountFromServer(records),
    getCountFromServer(query(records,where('createdAt','>=',since))),
    getDocs(query(records,orderBy('createdAt','desc'),limit(5)))
   ]);
-  counts[app]={total:total.data().count,today:today.data().count};
+  const events=[];
   for(const record of recent.docs){
    const value=record.data();
    if(value.createdAt?.toDate){
     events.push({app,at:value.createdAt.toDate().toISOString(),timezone:typeof value.timezone==='string'?value.timezone:'Unknown'});
    }
   }
+  return {app,total:total.data().count,today:today.data().count,events};
+ }));
+ const counts={},events=[];
+ for(const result of results){
+  counts[result.app]={total:result.total,today:result.today};
+  events.push(...result.events);
  }
  events.sort((a,b)=>b.at.localeCompare(a.at));
  return {counts,events:events.slice(0,20)};
