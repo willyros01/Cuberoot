@@ -1,0 +1,42 @@
+# Run only in a local Firestore emulator with an explicitly fake project ID.
+# No Firebase credentials, deployments, database mutations, or billing.
+name: APK Counter Security Rules Tests
+
+on:
+  push:
+    branches: [apk-counter-spark-prep]
+    paths:
+      - 'build/apk-counter/firestore.rules.template'
+      - 'build/apk-counter/test/**'
+      - '.github/workflows/apk-counter-rules-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  emulator-test:
+    if: ${{ github.repository == 'willyros01/Cuberoot' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Use Java 21 for Firestore emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install isolated test dependencies
+        working-directory: build/apk-counter/test
+        run: npm install --no-audit --no-fund
+      - name: Verify Firebase Security Rules (emulator only)
+        working-directory: build/apk-counter/test
+        env:
+          CI: 'true'
+          GOOGLE_APPLICATION_CREDENTIALS: ''
+        run: npm run test:emulator
