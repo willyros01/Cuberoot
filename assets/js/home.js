@@ -192,7 +192,7 @@ async function addFidunioDownload(box) {
         el('span', { class: 'apk-small', text: 'Download' }),
         el('span', { class: 'apk-large', text: 'Android APK' }) )));
     const avail = row.querySelector('.avail');
-    if (avail) avail.textContent = 'Web app · iPhone TestFlight · Signed Android test APK available';
+    if (avail) avail.textContent = 'Web app · iPhone TestFlight · Signed Android APK available';
   } catch (_) {
     // Never advertise an absent or unverified FIDUNIO APK.
   }
