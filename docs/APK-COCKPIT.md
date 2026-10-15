@@ -2,6 +2,14 @@
 
 Owner scope: GitHub + Firebase only. Cuberoot's current APK hosting, links, files and publisher remain unchanged. No Cloudflare Worker, routes, D1 database or geolocation service. The earlier PR #9 Cloudflare implementation is superseded.
 
+## Paint-first performance fix — 15 October 2026
+
+- In Cuberoot Publish's **APK downloads** tab, the heading and six app-name placeholders now render **before importing the Firebase SDK**. Firebase code starts loading on a post-paint task. The Google sign-in button becomes enabled when its code is ready; account selection still requires a real owner click.
+- After successful Google owner sign-in, the cockpit displays its static headings, app cards, **em dashes instead of unverified zero totals**, and "Loading…" labels before Firestore queries begin on a post-paint task.
+- All six apps' existing three Firestore query types continue to run concurrently (no query, permissions, timestamp, event count or download-route semantics changed). On a query error, the static layout remains visible and the user can tap Refresh.
+- Scripts are cache-busted through `admin/index.html?admin.js=v2.1.2` and `downloads-ui.js?v=2.1.0`. GitHub Actions **APK Cockpit Paint Before Firebase Test** run `38816473947` passed, and Pages build for main `95378ec` succeeded.
+- Performance has **not** been timed on the owner's browser. The change improves perceived responsiveness; it does not guarantee a particular Firebase network duration.
+
 ## Delivered UI
 
 - `/cockpit/`: no login; explicit sample data; no API access (`connect-src 'none'`). This is a visual preview, not a bypass for real records.
