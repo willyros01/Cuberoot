@@ -67,6 +67,17 @@ Firestore Standard free allowance is 20,000 document writes/day, 50,000 document
 - The helper sends **one genuine authenticated report** with the same checked-in sender and only then sets the schedule enable variable to `true`. All credentials are entered locally into Cloud Shell or generated there. Failed setup leaves scheduled sending off and reports to `mail-out.txt` without leaking credentials. Firebase and GitHub changes, if any, are recorded by the helper.
 - Do not claim daily automatic email is active until `mail-out.txt` explicitly states `PASS: DAILY EMAIL ENABLED` and receipt of the actual report is verified. GH Actions schedules are best effort, not an SLA for an exact minute.
 
+## Required iPad Cloud Shell procedure — 15 October 2026
+
+These are binding requirements for this project, explicitly confirmed by the owner after repeated problems:
+
+- **Cut and paste does not work in Google Cloud Shell on the owner's iPad.** Do not suggest long terminal commands, terminal selection, long-press copy, keyboard paste shortcuts, or further clipboard troubleshooting.
+- Provide each Cloud Shell helper as an actual **downloadable TXT attachment with a short filename**. The owner uploads it and **types a short command** such as `bash em.txt`; commands must not require copying long text into Cloud Shell.
+- **Short PASS/FAIL/error messages appear directly on-screen.** Do not force the owner to download a report file merely to read a short error. A supplementary diagnostic TXT file is acceptable for long outputs, especially for sharing here.
+- **Secrets or long values to transfer must be captured into a separately downloadable local TXT file**, never displayed as raw values in the Cloud Shell terminal, nor pasted into ChatGPT or repository files. In the email helper, this file is `emsecret.txt`, usable through iPad Files, not terminal copy.
+- The latest revised `em.txt` attachment suppresses the raw JSON secret from both terminal output and `emout.txt`, saves it to `emsecret.txt` with mode 0600, and leaves short status/errors visible. Both success and error paths were tested locally. The owner still needs to execute it in their Cloud Shell; no live activation should be claimed merely because the attachment exists.
+- When asked about short results, **show them in chat/on-screen instead of asking for a downloaded error report**. The secret remains a downloadable file.
+
 ## Current daily-email setup (supersedes earlier attempts) — 15 October 2026
 
 The approved architecture remains private: `cuberoot_apk_clicks_v1/{app}/events` is owner-read-only until a separate Firebase Auth Email/Password reporter UID is explicitly added; the existing `/households` permissions and public validated-click CREATE policy are unchanged. There is no public Firestore read. An intermediate simplified/public-read design was **reverted before any Firebase deployment**.
