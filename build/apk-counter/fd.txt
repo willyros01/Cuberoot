@@ -106,7 +106,7 @@ new_ruleset=None
 old_update=None
 try:
     source,proposed=approved_sources()
-    if (json.loads(cmd("gcloud","projects","describe",PROJECT,"--format=json")).get("projectNumber")!=NUMBER):
+    if str(json.loads(cmd("gcloud","projects","describe",PROJECT,"--format=json")).get("projectNumber"))!=NUMBER:
         fail("project number mismatch")
     token=cmd("gcloud","auth","print-access-token")
     if not token:
@@ -121,12 +121,18 @@ try:
         state["status"]="READY - NO CHANGES"
         state["next"]="Ask owner before running bash fd.txt --publish"
     else:
-        if not sys.stdin.isatty():
-            fail("interactive terminal required for publish")
-        print("ABOUT TO CHANGE FIRESTORE RULES on split-it-44dea.")
-        print("Only owner READ of new counter path will be allowed.")
-        print("Public counter WRITE remains DENIED. /households unchanged.")
-        confirmation=input('Type exactly PUBLISH OWNER READ RULES: ').strip()
+        # Python source is supplied via a here-document, so sys.stdin is
+        # not interactive. Always require a real controlling terminal instead.
+        try:
+            with open("/dev/tty","r+") as tty:
+                tty.write("ABOUT TO CHANGE FIRESTORE RULES on split-it-44dea.\n")
+                tty.write("Only owner READ will be allowed on the new counter path.\n")
+                tty.write("Public counter WRITES remain DENIED. /households unchanged.\n")
+                tty.write("Type exactly PUBLISH OWNER READ RULES: ")
+                tty.flush()
+                confirmation=tty.readline().strip()
+        except OSError:
+            fail("interactive Cloud Shell terminal required for publish")
         if confirmation!="PUBLISH OWNER READ RULES":
             fail("explicit confirmation not given")
         # Re-check immediately before creating the immutable ruleset.
