@@ -1,5 +1,5 @@
 import {cockpit} from './downloads-ui.js?v=2.0.0';
-import {ownerSignedIn,signInOwner,signOutOwner,loadOwnerReport} from './apk-firebase-report.js?v=1';
+import {ownerSignedIn,signInOwner,signOutOwner,loadOwnerReport} from './apk-firebase-report.js?v=2';
 
 // Only called after Cuberoot Publish has been unlocked with its vault passphrase.
 // Google sign-in is a separate, explicit owner-only authorization.
