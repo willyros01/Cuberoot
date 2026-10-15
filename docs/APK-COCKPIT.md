@@ -29,3 +29,9 @@ After deployment: configure the key inside encrypted admin state, set the public
 Rollback: set endpoint empty/remove the standalone tracking script. Existing downloads continue independently. Do not delete app files or alter publishing.
 
 Read-only owner audit: download `build/ca.txt`, run `bash ca.txt` in Google Cloud Shell, and return `ca-out.txt`. The script resolves the exact split-it project by display name or exact ID and captures database metadata, existing rule source, function inventory and billing status without resource mutations or secret values.
+
+## GitHub Pages recovery, 15 October 2026
+
+- GitHub Pages run #227 succeeded for main commit `5a0ccb4`, before the cockpit files were added at `b0a4a68`. The public `/cockpit/` URL subsequently displayed the site's 404 page while the root website worked.
+- Following restoration of GitHub account permissions, this documentation-only update requests a fresh branch-source Pages deployment from current `main`. It intentionally changes no website JavaScript, APK, download links, Firebase, DNS or Pages settings.
+- Deployment success and `/cockpit/` public accessibility must be verified separately; do not declare the preview live solely because this commit was accepted. The preview always shows fictional sample values until an audited Firebase backend is explicitly enabled.
