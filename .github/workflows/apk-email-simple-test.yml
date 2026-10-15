@@ -1,0 +1,41 @@
+name: APK Email Simple Offline Test
+on:
+  push:
+    branches: [apk-email-simple-test]
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: python3 -m py_compile build/apk-counter/daily-email.py
+      - name: Test low-overhead sender using synthetic Firestore counts
+        run: |
+          python3 - <<'PY'
+          import importlib.util, datetime as dt, os
+          spec=importlib.util.spec_from_file_location('sender','build/apk-counter/daily-email.py')
+          m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+          assert not hasattr(m,'firebase_id_token')
+          assert not hasattr(m,'OWNER_UID')
+          assert m.GMAIL_ADDRESS == 'willyros01@gmail.com'
+          app_slugs=[slug for slug,_ in m.APPS]
+          assert len(app_slugs)==6
+          calls=[]
+          m.firestore_count=lambda app,start=None,end=None:(calls.append((app, bool(start))) or (2 if start else 5))
+          m.firestore_recent=lambda app:[]
+          subject,body=m.create_summary(dt.datetime(2026,10,16,13,17,tzinfo=dt.timezone.utc))
+          assert '2026-10-15' in subject
+          assert 'Recorded clicks yesterday: 12' in body
+          assert 'All recorded clicks since tracking began: 30' in body
+          assert len(calls)==12
+          for slug in app_slugs:
+            assert len([x for x in calls if x[0]==slug])==2
+          assert m.toronto_day_bounds(dt.datetime(2026,1,10,14,17,tzinfo=dt.timezone.utc))[1].hour==5
+          assert m.toronto_day_bounds(dt.datetime(2026,7,10,13,17,tzinfo=dt.timezone.utc))[1].hour==4
+          try:
+            m.required('APK_COUNTER_NO_SUCH_SECRET')
+            assert False
+          except ValueError: pass
+          print('PASS: six apps, synthetic totals, no Firebase reporter, DST handling, no SMTP send')
+          PY
