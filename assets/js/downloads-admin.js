@@ -1,7 +1,7 @@
 import {cockpit} from './downloads-ui.js?v=2.1.0';
 
-// Firebase's large SDK is intentionally NOT a static import. The Publish page
-// and the cockpit labels must paint before any Firebase code loads.
+// Firebase's large SDK is intentionally NOT a static import. Only the
+// private sign-in prompt is visible before the owner is authenticated.
 let reportPromise;
 function reportModule(){
  if(!reportPromise)reportPromise=import('./apk-firebase-report.js?v=2').catch(error=>{
@@ -45,9 +45,10 @@ export function downloadsTab(){
  status.setAttribute('aria-live','polite');
  status.textContent='Cockpit ready. Connecting sign-in in the background…';
 
- // Static app names and layout are visible without waiting for Firebase.
+ // Build static placeholders off-screen; reveal real cockpit only after Google owner sign-in.
  const placeholder=document.createElement('div');
  placeholder.className='dc-content';
+ placeholder.hidden=true;
  const h=document.createElement('h2');
  h.textContent='By app';
  const cards=document.createElement('div');
@@ -78,7 +79,7 @@ export function downloadsTab(){
   login.textContent='Sign in with Google';
   logout.hidden=true;
   intro.hidden=false;
-  placeholder.hidden=false;
+  placeholder.hidden=true;
   panel.hidden=true;
   panel.replaceChildren();
   status.textContent='Private statistics. Sign in with the verified Google owner account.';
@@ -119,7 +120,7 @@ export function downloadsTab(){
   }).finally(()=>{logout.disabled=false;});
  });
 
- // Let the browser draw the heading and app cards before importing Firebase.
+ // Let the browser paint the private login prompt before importing Firebase.
  const afterPaint=()=>setTimeout(()=>{
   if(!root.isConnected)return;
   void reportModule().then(module=>{
