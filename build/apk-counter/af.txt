@@ -94,10 +94,15 @@ try:
         raise ValueError("STOP: live rules differ from the original audit. No proposed deployment.")
     # This baseline has three braces: household, database, service.
     # Insert only before the database closing brace.
-    closings=[m.start() for m in re.finditer(r"}",live)]
-    if len(closings)!=3 or "cuberoot_apk_clicks_v1" in live:
+    if live.count("match /households/{code}/{document=**}")!=1 or "cuberoot_apk_clicks_v1" in live:
         raise ValueError("STOP: unexpected source structure or pre-existing counter")
-    idx=closings[-2]
+    # Closing braces inside {database}, {code}, {document=**} are NOT
+    # structural closures. The final two closing braces close the database
+    # and service, respectively; baseline validation makes this deterministic.
+    last=live.rfind("}")
+    idx=live.rfind("}",0,last)
+    if idx<0 or not live[:idx].rstrip().endswith("}"):
+        raise ValueError("STOP: unexpected closing structure")
     proposal=live[:idx].rstrip()+"\n"+BLOCK+"\n"+live[idx:]
     if normalized(proposal.replace(BLOCK,"",1)) != normalized(live):
         # Original must be preserved as a coherent prefix/suffix, not replaced.
