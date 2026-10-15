@@ -2,6 +2,13 @@
 
 Owner scope: GitHub + Firebase only. Cuberoot's current APK hosting, links, files and publisher remain unchanged. No Cloudflare Worker, routes, D1 database or geolocation service. The earlier PR #9 Cloudflare implementation is superseded.
 
+## Google sign-in visibility correction — 15 October 2026
+
+- Before Google owner authentication, Cuberoot Publish's **APK downloads** tab shows only the private Google sign-in prompt; all six APK app cards and report contents are **hidden**.
+- After successful owner-only Google sign-in, the static app names and placeholder totals render immediately, then Firebase counts load in the background.
+- This correction changes only `assets/js/downloads-admin.js` and the two cache-busting import references (`assets/js/admin.js`, `admin/index.html`); no APK, Firestore, scheduled Gmail or download behavior changed.
+- GitHub Pages deployment of this UI update completed successfully for commit `86c8c096729d81a800c97f6bdd39892dbf94403e`.
+
 ## Paint-first performance fix — 15 October 2026
 
 - In Cuberoot Publish's **APK downloads** tab, the heading and six app-name placeholders now render **before importing the Firebase SDK**. Firebase code starts loading on a post-paint task. The Google sign-in button becomes enabled when its code is ready; account selection still requires a real owner click.
