@@ -18,6 +18,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from email.message import EmailMessage
+from concurrent.futures import ThreadPoolExecutor
 from zoneinfo import ZoneInfo
 
 PROJECT = "split-it-44dea"
@@ -149,15 +150,19 @@ def toronto_day_bounds(now: dt.datetime | None = None):
 
 def create_summary(token: str, now: dt.datetime | None = None) -> tuple[str, str]:
     day, start, end = toronto_day_bounds(now)
-    counts = {}
-    recent = []
-    for app, _ in APPS:
+    # Query six apps concurrently; keep a complete, deterministic report.
+    # Any failure aborts the entire email rather than sending partial counts.
+    def read_app(app):
         previous_day = firestore_count(app, token, start, end)
         all_time = firestore_count(app, token)
         if previous_day > all_time:
             raise ValueError("Inconsistent totals, refusing to send")
-        counts[app] = (previous_day, all_time)
-        recent.extend(firestore_recent(app, token))
+        return app, previous_day, all_time, firestore_recent(app, token)
+
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        results = list(pool.map(read_app, (slug for slug, _ in APPS)))
+    counts = {app: (previous_day, all_time) for app, previous_day, all_time, _ in results}
+    recent = [event for _, _, _, events in results for event in events]
     recent.sort(key=lambda event: event["at"], reverse=True)
     recent = recent[:10]
     daily = sum(v[0] for v in counts.values())
