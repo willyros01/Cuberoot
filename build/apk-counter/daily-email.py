@@ -22,6 +22,8 @@ from concurrent.futures import ThreadPoolExecutor
 from zoneinfo import ZoneInfo
 
 PROJECT = "split-it-44dea"
+PUBLIC_FIREBASE_WEB_API_KEY = "AIzaSyD2ZzzJCOz786VqTMZHpgVG_-FOi-KYI78"
+GMAIL_SENDER = "willyros01@gmail.com"
 TZ = ZoneInfo("America/Toronto")
 APPS = (
     ("fidunio", "FIDUNIO"),
@@ -219,18 +221,22 @@ def send_email(gmail_address: str, app_password: str, subject: str, body: str):
 
 
 def main():
-    # Double fail-closed: GitHub workflow gate AND runtime gate.
-    if os.environ.get("APK_COUNTER_DAILY_EMAIL_ENABLED", "") != "true":
-        print("Daily email disabled; no Firestore request or email.")
-        return
-    api_key = required("APK_COUNTER_FIREBASE_WEB_API_KEY")
-    reporter_email = required("APK_COUNTER_REPORTER_EMAIL")
-    reporter_password = required("APK_COUNTER_REPORTER_PASSWORD")
-    gmail_address = required("APK_COUNTER_GMAIL_ADDRESS")
-    gmail_password = required("APK_COUNTER_GMAIL_APP_PASSWORD")
-    token = firebase_id_token(api_key, reporter_email, reporter_password)
+    # Original private Firestore reporter, with ONE GitHub Actions secret.
+    # The reporter has read-only access to APK events and no other privileges.
+    settings = json.loads(required("APK_COUNTER_MAIL_CONFIG"))
+    if not isinstance(settings, dict) or set(settings) != {
+            "reporter_email", "reporter_password", "gmail_app_password"}:
+        raise ValueError("Invalid email configuration")
+    reporter_email = settings["reporter_email"]
+    reporter_password = settings["reporter_password"]
+    gmail_password = settings["gmail_app_password"]
+    if not all(isinstance(x, str) and x for x in
+               (reporter_email, reporter_password, gmail_password)):
+        raise ValueError("Incomplete email configuration")
+    token = firebase_id_token(PUBLIC_FIREBASE_WEB_API_KEY,
+                              reporter_email, reporter_password)
     subject, body = create_summary(token)
-    send_email(gmail_address, gmail_password, subject, body)
+    send_email(GMAIL_SENDER, gmail_password, subject, body)
     print("Daily cockpit summary sent. No credentials or private records logged.")
 
 
