@@ -18,3 +18,8 @@ This repository hosts the Cuberoot Systems public site and selected signed Andro
 ## Documentation boundaries
 
 Each app’s current migration notes stay in its own repository and platform branch. This index is not a substitute for each branch's tests/README. No new repositories or cross-branch auto-merges; keep credentials/private signing files out of source and docs. Historical app records remain retained in their original branches.
+
+
+## APK download cockpit (prepared, not activated)
+
+Implementation and activation/rollback notes are in [`analytics/README.md`](analytics/README.md). Adds an APK downloads tab to the existing encrypted Publish admin and a separately authenticated Cloudflare/D1 report API for six APKs. Counts start only after Cloudflare activation; local tests do not establish live operation. No application repositories or APK publishing/signing flows change.

@@ -1,0 +1,77 @@
+{
+  "name": "cuberoot-apk-count",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-15",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    {
+      "pattern": "https://www.cuberoot-systems.com/downloads/fidunio.apk*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://www.cuberoot-systems.com/downloads/scorecard.apk*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://www.cuberoot-systems.com/downloads/fairpot.apk*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://www.cuberoot-systems.com/downloads/wire.apk*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://www.cuberoot-systems.com/downloads/spendrecorder.apk*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://www.cuberoot-systems.com/downloads/cloud-files.apk*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://cuberoot-systems.com/downloads/fidunio.apk*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://cuberoot-systems.com/downloads/scorecard.apk*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://cuberoot-systems.com/downloads/fairpot.apk*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://cuberoot-systems.com/downloads/wire.apk*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://cuberoot-systems.com/downloads/spendrecorder.apk*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://cuberoot-systems.com/downloads/cloud-files.apk*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://www.cuberoot-systems.com/api/apk-downloads*",
+      "zone_name": "cuberoot-systems.com"
+    },
+    {
+      "pattern": "https://cuberoot-systems.com/api/apk-downloads*",
+      "zone_name": "cuberoot-systems.com"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "cuberoot-apk-count",
+      "database_id": "REPLACE_WITH_CREATED_D1_ID"
+    }
+  ],
+  "triggers": {
+    "crons": [
+      "23 4 * * *"
+    ]
+  }
+}
