@@ -1,61 +1,137 @@
-import {cockpit} from './downloads-ui.js?v=2.0.0';
-import {ownerSignedIn,signInOwner,signOutOwner,loadOwnerReport} from './apk-firebase-report.js?v=2';
+import {cockpit} from './downloads-ui.js?v=2.1.0';
 
-// Only called after Cuberoot Publish has been unlocked with its vault passphrase.
-// Google sign-in is a separate, explicit owner-only authorization.
+// Firebase's large SDK is intentionally NOT a static import. The Publish page
+// and the cockpit labels must paint before any Firebase code loads.
+let reportPromise;
+function reportModule(){
+ if(!reportPromise)reportPromise=import('./apk-firebase-report.js?v=2').catch(error=>{
+  reportPromise=null;
+  throw error;
+ });
+ return reportPromise;
+}
+
+const APPS=['FIDUNIO','The Scorecard','Fairpot','Wire','SpendRecorder','Cloud Files'];
 export function downloadsTab(){
  const root=document.createElement('section');
+ root.className='dc';
+ root.setAttribute('aria-label','Private APK download cockpit');
+ const intro=document.createElement('div');
+ intro.className='dc-heading';
+ const title=document.createElement('h1');
+ title.textContent='Download cockpit';
+ const subtitle=document.createElement('p');
+ subtitle.className='dc-subtitle';
+ subtitle.textContent='Your apps. Their reach. One simple view.';
+ intro.append(title,subtitle);
+
  const actions=document.createElement('div');
  actions.className='dc-toolbar';
  const login=document.createElement('button');
  login.className='btn';
  login.type='button';
- login.textContent='Sign in with Google';
+ login.textContent='Preparing Google sign-in…';
+ login.disabled=true;
  const logout=document.createElement('button');
  logout.className='btn btn-ghost';
  logout.type='button';
  logout.textContent='Sign out of statistics';
+ logout.hidden=true;
+ actions.append(login,logout);
+
  const status=document.createElement('p');
  status.className='dc-status';
  status.setAttribute('role','status');
  status.setAttribute('aria-live','polite');
- actions.append(login,logout);
- root.append(actions,status);
- function show(){
-  const signed=ownerSignedIn();
-  login.hidden=signed;
-  logout.hidden=!signed;
-  const previous=root.querySelector('[data-report-container]');
-  if(previous)previous.remove();
-  if(signed){
-   status.textContent='Signed in. Counts include recorded clicks only.';
-   const panel=document.createElement('div');
-   panel.setAttribute('data-report-container','');
-   panel.append(cockpit({load:loadOwnerReport}));
-   root.append(panel);
-  }else{
-   status.textContent='Private statistics. Sign in with the verified Google owner account.';
-  }
+ status.textContent='Cockpit ready. Connecting sign-in in the background…';
+
+ // Static app names and layout are visible without waiting for Firebase.
+ const placeholder=document.createElement('div');
+ placeholder.className='dc-content';
+ const h=document.createElement('h2');
+ h.textContent='By app';
+ const cards=document.createElement('div');
+ cards.className='dc-apps';
+ for(const name of APPS){
+  const card=document.createElement('article');
+  card.className='dc-app';
+  const label=document.createElement('h3');
+  label.textContent=name;
+  const number=document.createElement('strong');
+  number.textContent='—';
+  card.append(label,number);
+  cards.append(card);
  }
- login.addEventListener('click',async()=>{
+ const note=document.createElement('p');
+ note.className='dc-status';
+ note.textContent='Sign in to display recorded click counts.';
+ placeholder.append(h,cards,note);
+ const panel=document.createElement('div');
+ panel.setAttribute('data-report-container','');
+ panel.hidden=true;
+ root.append(intro,actions,status,placeholder,panel);
+
+ let api=null;
+ function showSignedOut(){
+  login.hidden=false;
+  login.disabled=!api;
+  login.textContent='Sign in with Google';
+  logout.hidden=true;
+  intro.hidden=false;
+  placeholder.hidden=false;
+  panel.hidden=true;
+  panel.replaceChildren();
+  status.textContent='Private statistics. Sign in with the verified Google owner account.';
+ }
+ function showSignedIn(){
+  if(!root.isConnected||!api)return;
+  login.hidden=true;
+  logout.hidden=false;
+  intro.hidden=true;
+  placeholder.hidden=true;
+  panel.hidden=false;
+  panel.replaceChildren(cockpit({load:api.loadOwnerReport}));
+  status.textContent='Signed in. Loading recorded clicks in the background…';
+ }
+ login.addEventListener('click',()=>{
+  if(!api)return;
   login.disabled=true;
   status.textContent='Opening Google sign-in…';
-  try{
-   await signInOwner();
-   show();
-  }catch(error){
-   status.textContent=error?.code
-    ? 'Google sign-in failed: '+String(error.code).replace(/[^a-zA-Z0-9/-]/g,'')
-    : error?.message==='This Google account is not the authorized cockpit owner.'
-      ? error.message
-      : 'Google sign-in did not complete. Open Cuberoot Publish directly in Safari.';
-  }finally{login.disabled=false;}
+  // Must begin directly in this click handler to avoid popup blocking.
+  void api.signInOwner().then(()=>{
+   if(root.isConnected)showSignedIn();
+  }).catch(error=>{
+   if(!root.isConnected)return;
+   const code=typeof error?.code==='string'
+    ?error.code.replace(/[^a-zA-Z0-9/-]/g,''):'';
+   status.textContent=code?'Google sign-in failed: '+code:
+    error?.message==='This Google account is not the authorized cockpit owner.'
+      ?error.message:'Google sign-in did not complete. Open Cuberoot Publish directly in Safari.';
+  }).finally(()=>{login.disabled=false;});
  });
- logout.addEventListener('click',async()=>{
+ logout.addEventListener('click',()=>{
+  if(!api)return;
   logout.disabled=true;
-  try{await signOutOwner();show();}
-  finally{logout.disabled=false;}
+  void api.signOutOwner().then(()=>{
+   if(root.isConnected)showSignedOut();
+  }).catch(()=>{
+   if(root.isConnected)status.textContent='Unable to sign out. Use Publish Lock to clear this session.';
+  }).finally(()=>{logout.disabled=false;});
  });
- show();
+
+ // Let the browser draw the heading and app cards before importing Firebase.
+ const afterPaint=()=>setTimeout(()=>{
+  if(!root.isConnected)return;
+  void reportModule().then(module=>{
+   if(!root.isConnected)return;
+   api=module;
+   if(api.ownerSignedIn())showSignedIn();
+   else showSignedOut();
+  }).catch(()=>{
+   if(root.isConnected)status.textContent='Google sign-in could not load. Refresh the page to retry.';
+  });
+ },0);
+ if(typeof requestAnimationFrame==='function')requestAnimationFrame(afterPaint);
+ else setTimeout(afterPaint,0);
  return root;
 }
