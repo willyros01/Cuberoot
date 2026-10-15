@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+# Cuberoot APK Counter: guarded Firestore rules publish.
+# CHECK MODE IS READ-ONLY. Publication requires "--publish" plus a typed approval.
+# This DOES NOT enable APK click writes or email. No gcloud project switch.
+set -euo pipefail
+umask 077
+command -v gcloud >/dev/null || { echo "ERROR: Open Google Cloud Shell."; exit 1; }
+python3 - "$@" <<'PY'
+import datetime as dt
+import hashlib
+import json
+import pathlib
+import re
+import subprocess
+import sys
+import urllib.error
+import urllib.request
+
+PROJECT="split-it-44dea"
+NUMBER="153404639150"
+OWNER="EJoRDnKQiGcDgw8RP1RRtkyei8K2"
+OLD_RULESET="projects/split-it-44dea/rulesets/b1b901c0-aefa-450b-a345-af4219781c37"
+OLD_HASH="4128d655516d7f0f96cd0b55be4ff4b411e148c966aadf4cbb4550026740415f"
+PROPOSED_HASH="08d5bb8f4890112551cf1ca187d78da0585e0d2eee7ea91ae7652312de4c3f72"
+RELEASE=f"projects/{PROJECT}/releases/cloud.firestore"
+ROOT="https://firebaserules.googleapis.com/v1/"
+REPORT=pathlib.Path("fd-out.txt")
+state={"purpose":"Guarded Cuberoot read-only counter rules publication",
+       "project":PROJECT,"cloudRulesChanged":False,
+       "at":dt.datetime.now(dt.timezone.utc).isoformat(),
+       "status":"FAIL"}
+args=sys.argv[1:]
+if args not in ([],["--publish"]):
+    raise SystemExit("Usage: bash fd.txt  (read-only check) OR bash fd.txt --publish")
+def sha(s):
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+def cmd(*s):
+    return subprocess.check_output(s, text=True, stderr=subprocess.DEVNULL).strip()
+def api(method,resource,token,data=None):
+    payload=None if data is None else json.dumps(data,separators=(",",":"),sort_keys=True).encode()
+    request=urllib.request.Request(ROOT+resource,method=method,
+        headers={"Authorization":"Bearer "+token,"Accept":"application/json",
+                 "Content-Type":"application/json"},data=payload)
+    with urllib.request.urlopen(request,timeout=40) as resp:
+        return json.loads(resp.read(2_000_000))
+def fail(msg):
+    raise ValueError("STOP: "+msg)
+def actual_release(token):
+    r=api("GET",RELEASE,token)
+    if r.get("name")!=RELEASE:
+        fail("release name mismatch")
+    return r
+def approved_sources():
+    doc=json.loads(pathlib.Path("af-out.txt").read_text(encoding="utf-8"))
+    if (doc.get("projectId")!=PROJECT or str(doc.get("projectNumber"))!=NUMBER
+        or doc.get("status")!="PASS" or doc.get("cloudChanges")!=0
+        or doc.get("activeRuleset")!=OLD_RULESET or
+        doc.get("liveRulesSha256")!=OLD_HASH or doc.get("proposalSha256")!=PROPOSED_HASH
+        or doc.get("baselineMatched") is not True
+        or doc.get("publicCounterWrites")!="DENIED"
+        or doc.get("householdSemantics")!="PRESERVED"):
+        fail("preflight attestation mismatch; rerun preflight")
+    for key,prefix in (("originalBackup","af-backup-"),("proposal","af-proposal-")):
+        value=doc.get(key,"")
+        if not isinstance(value,str) or not re.fullmatch(prefix+r"[0-9]{8}-[0-9]{6}\.txt",value):
+            fail("unexpected report file name: "+key)
+    source=pathlib.Path(doc["originalBackup"]).read_text(encoding="utf-8")
+    proposed=pathlib.Path(doc["proposal"]).read_text(encoding="utf-8")
+    if sha(source)!=OLD_HASH or sha(proposed)!=PROPOSED_HASH:
+        fail("local backup or proposal checksum mismatch")
+    if source.count("allow read, write: if true;")!=1:
+        fail("household grant mismatch")
+    block="""
+    // APK reporting staging only: owner reads, NO public writes.
+    match /cuberoot_apk_clicks_v1/{app}/events/{eventId} {
+      function isOwner() {
+        return request.auth != null && request.auth.uid == 'EJoRDnKQiGcDgw8RP1RRtkyei8K2';
+      }
+      allow get, list: if isOwner();
+      allow create, update, delete: if false;
+    }
+"""
+    if proposed.count(block)!=1 or proposed.replace(block,"",1).split()!=source.split():
+        fail("proposal does not preserve the original household rules")
+    if "REPLACE_WITH_" in proposed or proposed.count("cuberoot_apk_clicks_v1")!=1:
+        fail("unresolved placeholder or duplicated counter path")
+    return source,proposed
+def verify_original(token,src):
+    r=actual_release(token)
+    if r.get("rulesetName")!=OLD_RULESET:
+        fail("LIVE RULESET DRIFT; do not publish")
+    rs=api("GET",OLD_RULESET,token)
+    files=rs.get("source",{}).get("files",[])
+    if len(files)!=1 or files[0].get("name")!="firestore.rules" or files[0].get("content")!=src:
+        fail("LIVE RULES CONTENT DRIFT; do not publish")
+    return r
+def publish_release(token,ruleset):
+    return api("PATCH",RELEASE,token,{
+        "release":{"name":RELEASE,"rulesetName":ruleset},
+        "updateMask":"rulesetName"
+    })
+def write_report():
+    REPORT.write_text(json.dumps(state,indent=2)+"\n",encoding="utf-8")
+
+new_ruleset=None
+old_update=None
+try:
+    source,proposed=approved_sources()
+    if (json.loads(cmd("gcloud","projects","describe",PROJECT,"--format=json")).get("projectNumber")!=NUMBER):
+        fail("project number mismatch")
+    token=cmd("gcloud","auth","print-access-token")
+    if not token:
+        fail("No active Google Cloud Shell token")
+    release=verify_original(token,source)
+    old_update=release.get("updateTime")
+    if not old_update:
+        fail("missing original updateTime")
+    state.update({"sourceRuleset":OLD_RULESET,"oldRulesSha256":OLD_HASH,
+                  "proposedRulesSha256":PROPOSED_HASH})
+    if args==[]:
+        state["status"]="READY - NO CHANGES"
+        state["next"]="Ask owner before running bash fd.txt --publish"
+    else:
+        if not sys.stdin.isatty():
+            fail("interactive terminal required for publish")
+        print("ABOUT TO CHANGE FIRESTORE RULES on split-it-44dea.")
+        print("Only owner READ of new counter path will be allowed.")
+        print("Public counter WRITE remains DENIED. /households unchanged.")
+        confirmation=input('Type exactly PUBLISH OWNER READ RULES: ').strip()
+        if confirmation!="PUBLISH OWNER READ RULES":
+            fail("explicit confirmation not given")
+        # Re-check immediately before creating the immutable ruleset.
+        if verify_original(token,source).get("updateTime")!=old_update:
+            fail("release updateTime changed")
+        new=api("POST",f"projects/{PROJECT}/rulesets",token,{
+            "source":{"files":[{"name":"firestore.rules","content":proposed}]},
+            "attachment_point":f"firestore.googleapis.com/projects/{NUMBER}/databases/(default)"
+        })
+        new_ruleset=new.get("name")
+        if not re.fullmatch(r"projects/split-it-44dea/rulesets/[A-Za-z0-9_-]+",new_ruleset or ""):
+            fail("unexpected created ruleset")
+        state["candidateRuleset"]=new_ruleset
+        candidate=api("GET",new_ruleset,token)
+        files=candidate.get("source",{}).get("files",[])
+        if len(files)!=1 or files[0].get("content")!=proposed:
+            fail("created ruleset content mismatch (not published)")
+        if verify_original(token,source).get("updateTime")!=old_update:
+            fail("release drift after ruleset creation (not published)")
+        patch=publish_release(token,new_ruleset)
+        if patch.get("rulesetName")!=new_ruleset:
+            fail("publish response mismatch; inspect live rules immediately")
+        result=actual_release(token)
+        if result.get("rulesetName")!=new_ruleset:
+            fail("publish was not confirmed; inspect live rules immediately")
+        state["cloudRulesChanged"]=True
+        state["activeRuleset"]=new_ruleset
+        state["status"]="PUBLISHED OWNER-READ-ONLY RULES; CLICK WRITES REMAIN OFF"
+        state["next"]="Verify Firestore propagation and auth before activating any tracking."
+except Exception as exc:
+    state["error"]=(type(exc).__name__+": "+str(exc))[:450]
+    if new_ruleset and state.get("status","").startswith("FAIL"):
+        state["next"]="New ruleset may exist; check active release before attempting recovery. Original ruleset: "+OLD_RULESET
+finally:
+    write_report()
+
+print("APK COUNTER FIRESTORE:",state["status"])
+print("Result: fd-out.txt; original backup and proposal are unchanged.")
+if state.get("error"):
+    print(state["error"])
+if state["status"]=="FAIL":
+    sys.exit(1)
+PY
