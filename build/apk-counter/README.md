@@ -53,6 +53,14 @@ A temporary, isolated page was added under `/cockpit/owner-check.html` on Cubero
 
 The public download counter is STILL DISABLED (`assets/js/downloads-config.js` endpoint empty), and the Firebase rules have not changed. Do not merge prep into main or activate counting just because the owner UID has been collected.
 
+## Owner Google UID — received, still pending identity verification
+
+- **2026-10-15:** Owner completed the standalone `/cockpit/owner-check.html` Google popup test and supplied a Firebase Auth UID. The exact UID is present in `firestore.rules.template` as the owner-only read allowlist entry. This is an identifier, **not an API token, password, or credential**.
+- Before deploying rules, confirm the same UID appears under Firebase Authentication > Users for the intended Google identity. Do not infer identity from the UID's format alone.
+- The reporter UID is still the distinct placeholder `REPLACE_WITH_MAIL_REPORTER_UID`; daily email is not configured.
+- `allow create: if false`, `allow update, delete: if false` and the existing broad `/households` rule are unchanged; **nothing here was deployed to Firestore**.
+- After the UID is checked, run Firebase Local Emulator Suite rule tests against the complete fetched rule source before any live deployment. Keep the live counter off while assessing Spark shared-quota abuse risk.
+
 ## Daily Gmail summary — STAGED, DISABLED
 
 Owner request (2026-10-15): deliver a private cockpit summary to the owner's Gmail **each day**. The implementation lives only in this preparation branch:
