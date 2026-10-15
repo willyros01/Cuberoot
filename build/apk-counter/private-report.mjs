@@ -3,7 +3,6 @@
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {getAuth, signInWithEmailAndPassword, setPersistence, inMemoryPersistence, signOut} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {getFirestore, collection, query, where, orderBy, limit, getCountFromServer, getDocs, Timestamp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
-import {initializeAppCheck, ReCaptchaV3Provider} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js';
 import {counterConfig} from './config.example.mjs';
 
 const APPS=['fidunio','scorecard','fairpot','wire','spendrecorder','cloud-files'];
@@ -11,11 +10,10 @@ let state;
 function setup(){
  if(!counterConfig.enabled||counterConfig.projectId!=='split-it-44dea'
  ||counterConfig.firebase?.projectId!=='split-it-44dea'||!counterConfig.firebase.apiKey
- ||!counterConfig.firebase.appId||!counterConfig.appCheckSiteKey)
+ ||!counterConfig.firebase.appId)
   throw Error('APK counting is disabled');
  if(!state){
   const app=initializeApp(counterConfig.firebase,'cuberoot-apk-report');
-  initializeAppCheck(app,{provider:new ReCaptchaV3Provider(counterConfig.appCheckSiteKey),isTokenAutoRefreshEnabled:true});
   state={auth:getAuth(app),db:getFirestore(app)};
  }
  return state;
