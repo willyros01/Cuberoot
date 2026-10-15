@@ -1,7 +1,7 @@
 // STAGED / INERT until explicitly imported into unlocked Publish admin.
 // Owner credentials are kept in memory only, never in GitHub or local storage.
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
-import {getAuth, signInWithEmailAndPassword, setPersistence, inMemoryPersistence, signOut} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
+import {initializeAuth, GoogleAuthProvider, signInWithPopup, inMemoryPersistence, browserPopupRedirectResolver, signOut} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {getFirestore, collection, query, where, orderBy, limit, getCountFromServer, getDocs, Timestamp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 import {counterConfig} from './config.example.mjs';
 
@@ -14,15 +14,21 @@ function setup(){
   throw Error('APK counting is disabled');
  if(!state){
   const app=initializeApp(counterConfig.firebase,'cuberoot-apk-report');
-  state={auth:getAuth(app),db:getFirestore(app)};
+  // Memory-only session: signing in never saves an OAuth session to browser storage.
+  const auth=initializeAuth(app,{persistence:inMemoryPersistence,popupRedirectResolver:browserPopupRedirectResolver});
+  state={auth,db:getFirestore(app)};
  }
  return state;
 }
-export async function signInForApkReport(email,password){
+export async function signInForApkReport(){
+ // Call directly from an actual button press in full Safari/Chrome to avoid popup blockers.
  const {auth}=setup();
- await setPersistence(auth,inMemoryPersistence);
- await signInWithEmailAndPassword(auth,email,password);
- // Rules check the exact owner UID; credentials alone do not grant read.
+ const provider=new GoogleAuthProvider();
+ provider.setCustomParameters({prompt:'select_account'});
+ const result=await signInWithPopup(auth,provider);
+ // Return non-secret UID only for verifying the exact owner-rule match.
+ // Google email/provider by itself does not grant any Firestore read permission.
+ return {uid:result.user.uid};
 }
 export async function signOutOfApkReport(){
  if(state)await signOut(state.auth);
