@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Daily APK click email: public read-only Firestore counters + Gmail SMTP.
+"""Disabled-by-default scheduled owner email: Firestore REST + Gmail SMTP.
 
-No Firebase reporter account, API key, GitHub CLI, or Cloud Shell authentication.
-Requires only the Gmail app password in GitHub Actions secret storage.
-Firestore rules must explicitly permit read of APK click events (only that
-collection); this script does not mutate rules, Firestore, or download APKs.
+Needs a dedicated Firebase Email/Password user whose *exact UID* has read-only
+access to cuberoot_apk_clicks_v1 in reviewed Firestore rules. This script
+does not bypass Security Rules, mutate Firestore, or download APKs.
 """
 from __future__ import annotations
 
@@ -16,13 +15,13 @@ import smtplib
 import ssl
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from email.message import EmailMessage
 from concurrent.futures import ThreadPoolExecutor
 from zoneinfo import ZoneInfo
 
 PROJECT = "split-it-44dea"
-GMAIL_ADDRESS = "willyros01@gmail.com"
 TZ = ZoneInfo("America/Toronto")
 APPS = (
     ("fidunio", "FIDUNIO"),
@@ -44,8 +43,10 @@ def required(name: str) -> str:
     return value
 
 
-def api_post(url: str, payload: dict):
+def api_post(url: str, payload: dict, bearer: str = ""):
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    if bearer:
+        headers["Authorization"] = "Bearer " + bearer
     data = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
     request = urllib.request.Request(url, data=data, headers=headers, method="POST")
     with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
@@ -53,15 +54,27 @@ def api_post(url: str, payload: dict):
     return json.loads(result)
 
 
-def firestore_query(app: str, kind: str, body: dict):
+def firebase_id_token(api_key: str, email: str, password: str) -> str:
+    url = ("https://identitytoolkit.googleapis.com/v1/accounts:"
+           "signInWithPassword?key=" + urllib.parse.quote(api_key, safe=""))
+    result = api_post(url, {
+        "email": email, "password": password, "returnSecureToken": True
+    })
+    token = result.get("idToken", "")
+    if not isinstance(token, str) or not token:
+        raise ValueError("Firebase Authentication did not return a token")
+    return token
+
+
+def firestore_query(app: str, kind: str, body: dict, token: str):
     if app not in dict(APPS) or kind not in ("runQuery", "runAggregationQuery"):
         raise ValueError("Unexpected Firestore request")
     parent = f"{ROOT}/cuberoot_apk_clicks_v1/{app}"
     url = "https://firestore.googleapis.com/v1/" + parent + ":" + kind
-    return api_post(url, body)
+    return api_post(url, body, token)
 
 
-def firestore_count(app: str, start: dt.datetime | None = None,
+def firestore_count(app: str, token: str, start: dt.datetime | None = None,
                     end: dt.datetime | None = None) -> int:
     filters = []
     for operator, instant in (("GREATER_THAN_OR_EQUAL", start), ("LESS_THAN", end)):
@@ -80,7 +93,7 @@ def firestore_count(app: str, start: dt.datetime | None = None,
             "structuredQuery": q,
             "aggregations": [{"alias": "clicks", "count": {}}]
         }
-    })
+    }, token)
     if not isinstance(response, list):
         raise ValueError("Malformed Firestore count response")
     values = [x["result"]["aggregateFields"]["clicks"]["integerValue"]
@@ -93,14 +106,14 @@ def firestore_count(app: str, start: dt.datetime | None = None,
     return n
 
 
-def firestore_recent(app: str) -> list[dict]:
+def firestore_recent(app: str, token: str) -> list[dict]:
     response = firestore_query(app, "runQuery", {
         "structuredQuery": {
             "from": [{"collectionId": "events"}],
             "orderBy": [{"field": {"fieldPath": "createdAt"}, "direction": "DESCENDING"}],
             "limit": MAX_RECENT_PER_APP
         }
-    })
+    }, token)
     if not isinstance(response, list):
         raise ValueError("Malformed recent activity response")
     result = []
@@ -135,16 +148,16 @@ def toronto_day_bounds(now: dt.datetime | None = None):
     return report_day, start.astimezone(dt.timezone.utc), end.astimezone(dt.timezone.utc)
 
 
-def create_summary(now: dt.datetime | None = None) -> tuple[str, str]:
+def create_summary(token: str, now: dt.datetime | None = None) -> tuple[str, str]:
     day, start, end = toronto_day_bounds(now)
     # Query six apps concurrently; keep a complete, deterministic report.
     # Any failure aborts the entire email rather than sending partial counts.
     def read_app(app):
-        previous_day = firestore_count(app, start, end)
-        all_time = firestore_count(app)
+        previous_day = firestore_count(app, token, start, end)
+        all_time = firestore_count(app, token)
         if previous_day > all_time:
             raise ValueError("Inconsistent totals, refusing to send")
-        return app, previous_day, all_time, firestore_recent(app)
+        return app, previous_day, all_time, firestore_recent(app, token)
 
     with ThreadPoolExecutor(max_workers=6) as pool:
         results = list(pool.map(read_app, (slug for slug, _ in APPS)))
@@ -180,7 +193,7 @@ def create_summary(now: dt.datetime | None = None) -> tuple[str, str]:
         "completed downloads or installations. Counts can be missed",
         "or fabricated; browser timezones are not physical locations.",
         "",
-        "Report for the Cuberoot Gmail account.",
+        "Private summary for the configured Gmail account.",
         "Source: Cuberoot APK counter / split-it-44dea.",
     ])
     return subject, "\n".join(lines) + "\n"
@@ -206,18 +219,26 @@ def send_email(gmail_address: str, app_password: str, subject: str, body: str):
 
 
 def main():
-    # One credential, stored only in GitHub Actions; absent => no email.
+    # Double fail-closed: GitHub workflow gate AND runtime gate.
+    if os.environ.get("APK_COUNTER_DAILY_EMAIL_ENABLED", "") != "true":
+        print("Daily email disabled; no Firestore request or email.")
+        return
+    api_key = required("APK_COUNTER_FIREBASE_WEB_API_KEY")
+    reporter_email = required("APK_COUNTER_REPORTER_EMAIL")
+    reporter_password = required("APK_COUNTER_REPORTER_PASSWORD")
+    gmail_address = required("APK_COUNTER_GMAIL_ADDRESS")
     gmail_password = required("APK_COUNTER_GMAIL_APP_PASSWORD")
-    subject, body = create_summary()
-    send_email(GMAIL_ADDRESS, gmail_password, subject, body)
-    print("Daily cockpit summary sent. No credential or click records logged.")
+    token = firebase_id_token(api_key, reporter_email, reporter_password)
+    subject, body = create_summary(token)
+    send_email(gmail_address, gmail_password, subject, body)
+    print("Daily cockpit summary sent. No credentials or private records logged.")
 
 
 if __name__ == "__main__":
     try:
         main()
     except Exception:
-        # Avoid exposing HTTP error response bodies or SMTP passwords in CI logs.
-        print("Daily report NOT SENT: missing Gmail secret, Firestore read, or mail failed.",
+        # Avoid exposing Firebase ID tokens, API responses, or SMTP secrets in CI logs.
+        print("Daily report NOT SENT: configuration, authentication, query or mail failed.",
               file=sys.stderr)
         sys.exit(1)
