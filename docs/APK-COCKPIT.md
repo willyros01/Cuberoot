@@ -44,9 +44,18 @@ Firestore Standard free allowance is 20,000 document writes/day, 50,000 document
 - **Remaining functional acceptance:** Owner opens `https://www.cuberoot-systems.com/`, taps exactly one Android APK download button, then visits `https://www.cuberoot-systems.com/admin/`, unlocks Publish, selects **APK downloads**, signs in with Google and taps Refresh. Confirm that the app's click count increased; do not count a completed installation as necessary. If report fails, diagnose that first rather than claiming success.
 - Threat limit: this free-tier public CREATE endpoint permits forged click records and can consume the same Spark quota as split-it. Accepted for a low-volume trial by owner. No App Check enforcement; do not enable it globally without app compatibility testing.
 
+## Daily email activation — 15 October 2026
+
+- User confirmed the APK download cockpit is working. Daily report activation is requested for **9:17 AM America/Toronto**, with previous local calendar day and lifetime counts for six apps.
+- Scheduled workflow is already present on `main`: `.github/workflows/apk-counter-daily-email.yml`. It intentionally remains **OFF** until `APK_COUNTER_DAILY_EMAIL_ENABLED=true` is configured. No credential values belong in the repository.
+- The report generator `build/apk-counter/daily-email.py` now reads all six apps concurrently and fails closed if any count/record request fails; no fabricated numbers or partial report are sent.
+- A single secure Google Cloud Shell helper, distributed as `mail1234.txt`, is prepared for **owner-side execution**. It first validates the exact currently deployed Firestore ruleset and SHA-256, project identity, GitHub CLI auth and Gmail SMTP app password. If those pass, it creates a dedicated Firebase Email/Password reporter using an owner's Gmail plus-address, securely sets four repository Actions secrets and two variables through `gh`, and adds an exact read-only reporter UID on the counter rule. It preserves the live `/households` rule and click-create permissions.
+- The helper sends **one genuine authenticated report** with the same checked-in sender and only then sets the schedule enable variable to `true`. All credentials are entered locally into Cloud Shell or generated there. Failed setup leaves scheduled sending off and reports to `mail-out.txt` without leaking credentials. Firebase and GitHub changes, if any, are recorded by the helper.
+- Do not claim daily automatic email is active until `mail-out.txt` explicitly states `PASS: DAILY EMAIL ENABLED` and receipt of the actual report is verified. GH Actions schedules are best effort, not an SLA for an exact minute.
+
 ## Email status
 
-The owner explicitly requested daily reports. A **one-time Gmail delivery test** was sent through the connected Gmail account on October 15, 2026; it contains no fabricated statistics. The proposed GitHub Actions scheduled sender is fail-closed, uses a separate Firebase read-only Email/Password reporter and personal Gmail SMTP app password, and targets the previous Toronto day. Automatic reports still require the reporter account, Firebase rule UID and GitHub Actions secrets/variable; do not claim recurring reports are active without those credentials and a received sample report.
+The owner explicitly requested daily reports. A **one-time Gmail delivery test** was sent through the connected Gmail account on October 15, 2026; it contains no fabricated statistics. The proposed GitHub Actions scheduled sender is fail-closed, uses a separate Firebase read-only Email/Password reporter and personal Gmail SMTP app password, and targets the previous Toronto day. The one-step Cloud Shell activation can provision the missing reporter identity, rules and Actions credentials locally. Do not claim recurring reports are active without a successful activation report and a received genuine data summary.
 
 ## GitHub Pages recovery, 15 October 2026
 
