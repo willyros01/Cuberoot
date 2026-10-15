@@ -47,6 +47,12 @@ Firestore Spark has a shared-project limit of 20,000 writes/day, 50,000 reads/da
 - Firebase App Check metrics: https://firebase.google.com/docs/app-check/monitor-metrics
 - Firebase security rules: https://firebase.google.com/docs/firestore/security/get-started
 - Firebase Spark pricing/quota: https://firebase.google.com/docs/projects/billing/firebase-pricing-plans
+## Owner UID verification — available on live GitHub Pages (NOT the counter)
+
+A temporary, isolated page was added under `/cockpit/owner-check.html` on Cuberoot `main` (2026-10-15). It imports **Firebase Authentication only**, has no Firestore SDK or write operations, and initializes the app using **in-memory-only** auth persistence. The owner opens the link directly in Safari, taps *Sign in with Google*, and copies the resulting **Firebase Auth UID**. The page signs out immediately after obtaining the UID; never share OAuth tokens, passwords or credentials. This UID is not verified until the owner completes Google login. The test page must be removed after its use. Browser/Pages behavior must be verified independently; commits alone do not prove accessibility.
+
+The public download counter is STILL DISABLED (`assets/js/downloads-config.js` endpoint empty), and the Firebase rules have not changed. Do not merge prep into main or activate counting just because the owner UID has been collected.
+
 ## Daily Gmail summary — STAGED, DISABLED
 
 Owner request (2026-10-15): deliver a private cockpit summary to the owner's Gmail **each day**. The implementation lives only in this preparation branch:
