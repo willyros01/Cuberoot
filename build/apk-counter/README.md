@@ -61,6 +61,16 @@ The public download counter is STILL DISABLED (`assets/js/downloads-config.js` e
 - `allow create: if false`, `allow update, delete: if false` and the existing broad `/households` rule are unchanged; **nothing here was deployed to Firestore**.
 - After the UID is checked, run Firebase Local Emulator Suite rule tests against the complete fetched rule source before any live deployment. Keep the live counter off while assessing Spark shared-quota abuse risk.
 
+## Accelerated read-only Firebase preflight
+
+- The owner's 2026-10-15 emulator security test was reported **PASS**. Do not repeat it without code changes.
+- Run the new **`build/apk-counter/af.txt`** using Google Cloud Shell: upload the file, then run `bash af.txt`. This **never writes to Firebase**, never changes the currently selected gcloud project, and requires no cloud project switching.
+- It verifies project ID **`split-it-44dea`** and project number **`153404639150`**, fetches the live active Firestore release and source rules, checks them against the exact household rule structure captured in the owner's first audit, and stops if anything drifted.
+- It backs up the live rule text verbatim as `af-backup-<UTC timestamp>.txt`, constructs a separate candidate `af-proposal-<UTC timestamp>.txt` with **owner-only read access and counter writes DENIED**, and produces concise `af-out.txt` with SHA-256 hashes and PASS/FAIL. Never apply the candidate automatically. No Cloud Functions, Cloudflare, billing or extra DB.
+- The prepared proposal deliberately excludes the **daily email reporter** until a separate UID is provisioned. This is a safe read-only staging gate, **not** a live counter deployment. The audited production `/households` rule must remain byte-for-byte unchanged.
+- After owner returns `af-out.txt`, prepare a separately approved, conditional one-command publish-and-verify script with full backup, no-op on drift, fail-closed checks and explicit owner confirmation. Do not silently deploy because preflight passed.
+- The technical blocker for live public recording remains: direct anonymous Firestore client writes can be spoofed or exhaust the same free quota as the existing split-it app. Passing the emulator test or deploying owner-only rules does not solve this. Review an abuse-limited ingestion option before enabling public collection.
+
 ## Local Firestore rules security tests — staged, run status pending
 
 - Branch `apk-counter-spark-prep` includes `build/apk-counter/test/rules.test.mjs`, `package.json`, `firebase.json`, and `.github/workflows/apk-counter-rules-test.yml`.
