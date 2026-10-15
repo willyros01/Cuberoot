@@ -1,7 +1,7 @@
 // STAGING TEMPLATE ONLY - DO NOT DEPLOY AS-IS.
 // IMPORTANT: household rule behavior preserved from the 2026-10-15 audit.
 // Safe default: public create OFF until go-live gates are verified.
-// The owner UID is deliberately unconfigured.
+// Owner Firebase Auth UID copied from the successful Google sign-in test; still verify user in Firebase Authentication -> Users.
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -10,7 +10,7 @@ service cloud.firestore {
     }
     match /cuberoot_apk_clicks_v1/{app}/events/{eventId} {
       function isOwner() {
-        return request.auth != null && request.auth.uid == 'REPLACE_WITH_OWNER_UID';
+        return request.auth != null && request.auth.uid == 'EJoRDnKQiGcDgw8RP1RRtkyei8K2';
       }
       // Dedicated non-owner account for daily read-only emailed summaries.
       function isMailReporter() {
