@@ -47,3 +47,30 @@ Firestore Spark has a shared-project limit of 20,000 writes/day, 50,000 reads/da
 - Firebase App Check metrics: https://firebase.google.com/docs/app-check/monitor-metrics
 - Firebase security rules: https://firebase.google.com/docs/firestore/security/get-started
 - Firebase Spark pricing/quota: https://firebase.google.com/docs/projects/billing/firebase-pricing-plans
+## Daily Gmail summary — STAGED, DISABLED
+
+Owner request (2026-10-15): deliver a private cockpit summary to the owner's Gmail **each day**. The implementation lives only in this preparation branch:
+- `build/apk-counter/daily-email.py`: read-only Firebase Authentication + Firestore REST queries, daily report generator, and Gmail SMTP sender.
+- `.github/workflows/apk-counter-daily-email.yml`: schedules the report at **9:17 AM America/Toronto** (GitHub's actual run can be late); `workflow_dispatch` is also available after safe deployment.
+- Reports the **previous Toronto calendar day**, aggregate recorded clicks per each of six apps, lifetime recorded clicks, plus up to 10 recent timestamped events. Labels clicks as estimates, not completed downloads or installations. The day range honors Eastern daylight saving time.
+- Fetches all six datasets successfully **before sending anything**. Errors result in no mail, not a partial or invented report. The workflow is not yet on `main`; even if merged, it requires `APK_COUNTER_DAILY_EMAIL_ENABLED=true` and the script independently checks that exact flag.
+- Uses a **separate Firebase Email/Password reporter user**, not the owner's Google account or a broad privileged service-account key. Add `REPLACE_WITH_MAIL_REPORTER_UID` to the new collection's read-only rules when deploying; never change the existing `/households` rule. The automated user has no write privileges in the proposed counter rules. Keep Anonymous sign-in disabled until separately approved.
+- The workflow sends via Gmail's documented SMTP **app password**, with email **From = To**: the same personal Gmail account, never an arbitrary recipient. If Gmail app passwords are unavailable (e.g. under Advanced Protection), stop and discuss a separate OAuth design; do not disable account security.
+- Email must be configured by the owner; do not paste credentials into a chat or commit credentials into the repository.
+
+### Manual future activation — not authorized yet
+
+1. First complete and verify the actual live click counter, owner UID, Firestore rules emulator tests, privacy disclosure, and APK-download failure-isolation tests. **Do not turn on scheduled email before live data has been verified.**
+2. In Firebase Authentication > Users, manually create a distinct Email/Password account for the **read-only daily reporter** (the provider is already enabled). Save its unique generated password privately; obtain its Firebase Auth UID (not a password). The security rules template now has a separate exact reporter UID placeholder. Test that this identity can read ONLY the counter data, cannot write the counter, and that unauthenticated reads fail. Never rely on an email string for permissions.
+3. In GitHub **Actions secrets** for Cuberoot (entered manually by the owner):
+   - `APK_COUNTER_REPORTER_EMAIL`: email of the dedicated Firebase reporter account
+   - `APK_COUNTER_REPORTER_PASSWORD`: dedicated Firebase reporter password
+   - `APK_COUNTER_GMAIL_ADDRESS`: owner's sending/receiving personal Gmail address
+   - `APK_COUNTER_GMAIL_APP_PASSWORD`: 16-character Gmail SMTP app password created with two-step verification
+4. In GitHub **Actions variables** for Cuberoot:
+   - `APK_COUNTER_FIREBASE_WEB_API_KEY`: public Firebase Web API key shown in `config.example.mjs`
+   - `APK_COUNTER_DAILY_EMAIL_ENABLED`: leave unset or `false` during preparation
+5. After security tests, review and selectively merge to `main`. Manually test a read-only summary with a controlled mailbox, check date boundaries, count consistency, and absence of credentials in Actions logs. Activate only with explicit owner approval by setting `APK_COUNTER_DAILY_EMAIL_ENABLED=true`. Stop sending immediately by setting it to `false` or removing it; no Firebase/website change is needed.
+6. GitHub Actions scheduling is best-effort, not a guaranteed exact-time or exactly-once delivery mechanism. Manual reruns can produce duplicates. Do not claim successful email delivery until a real message is received and verified by the owner.
+
+Email reporting is independent of APK files, their public links, Cuberoot Pages deployment, and publishing workflows. **No scheduled mail, live Firebase reads, or emails have occurred as part of this staging work.**
