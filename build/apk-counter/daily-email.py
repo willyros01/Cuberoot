@@ -196,7 +196,7 @@ def create_summary(token: str, now: dt.datetime | None = None) -> tuple[str, str
 
 def send_email(gmail_address: str, app_password: str, subject: str, body: str):
     # Deliver only to the sending Gmail account; never forward to arbitrary addresses.
-    if not re.fullmatch(r"[A-Za-z0-9._%+\\-]+@(?:gmail|googlemail)\\.com",
+    if not re.fullmatch(r"[A-Za-z0-9._%+-]+@(?:gmail|googlemail)\.com",
                         gmail_address, re.IGNORECASE):
         raise ValueError("Expected a valid personal Gmail address")
     secret = "".join(app_password.split())
