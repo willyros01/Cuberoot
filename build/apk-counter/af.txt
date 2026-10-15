@@ -99,7 +99,7 @@ try:
         raise ValueError("STOP: unexpected source structure or pre-existing counter")
     idx=closings[-2]
     proposal=live[:idx].rstrip()+"\n"+BLOCK+"\n"+live[idx:]
-    if normalized(live) not in normalized(proposal):
+    if normalized(proposal.replace(BLOCK,"",1)) != normalized(live):
         # Original must be preserved as a coherent prefix/suffix, not replaced.
         raise ValueError("STOP: cannot preserve existing rules exactly")
     if proposal.count("allow read, write: if true;")!=1 or "allow create, update, delete: if false;" not in proposal:
