@@ -1,5 +1,5 @@
-# Daily workflow is fail-closed and skips its job until APK_COUNTER_DAILY_EMAIL_ENABLED=true.
-# Do not set true until the separate read-only reporter and Gmail secrets are configured.
+# One private Gmail app password; APK click data is read-only from Firestore.
+# No Firebase reporter account or GitHub CLI authentication.
 name: Cuberoot APK Daily Gmail Summary
 
 on:
@@ -17,18 +17,18 @@ concurrency:
 
 jobs:
   daily-email:
-    if: ${{ github.repository == 'willyros01/Cuberoot' && vars.APK_COUNTER_DAILY_EMAIL_ENABLED == 'true' }}
+    if: ${{ github.repository == 'willyros01/Cuberoot' }}
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - name: Read source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Send yesterday's authenticated, complete summary to owner's Gmail
+      - name: Send yesterday's complete six-app summary
         env:
-          APK_COUNTER_DAILY_EMAIL_ENABLED: ${{ vars.APK_COUNTER_DAILY_EMAIL_ENABLED }}
-          APK_COUNTER_FIREBASE_WEB_API_KEY: ${{ vars.APK_COUNTER_FIREBASE_WEB_API_KEY }}
-          APK_COUNTER_REPORTER_EMAIL: ${{ secrets.APK_COUNTER_REPORTER_EMAIL }}
-          APK_COUNTER_REPORTER_PASSWORD: ${{ secrets.APK_COUNTER_REPORTER_PASSWORD }}
-          APK_COUNTER_GMAIL_ADDRESS: ${{ secrets.APK_COUNTER_GMAIL_ADDRESS }}
           APK_COUNTER_GMAIL_APP_PASSWORD: ${{ secrets.APK_COUNTER_GMAIL_APP_PASSWORD }}
-        run: python3 build/apk-counter/daily-email.py
+        run: |
+          if [ -z "$APK_COUNTER_GMAIL_APP_PASSWORD" ]; then
+            echo "Daily email not configured: add APK_COUNTER_GMAIL_APP_PASSWORD to Actions secrets. No report sent."
+            exit 0
+          fi
+          python3 build/apk-counter/daily-email.py
