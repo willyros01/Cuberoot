@@ -12,6 +12,10 @@ service cloud.firestore {
       function isOwner() {
         return request.auth != null && request.auth.uid == 'REPLACE_WITH_OWNER_UID';
       }
+      // Dedicated non-owner account for daily read-only emailed summaries.
+      function isMailReporter() {
+        return request.auth != null && request.auth.uid == 'REPLACE_WITH_MAIL_REPORTER_UID';
+      }
       function isAllowedApp() {
         return app in ['fidunio', 'scorecard', 'fairpot', 'wire',
                        'spendrecorder', 'cloud-files'];
@@ -30,7 +34,7 @@ service cloud.firestore {
             && request.resource.data.build.matches('^[0-9]{0,18}$')
             && eventId.matches('^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
       }
-      allow get, list: if isOwner();
+      allow get, list: if isOwner() || isMailReporter();
       // DO NOT open create until App Check's project-wide rollout is vetted.
       // Direct public writes can still be fabricated, even with validation.
       allow create: if false;
