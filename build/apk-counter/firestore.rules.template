@@ -1,0 +1,40 @@
+// STAGING TEMPLATE ONLY - DO NOT DEPLOY AS-IS.
+// IMPORTANT: household rule behavior preserved from the 2026-10-15 audit.
+// Safe default: public create OFF until go-live gates are verified.
+// The owner UID is deliberately unconfigured.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /households/{code}/{document=**} {
+      allow read, write: if true;
+    }
+    match /cuberoot_apk_clicks_v1/{app}/events/{eventId} {
+      function isOwner() {
+        return request.auth != null && request.auth.uid == 'REPLACE_WITH_OWNER_UID';
+      }
+      function isAllowedApp() {
+        return app in ['fidunio', 'scorecard', 'fairpot', 'wire',
+                       'spendrecorder', 'cloud-files'];
+      }
+      function validRecord() {
+        return request.resource.data.keys().hasOnly(['app', 'createdAt', 'timezone', 'build'])
+            && request.resource.data.keys().hasAll(['app', 'createdAt', 'timezone', 'build'])
+            && request.resource.data.app is string
+            && request.resource.data.app == app
+            && request.resource.data.createdAt is timestamp
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.timezone is string
+            && request.resource.data.timezone.size() <= 64
+            && request.resource.data.timezone.matches('^[A-Za-z0-9_+./-]{1,64}$')
+            && request.resource.data.build is string
+            && request.resource.data.build.matches('^[0-9]{0,18}$')
+            && eventId.matches('^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
+      }
+      allow get, list: if isOwner();
+      // DO NOT open create until App Check's project-wide rollout is vetted.
+      // Direct public writes can still be fabricated, even with validation.
+      allow create: if false;
+      allow update, delete: if false;
+    }
+  }
+}
