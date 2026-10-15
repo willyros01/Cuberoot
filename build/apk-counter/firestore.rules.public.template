@@ -1,0 +1,37 @@
+// STAGED candidate for low-volume public APK click recording.
+// The existing /households rule is intentionally unchanged.
+// Public reads, updates and deletes of click events are never allowed.
+// Any browser may CREATE a valid click; free-tier quota abuse remains possible.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /households/{code}/{document=**} {
+      allow read, write: if true;
+    }
+    match /cuberoot_apk_clicks_v1/{app}/events/{eventId} {
+      function isOwner() {
+        return request.auth != null && request.auth.uid == 'EJoRDnKQiGcDgw8RP1RRtkyei8K2';
+      }
+      function allowedApp() {
+        return app in ['fidunio','scorecard','fairpot','wire',
+                       'spendrecorder','cloud-files'];
+      }
+      function validRecord() {
+        return request.resource.data.keys().hasOnly(['app','createdAt','timezone','build'])
+          && request.resource.data.keys().hasAll(['app','createdAt','timezone','build'])
+          && request.resource.data.app is string
+          && request.resource.data.app == app
+          && request.resource.data.createdAt is timestamp
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.timezone is string
+          && request.resource.data.timezone.matches('^[A-Za-z0-9_+./-]{1,64}$')
+          && request.resource.data.build is string
+          && request.resource.data.build.matches('^[0-9]{0,18}$')
+          && eventId.matches('^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
+      }
+      allow get, list: if isOwner();
+      allow create: if allowedApp() && validRecord();
+      allow update, delete: if false;
+    }
+  }
+}
