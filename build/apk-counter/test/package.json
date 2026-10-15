@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "test": "node rules.test.mjs",
+    "test": "node rules.test.mjs && node public-rules.test.mjs",
     "test:emulator": "firebase emulators:exec --project demo-cuberoot-apk --only firestore \"npm run test\""
   },
   "devDependencies": {
