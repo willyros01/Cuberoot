@@ -3,7 +3,6 @@
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {getAuth, signInAnonymously, setPersistence, browserLocalPersistence} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {getFirestore, doc, setDoc, serverTimestamp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
-import {initializeAppCheck, ReCaptchaV3Provider} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js';
 import {counterConfig} from './config.example.mjs';
 
 const APPS=new Set(['fidunio','scorecard','fairpot','wire','spendrecorder','cloud-files']);
@@ -11,13 +10,12 @@ function ready() {
  const c=counterConfig;
  return c.enabled===true && c.projectId==='split-it-44dea' &&
  c.firebase?.projectId===c.projectId && !!c.firebase.apiKey &&
- !!c.firebase.appId && !!c.appCheckSiteKey;
+ !!c.firebase.appId;
 }
 let clientPromise;
 function client(){
  if(!clientPromise) clientPromise=(async()=>{
   const app=initializeApp(counterConfig.firebase,'cuberoot-apk-clicks');
-  initializeAppCheck(app,{provider:new ReCaptchaV3Provider(counterConfig.appCheckSiteKey),isTokenAutoRefreshEnabled:true});
   const auth=getAuth(app);
   await setPersistence(auth,browserLocalPersistence);
   if(!auth.currentUser||!auth.currentUser.isAnonymous)await signInAnonymously(auth);
