@@ -9,7 +9,19 @@ export function downloadsTab({getKey, saveKey}) {
   const key = el('input',{class:'input',type:'password',id:'apk-key',autocomplete:'off',spellcheck:'false','aria-label':'Download service admin key'});
   const status = el('p',{role:'status'});
   const connect = el('button',{class:'btn',type:'button',text:getKey()?'Replace connection key':'Connect download service'});
-  view.append(el('details',{},el('summary',{text:'Download service connection'}),el('p',{text:'Use the private key created during Cloudflare activation. It is saved only inside your encrypted admin vault.'}),el('label',{for:'apk-key',text:'Private download service key'}),key,connect));
+  const generate = el('button',{class:'btn btn-ghost',type:'button',text:'Generate key',onclick:()=>{
+    key.value = Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join('');
+    status.textContent='New key generated. Copy it into Cloudflare and keep a private backup, then connect the service.';
+  }});
+  const show = el('button',{class:'btn btn-ghost',type:'button',text:'Show key','aria-pressed':'false','aria-controls':'apk-key',onclick:()=>{
+    const visible = key.type === 'password';key.type=visible?'text':'password';show.textContent=visible?'Hide key':'Show key';show.setAttribute('aria-pressed',String(visible));
+  }});
+  const copy = el('button',{class:'btn btn-ghost',type:'button',text:'Copy key',onclick:async()=>{
+    if(!key.value){status.textContent='Generate or enter a key first.';return;}
+    try{await navigator.clipboard.writeText(key.value);status.textContent='Key copied. Paste it into the Cloudflare Secret value field.';}
+    catch{status.textContent='Copy was unavailable. Use Show key, select the value and copy it.';}
+  }});
+  view.append(el('details',{},el('summary',{text:'Download service connection'}),el('p',{text:'Use the private key shared with Cloudflare during activation. It is saved only inside your encrypted admin vault.'}),el('label',{for:'apk-key',text:'Private download service key'}),key,el('div',{class:'actions'},generate,show,copy,connect)));
   const dates = new Date();
   const to = new Date(dates); to.setUTCDate(to.getUTCDate()+1);
   dates.setUTCDate(dates.getUTCDate()-29);
