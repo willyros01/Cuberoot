@@ -26,9 +26,10 @@ try{
     popupRedirectResolver:browserPopupRedirectResolver
   });
   status.textContent='Ready. Tap Sign in with Google.';
-}catch{
+}catch(e){
   login.disabled=true;
-  status.textContent='Sign-in could not initialize. Please report this screen.';
+  const code=(typeof e?.code==='string' && /^auth\/[a-z0-9-]+$/.test(e.code))?e.code:'initialization-error';
+  status.textContent='Google sign-in could not initialize. Error code: '+code+'. Please send this code only.';
 }
 if(auth){
   login.addEventListener('click',async()=>{
@@ -46,16 +47,23 @@ if(auth){
       // UID is all this page needs; do not keep an active auth session.
       try{await signOut(auth)}catch{}
     }catch(e){
-      const reason=e?.code;
+      // Show the Firebase *code* only. Do not expose OAuth tokens,
+      // credentials, URLs, or raw exception messages on this page.
+      const reason=(typeof e?.code==='string' && /^auth\/[a-z0-9-]+$/.test(e.code))?e.code:'unknown';
       const msg={
-        'auth/popup-blocked':'Safari blocked the Google window. Open this page directly in Safari and allow the popup.',
-        'auth/unauthorized-domain':'Cuberoot domain is not authorized in Firebase. Please send a screenshot.',
-        'auth/operation-not-allowed':'Google sign-in is not enabled for this Firebase project.',
-        'auth/popup-closed-by-user':'Google sign-in was closed before completion. Try again.',
-        'auth/cancelled-popup-request':'A second sign-in request interrupted the first. Try again.',
-        'auth/network-request-failed':'Network error. Check connectivity, then try again.'
-      }[reason]||'Google sign-in did not finish. Please send a screenshot of this screen.';
-      status.textContent=msg;
+        'auth/popup-blocked':'The Google popup was blocked.',
+        'auth/unauthorized-domain':'This website is not authorized for Firebase Authentication.',
+        'auth/operation-not-allowed':'Google sign-in is disabled in Firebase.',
+        'auth/popup-closed-by-user':'The sign-in window closed before completion.',
+        'auth/cancelled-popup-request':'A second sign-in interrupted the first.',
+        'auth/network-request-failed':'The browser could not reach Firebase.',
+        'auth/operation-not-supported-in-this-environment':'This browser environment cannot support the popup.',
+        'auth/invalid-api-key':'Firebase rejected the public web API key.',
+        'auth/configuration-not-found':'Firebase Authentication configuration was not found.',
+        'auth/internal-error':'Firebase returned an internal sign-in error.',
+        'auth/web-storage-unsupported':'Browser storage is not available.'
+      }[reason]||'Please send this error code so we can diagnose it.';
+      status.textContent='Sign-in FAILED. Firebase error code: '+reason+'. '+msg;
       result.hidden=true;
       uid.textContent='';
     }finally{
