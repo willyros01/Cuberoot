@@ -1,0 +1,26 @@
+name: APK Counter Daily Email Dry Run
+
+on:
+  push:
+    branches: [apk-counter-spark-prep]
+    paths:
+      - 'build/apk-counter/daily-email.py'
+      - '.github/workflows/apk-counter-daily-email.yml'
+      - '.github/workflows/apk-counter-mail-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  disabled-mode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Validate disabled daily email without secrets
+        env:
+          APK_COUNTER_DAILY_EMAIL_ENABLED: 'false'
+        run: |
+          python3 -m py_compile build/apk-counter/daily-email.py
+          python3 build/apk-counter/daily-email.py
