@@ -14,6 +14,29 @@ export function cockpit({preview=false,load}) {
  root.append(el('div',{class:'dc-heading'},el('div',{},el('p',{class:'dc-kicker',text:'CUBEROOT / APK ACTIVITY'}),el('h1',{text:'Download cockpit'}),el('p',{class:'dc-subtitle',text:'Your apps. Their reach. One simple view.'})),el('span',{class:'dc-mode',text:preview?'DESIGN PREVIEW':'PRIVATE ADMIN'})));
  if(preview)root.append(el('div',{class:'dc-preview',role:'note'},el('strong',{text:'Sample data — counting is not active.'}),el('span',{text:' This preview opens without login. Real records stay in your admin area.'})));
  root.append(el('div',{class:'dc-toolbar'},el('label',{for:'dc-app'},'Show app',select),refresh),status,content);
+ // Render the complete, non-numeric layout synchronously. Never display zero as
+ // a substitute for a value that has not yet been retrieved from Firebase.
+ function showPending(){
+  const chosen=Object.entries(APPS).filter(([key])=>!select.value||key===select.value);
+  const summary=el('div',{class:'dc-totals'},
+   el('article',{class:'dc-total dc-total-primary'},
+    el('span',{text:'Total recorded clicks'}),el('strong',{text:'—'}),
+    el('span',{class:'dc-detail',text:'Waiting for Firebase'})),
+   el('article',{class:'dc-total'},
+    el('span',{text:'Today'}),el('strong',{text:'—'}),
+    el('span',{class:'dc-detail',text:'Calendar day in Toronto'})));
+  const apps=el('div',{class:'dc-apps'},chosen.map(([key,name])=>
+   el('article',{class:'dc-app','data-app':key},
+    el('span',{class:'dc-app-mark','aria-hidden':'true',text:name==='The Scorecard'?'S':name.slice(0,1)}),
+    el('div',{},el('h3',{text:name}),el('span',{text:'Loading…'})),
+    el('strong',{text:'—'}))));
+  content.replaceChildren(summary,
+   el('div',{class:'dc-section-heading'},el('h2',{text:'By app'}),el('span',{text:'Recorded clicks'})),
+   apps,
+   el('div',{class:'dc-section-heading'},el('h2',{text:'Recent downloads'}),el('span',{text:'Times in Toronto'})),
+   el('p',{class:'dc-empty',text:'Loading recent activity…'}));
+ }
+ showPending();
  function render(data){
   if(!data||!Array.isArray(data.events)||!data.counts)throw new Error('Download records are unavailable.');
   const slug=select.value;
@@ -37,9 +60,15 @@ export function cockpit({preview=false,load}) {
  async function update(){
   if(busy)return;busy=true;refresh.disabled=true;status.textContent='Loading…';
   try{const next=await load();if(!root.isConnected)return;data=next;render(data);status.textContent=preview?'Preview · sample activity':'Updated '+new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});}
-  catch(e){if(root.isConnected){content.replaceChildren(el('div',{class:'dc-empty'},el('h2',{text:'No live connection yet'}),el('p',{text:'Download counting needs its Firebase connection. Your APK download buttons continue to work normally.'})));status.textContent='Counting is not active.';}}
+  catch(e){if(root.isConnected){if(!data)showPending();status.textContent='Unable to load statistics. Tap Refresh to try again.';}}
   finally{busy=false;refresh.disabled=false;}
  }
- select.addEventListener('change',()=>{if(data)render(data)});refresh.addEventListener('click',update);
- setTimeout(update,0);return root;
+ select.addEventListener('change',()=>{if(data)render(data);else showPending();});
+ refresh.addEventListener('click',update);
+ // Schedule the query only AFTER the browser has had a chance to paint the
+ // heading, totals placeholders and all six app cards.
+ const afterPaint=()=>setTimeout(()=>{if(root.isConnected)void update();},0);
+ if(typeof requestAnimationFrame==='function')requestAnimationFrame(afterPaint);
+ else setTimeout(afterPaint,0);
+ return root;
 }
