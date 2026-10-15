@@ -1,0 +1,50 @@
+name: APK Private Email One-Secret Tests
+on:
+  push:
+    branches: [apk-email-private-setup-test]
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Compile scripts and verify private reporter protocol
+        run: |
+          python3 -m py_compile build/apk-counter/daily-email.py build/apk-counter/activate-private-email.py
+          python3 - <<'PY'
+          import importlib.util, datetime as dt, json, os
+          from pathlib import Path
+          def load(name,path):
+            spec=importlib.util.spec_from_file_location(name,path)
+            m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+            return m
+          m=load('report','build/apk-counter/daily-email.py')
+          a=load('activate','build/apk-counter/activate-private-email.py')
+          assert a.RULESET_SHA=='9e9cb47886c728628bc7c3d11e4ece77d38b8a6df00607d33c9705267f02ecf1'
+          assert a.RELEASE=='projects/split-it-44dea/releases/cloud.firestore'
+          assert a.SECRET_URL.endswith('/settings/secrets/actions/new')
+          assert m.GMAIL_SENDER=='willyros01@gmail.com'
+          assert m.PUBLIC_FIREBASE_WEB_API_KEY==a.API_KEY
+          assert 'gh' not in a.shell.__code__.co_consts
+          assert len(m.APPS)==6
+          captured=[]
+          m.firebase_id_token=lambda k,e,p:'FAKE_TOKEN'
+          m.firestore_count=lambda app,t,start=None,end=None:2 if start else 5
+          m.firestore_recent=lambda app,t:[]
+          m.send_email=lambda *args: captured.append(args)
+          os.environ['APK_COUNTER_MAIL_CONFIG']=json.dumps({
+             'reporter_email':a.REPORTER_EMAIL,'reporter_password':'fake',
+             'gmail_app_password':'1234567890123456'})
+          m.main()
+          assert len(captured)==1
+          assert captured[0][0]=='willyros01@gmail.com'
+          assert 'Recorded clicks yesterday: 12' in captured[0][3]
+          assert 'All recorded clicks since tracking began: 30' in captured[0][3]
+          assert m.toronto_day_bounds(dt.datetime(2026,1,10,14,17,tzinfo=dt.timezone.utc))[1].hour==5
+          assert m.toronto_day_bounds(dt.datetime(2026,7,10,13,17,tzinfo=dt.timezone.utc))[1].hour==4
+          assert 'APK_COUNTER_MAIL_CONFIG' in Path('.github/workflows/apk-counter-daily-email.yml').read_text()
+          assert 'APK_COUNTER_REPORTER_PASSWORD' not in Path('.github/workflows/apk-counter-daily-email.yml').read_text()
+          print('PASS: read-only reporter, one secret, exact six-app totals, DST; no live email sent')
+          PY
