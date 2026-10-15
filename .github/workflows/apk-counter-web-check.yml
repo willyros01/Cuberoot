@@ -1,0 +1,60 @@
+name: APK Counter Web Integration Check
+
+on:
+  push:
+    branches: [apk-counter-spark-prep]
+    paths:
+      - 'assets/js/apk-firebase-*.js'
+      - 'assets/js/downloads-admin.js'
+      - 'assets/js/admin.js'
+      - 'index.html'
+      - 'admin/index.html'
+      - 'privacy.html'
+      - '.github/workflows/apk-counter-web-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Parse new and existing JavaScript
+        run: |
+          node --check assets/js/apk-firebase-report.js
+          node --check assets/js/apk-firebase-track.js
+          node --check assets/js/downloads-admin.js
+          node --check assets/js/admin.js
+          node --check assets/js/downloads-ui.js
+          node --check assets/js/downloads-track.js
+          node --check assets/js/home.js
+      - name: Static security and download independence checks
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          index=Path('index.html').read_text()
+          admin=Path('admin/index.html').read_text()
+          privacy=Path('privacy.html').read_text()
+          public=Path('assets/js/apk-firebase-track.js').read_text()
+          owner=Path('assets/js/apk-firebase-report.js').read_text()
+          assert 'assets/js/apk-firebase-track.js?v=1' in index
+          assert "https://firestore.googleapis.com" in index
+          assert "https://firestore.googleapis.com" in admin
+          assert "https://apis.google.com" in admin
+          assert 'counts' not in public or "setDoc" in public
+          assert "preventDefault(" not in public and "stopPropagation(" not in public
+          assert "window.location" not in public and "anchor.href =" not in public
+          assert 'a[download]' in public
+          assert 'This site does not use cookies, analytics or advertising, and it does not track you.' not in privacy
+          assert 'Firebase' in privacy and 'timezone' in privacy
+          assert 'inMemoryPersistence' in owner
+          assert 'signInWithPopup' in owner
+          assert "allow create" not in owner
+          print("PASS web integration, privacy and download isolation")
+          PY
