@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://www.gstatic.com; style-src 'unsafe-inline'; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://split-it-44dea.firebaseapp.com; frame-src https://split-it-44dea.firebaseapp.com https://accounts.google.com; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<title>Owner sign-in verification — Cuberoot</title>
+<style>
+:root{color-scheme:light}*{box-sizing:border-box}
+body{font:24px/1.5 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#173b35;background:#f3f5ee;margin:0;padding:24px}
+main{max-width:760px;margin:32px auto;background:#fffef9;border:2px solid #c9d5ce;border-radius:22px;padding:36px}
+h1{font-size:clamp(34px,5vw,52px);line-height:1.2;margin:0 0 20px}
+p{margin:14px 0 22px}button{font:inherit;background:#173b35;color:white;padding:18px 24px;border:0;border-radius:14px;min-height:64px;cursor:pointer}
+button:disabled{opacity:.6}button:focus-visible{outline:4px solid #ae6d0d;outline-offset:4px}
+strong{display:block}#uid{display:block;font:24px/1.5 ui-monospace,monospace;overflow-wrap:anywhere;margin:16px 0;padding:18px;background:#f3f5ee;border:1px solid #c9d5ce;border-radius:12px}
+#result[hidden],#copy[hidden]{display:none}#status{min-height:2.5em}
+small{font-size:19px}a{color:#173b35}nav{max-width:760px;margin:auto}
+@media(max-width:500px){main{padding:22px}body{padding:14px}}
+</style>
+<script type="module" src="owner-check.js?v=1"></script>
+</head>
+<body>
+<nav><a href="./">← Cockpit preview</a></nav>
+<main>
+<h1>Verify cockpit owner</h1>
+<p>Sign in with your Google account. This temporary page will display only your Firebase user ID for the private download cockpit.</p>
+<p><strong>No APK downloads, database reads, or database writes occur here.</strong></p>
+<button id="login" type="button">Sign in with Google</button>
+<p id="status" role="status" aria-live="polite">Ready. Open this page in Safari, outside ChatGPT.</p>
+<section id="result" hidden>
+<h2>Firebase user ID</h2>
+<output id="uid" aria-label="Firebase user ID"></output>
+<button id="copy" type="button">Copy user ID</button>
+<p><small>Your ID is not a password. Share only the ID, not any sign-in token or password.</small></p>
+</section>
+<p><small>This page uses a session held in memory only. Close the tab when finished.</small></p>
+</main>
+</body>
+</html>
