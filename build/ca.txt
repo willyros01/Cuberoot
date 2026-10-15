@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Cuberoot: read-only split-it Firebase audit. No deployment or resource changes.
+set -euo pipefail
+umask 077
+command -v gcloud >/dev/null || { echo 'Run this file in Google Cloud Shell.'; exit 1; }
+python3 - <<'PY'
+import datetime,json,pathlib,re,subprocess,urllib.request,urllib.error
+out=pathlib.Path('ca-out.txt')
+report={'purpose':'Read-only split-it audit for isolated Cuberoot download counting','at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'changes':'No cloud resources changed'}
+def run(args):return subprocess.check_output(args,text=True).strip()
+def norm(s):return re.sub('[^a-z0-9]','',s.lower())
+projects=json.loads(run(['gcloud','projects','list','--format=json']))
+matched=[p for p in projects if p.get('lifecycleState')=='ACTIVE' and (norm(p.get('name',''))=='splitit' or p.get('projectId')=='split-it')]
+if len(matched)!=1:
+ report['error']='Could not uniquely identify split-it. No project selected or modified.'
+ report['candidates']=[{'projectId':p.get('projectId'),'name':p.get('name')} for p in projects if 'split' in (p.get('name','')+' '+p.get('projectId','')).lower()]
+ out.write_text(json.dumps(report,indent=2)+'\n');print('Identification needs review. Return ca-out.txt.');raise SystemExit(1)
+p=matched[0];pid=p['projectId'];report['project']={k:p.get(k) for k in ('projectId','name','projectNumber')}
+subprocess.run(['gcloud','config','set','project',pid,'--quiet'],check=True,stdout=subprocess.DEVNULL)
+token=run(['gcloud','auth','print-access-token'])
+def get(url):
+ req=urllib.request.Request(url,headers={'Authorization':'Bearer '+token})
+ try:
+  with urllib.request.urlopen(req,timeout=45) as r:return json.load(r)
+ except urllib.error.HTTPError as e:
+  return {'httpStatus':e.code,'error':e.read().decode()[:1200]}
+report['databases']=get('https://firestore.googleapis.com/v1/projects/'+pid+'/databases')
+report['billing']=get('https://cloudbilling.googleapis.com/v1/projects/'+pid+'/billingInfo')
+for generation in ['v1','v2']:
+ report['functions_'+generation]=get('https://cloudfunctions.googleapis.com/'+generation+'/projects/'+pid+'/locations/-/functions')
+ # Existing function configuration may include private environment variables.
+ # Retain only inventory/location/runtime metadata, never variables or secret values.
+ functions=report['functions_'+generation].get('functions',[])
+ if functions:report['functions_'+generation]={'functions':[{'name':f.get('name'),'state':f.get('state') or f.get('status'),'runtime':f.get('runtime') or f.get('buildConfig',{}).get('runtime')} for f in functions]}
+release=get('https://firebaserules.googleapis.com/v1/projects/'+pid+'/releases/cloud.firestore')
+report['firestoreRelease']=release
+if release.get('rulesetName'):report['firestoreRules']=get('https://firebaserules.googleapis.com/v1/'+release['rulesetName'])
+out.write_text(json.dumps(report,indent=2)+'\n')
+print('READ-ONLY AUDIT COMPLETE')
+print('Project: '+pid)
+print('Return ca-out.txt. No functions, rules, databases or downloads were changed.')
+PY

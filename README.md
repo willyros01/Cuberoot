@@ -18,3 +18,7 @@ This repository hosts the Cuberoot Systems public site and selected signed Andro
 ## Documentation boundaries
 
 Each app’s current migration notes stay in its own repository and platform branch. This index is not a substitute for each branch's tests/README. No new repositories or cross-branch auto-merges; keep credentials/private signing files out of source and docs. Historical app records remain retained in their original branches.
+
+## APK cockpit — 15 October 2026
+
+The large-text no-login design preview is `/cockpit/`; its data is explicitly fictional. The same view appears in the unlocked Publish admin under APK downloads. The Firebase connection is not activated: `assets/js/downloads-config.js` has an empty endpoint, so no tracking requests occur. APK URLs, bytes, publishing and native download behavior remain unchanged. See `docs/APK-COCKPIT.md` for status and the remaining Firebase connection work. The earlier Cloudflare design is superseded and must not be activated.

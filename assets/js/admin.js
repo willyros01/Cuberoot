@@ -4,6 +4,7 @@ import { SITE } from './config.js?v=1.3.0';
 import { el, icon, hydrateIcons, formatDate, formatSize, connectionNotice } from './common.js?v=1.3.0';
 import { GitHubRepo } from './github.js?v=1.3.0';
 import * as V from './vault.js?v=1.3.0';
+import { downloadsTab } from './downloads-admin.js?v=2.0.0';
 
 hydrateIcons();
 const root = document.getElementById('admin-root');
@@ -433,10 +434,10 @@ function mainScreen() {
   document.getElementById('admin-tools').hidden = false;
   document.getElementById('gh-pill').hidden = !repo.token;
   if (!ui.app) ui.app = knownApps()[0] ? knownApps()[0].slug : '__new';
-  const tabs = [['docs', 'Documents'], ['readers', 'Readers'], ['settings', 'Settings']];
+  const tabs = [['docs', 'Documents'], ['readers', 'Readers'], ['downloads', 'APK downloads'], ['settings', 'Settings']];
   const tabBar = el('div', { class: 'tabs', role: 'tablist' }, tabs.map(([k, label]) =>
     el('button', { class: 'tab', type: 'button', role: 'tab', 'aria-selected': String(ui.tab === k), text: label, onclick: () => { ui.tab = k; flash(); mainScreen(); } })));
-  const body = ui.tab === 'docs' ? docsTab() : ui.tab === 'readers' ? readersTab() : settingsTab();
+  const body = ui.tab === 'docs' ? docsTab() : ui.tab === 'readers' ? readersTab() : ui.tab === 'downloads' ? downloadsTab({getKey: () => state?.downloadService?.key || ''}) : settingsTab();
   root.replaceChildren(
     el('div', { class: 'admin-head' },
       el('div', { class: 'row' },
