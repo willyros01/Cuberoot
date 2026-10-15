@@ -8,6 +8,5 @@ export const counterConfig = Object.freeze({
     authDomain: '',
     projectId: 'split-it-44dea',
     appId: ''
-  },
-  appCheckSiteKey: ''
+  }
 });
