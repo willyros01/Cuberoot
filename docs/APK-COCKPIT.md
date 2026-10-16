@@ -1,3 +1,14 @@
+## Google Apps Script no-password alternative (prepared, NOT deployed) — October 2026
+
+The user requires one complete, tested solution rather than a sequence of partial fixes. A **proposed** Google Apps Script implementation has been created and locally tested, but it **cannot honestly be called end-to-end verified or activated** without owner Google OAuth authorization and a live Firebase IAM query.
+
+- Proposed architecture: Apps Script `ScriptApp.getOAuthToken()` with explicit `https://www.googleapis.com/auth/datastore` OAuth scope, Firestore REST `runAggregationQuery` via existing Google IAM (not Firebase client security rules), and Google `MailApp.sendEmail`. The owner-only Firestore rules and working APK cockpit remain unchanged. No GitHub CLI, SMTP app password, dedicated Firebase Auth reporter, key file, Cloud Functions, Cloudflare, or paid billing.
+- A single `activateAndTest` script function will require user OAuth consent, aggregate actual previous-Toronto-day and lifetime click counts for all six apps, send a real email, and **only after a successful send** create one daily Google Apps Script clock trigger with `.atHour(9).nearMinute(17).everyDays(1).inTimezone('America/Toronto')`. The trigger time is approximate **+/-15 minutes** per Google's documentation; never claim exact minute.
+- Delivered source files in the ChatGPT workspace bundle `mail.zip`: `mail.gs`, `appsscript.json`, `INSTALL.txt`. Offline Node simulation **PASS**: syntax, manifest OAuth scopes, DST 23/25-hour Toronto calendar days, six-app aggregation, 12 query request bodies, simulated mail send and trigger installation, single-trigger idempotence, and fail-closed Firebase 403, missing/bad results, and MailApp errors.
+- The Apps Script browser code editor is reported difficult or unusable on iPads. **Do not instruct the owner to use Cloud Shell copy/paste or assume that the Apps Script mobile editor works**. One-time activation in a proper desktop browser may be necessary.
+- As of this documentation, there has been **NO live Apps Script deployment, OAuth owner authorization, actual Firestore query via Apps Script, Gmail email from Apps Script, or trigger registration**. Original GitHub Actions daily-email sender is disabled until owner secrets are configured. Do not represent either system as active, and avoid creating duplicate report schedules.
+
+
 # Simple APK cockpit
 
 Owner scope: GitHub + Firebase only. Cuberoot's current APK hosting, links, files and publisher remain unchanged. No Cloudflare Worker, routes, D1 database or geolocation service. The earlier PR #9 Cloudflare implementation is superseded.
