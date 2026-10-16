@@ -1,3 +1,16 @@
+## Live APK counts + daily Gmail — 15 October 2026
+
+Owner approved **public read-only access to APK click event records** on 15 October 2026. NOTE: raw click records therefore expose app/build, click timestamp, and browser-reported timezone; this privacy exposure was explicitly authorized. The owner executed a one-time Cloud Shell helper and supplied its verified PASS report. The helper said:
+
+- Project `split-it-44dea`; active ruleset `projects/split-it-44dea/rulesets/16e05720-96fa-4e6b-bbfc-a9fa4d6d899f`; proposal source SHA-256 `748011170639dfbc02ec1b6e5ff1114c1b626b0cf907a2c66b571e4a3ca04007`; backup `pub-backup-20261016-004937.txt`.
+- Status `PASS: PUBLIC READ + SIX COUNTS VERIFIED`. Existing `/households` rules and APK click-write rules were preserved **exactly** per owner output.
+- Actual Firestore counts for reporting date **2026-10-14 Toronto**: fidunio 0/1, scorecard 0/1, fairpot 0/2, wire 0/0, spendrecorder 0/0, cloud-files 0/0 (yesterday/lifetime respectively); total 0/4.
+- Cuberoot `main` includes `build/apk-counter/public-report.py`, which queries all twelve (six yesterday/six lifetime) public Firestore aggregate counts and validates every response. `.github/workflows/apk-counter-public-report.yml` runs this reporter **daily 08:17 Toronto**, publishing validated daily numbers to a *dedicated public GitHub issue* [#10](https://github.com/willyros01/Cuberoot/issues/10). It is not designed to reveal raw event records. Any bad/missing query fails closed, leaving existing report untouched. The existing password-based GitHub Actions email workflow was **not activated**.
+- The ChatGPT daily task **Cuberoot Daily APK Email** is scheduled for **09:17 Toronto**, consumes GitHub issue #10 after checking exact previous date, all six numeric rows, and totals, checks Gmail Sent for duplicates, and sends using the connected Gmail account. It MUST NOT send fake, incomplete, stale or link-only reports. The task was created and is enabled. No account/app passwords stored by Cuberoot.
+- The verified **first real-count email** was sent using the connected Gmail connector from/to `willyros01@gmail.com`; subject `Cuberoot APK clicks — 2026-10-14 (Toronto)`, Gmail confirmed Sent/Inbox message ID `1a142331ade9deef`; it contained the owner's actual Firestore-verified 0 yesterday/4 lifetime, with all six app rows. GitHub issue #10 was updated and read back successfully with the same owner-verified snapshot.
+- **Future daily automatic integration remains unproven until the next scheduled reporting run and actual email are observed.** GitHub Actions schedule is best-effort and may be delayed, causing ChatGPT daily task to refuse stale source data; this is safe failure, not a zero count. Verify first automatic 08:17 and 09:17 runs before claiming unattended delivery reliable.
+- Do not interpret any earlier private-reporter/App Script instructions below as current requirements; they were superseded by this approved public-read reporting flow.
+
 ## Approved six-app email path — owner Firebase activation pending (October 2026)
 
 Owner explicitly authorized public READ of six APK click-event collections, but **not any changes to existing household rules**. Event fields may include timestamps, timezone and build; this is a privacy trade-off the owner accepted to automate private email reporting.
