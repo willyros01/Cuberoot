@@ -271,7 +271,7 @@ function unlockScreen() {
   });
   const forgot = el('button', { class: 'link-btn', type: 'button', text: 'Forgot your passphrase? Use your recovery code', onclick: () => recoveryScreen() });
   root.replaceChildren(el('div', { class: 'center-page' },
-    el('div', { class: 'eyebrow', text: 'Admin · Willy only' }), el('h1', { text: 'Unlock Publish' }), connectionNotice(), form,
+    el('div', { class: 'eyebrow', text: 'Admin' }), el('h1', { text: 'Unlock Publish' }), connectionNotice(), form,
     el('p', {}, forgot),
     el('p', { class: 'hint', text: 'Your passphrase never leaves this device.' })));
   p.input.focus();
@@ -370,7 +370,7 @@ function recoveryScreen() {
     } finally { btn.disabled = false; note.hidden = true; }
   });
   root.replaceChildren(el('div', { class: 'center-page' },
-    el('div', { class: 'eyebrow', text: 'Admin · Willy only' }), el('h1', { text: 'Recover Publish' }), connectionNotice(), form,
+    el('div', { class: 'eyebrow', text: 'Admin' }), el('h1', { text: 'Recover Publish' }), connectionNotice(), form,
     el('p', {}, el('button', { class: 'link-btn', type: 'button', text: '← Back to the passphrase', onclick: () => unlockScreen() }))));
   code.input.focus();
 }
@@ -441,7 +441,7 @@ function mainScreen() {
   root.replaceChildren(
     el('div', { class: 'admin-head' },
       el('div', { class: 'row' },
-        el('div', {}, el('div', { class: 'eyebrow', text: 'Admin · Willy only' }), el('h1', { text: 'Publish' })),
+        el('div', {}, el('div', { class: 'eyebrow', text: 'Admin' }), el('h1', { text: 'Publish' })),
         el('a', { href: '../library.html', text: 'View the library as a reader →' })),
       ui.flash ? alertBox(ui.flash.kind, ui.flash.text) : null,
       tabBar),
