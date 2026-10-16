@@ -1,3 +1,11 @@
+## APK cockpit date range — October 2026
+
+The date-range control is available in Publish > APK downloads. Choose inclusive From and To dates in Toronto local time, then Apply dates. Clear dates restores the original Today and All-time screen. Filtering includes six per-app totals and the activity list, with All-time counts visible for comparison. The app dropdown and Refresh remain functional.
+
+Changed only Cuberoot cockpit JavaScript, cockpit CSS, and versioned imports. Existing downloads, email scheduling, Firestore policies, and unrelated app code were left unchanged.
+
+Offline tests passed: Toronto DST start/end, reversed and invalid dates, six-app Firestore period queries, Apply/Refresh/Clear interactions. The GitHub Pages deployment for commit 7d72d8dc7b590bf6cb0d0cb04ba0e58c653d0189 succeeded in run 38833015253. Actual Safari owner testing is still pending.
+
 ## Live APK counts + daily Gmail — 15 October 2026
 
 Owner approved **public read-only access to APK click event records** on 15 October 2026. NOTE: raw click records therefore expose app/build, click timestamp, and browser-reported timezone; this privacy exposure was explicitly authorized. The owner executed a one-time Cloud Shell helper and supplied its verified PASS report. The helper said:
