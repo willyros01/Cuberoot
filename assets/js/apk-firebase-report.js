@@ -4,6 +4,7 @@ import {initializeAuth,GoogleAuthProvider,signInWithPopup,inMemoryPersistence,br
   from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {getFirestore,collection,query,where,orderBy,limit,getCountFromServer,getDocs,Timestamp}
   from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
+import {torontoRange} from './apk-date-window.js?v=1';
 
 const firebase={
  apiKey:'AIzaSyD2ZzzJCOz786VqTMZHpgVG_-FOi-KYI78',
@@ -59,31 +60,44 @@ function startOfTorontoDay(now=new Date()){
  }
  throw new Error('Unable to determine Toronto reporting day.');
 }
-export async function loadOwnerReport(){
+export async function loadOwnerReport(range=null){
  const {auth,db}=setup();
  if(auth.currentUser?.uid!==OWNER_UID)throw new Error('Please sign in as the cockpit owner.');
- const since=Timestamp.fromDate(startOfTorontoDay());
- // Query all six apps concurrently instead of waiting for each app in turn.
- // Promise.all preserves APPS order and fails the whole report on any query error.
+ // No range = the original Today + lifetime view, unchanged.
+ // Selected dates use inclusive Toronto days, with an exclusive next-day
+ // boundary to handle 23/25-hour daylight-saving days correctly.
+ const selected=range?torontoRange(range.from,range.to):null;
+ const since=selected?null:Timestamp.fromDate(startOfTorontoDay());
  const results=await Promise.all(APPS.map(async app=>{
   const records=collection(db,'cuberoot_apk_clicks_v1',app,'events');
-  const [total,today,recent]=await Promise.all([
+  const period=selected
+   ?query(records,where('createdAt','>=',Timestamp.fromDate(selected.start)),
+           where('createdAt','<',Timestamp.fromDate(selected.end)))
+   :query(records,where('createdAt','>=',since));
+  const recent=selected
+   ?query(records,where('createdAt','>=',Timestamp.fromDate(selected.start)),
+           where('createdAt','<',Timestamp.fromDate(selected.end)),
+           orderBy('createdAt','desc'),limit(5))
+   :query(records,orderBy('createdAt','desc'),limit(5));
+  // No partial results. A failed query must not appear as zero.
+  const [allTime,periodCount,recentDocs]=await Promise.all([
    getCountFromServer(records),
-   getCountFromServer(query(records,where('createdAt','>=',since))),
-   getDocs(query(records,orderBy('createdAt','desc'),limit(5)))
+   getCountFromServer(period),
+   getDocs(recent)
   ]);
   const events=[];
-  for(const record of recent.docs){
+  for(const record of recentDocs.docs){
    const value=record.data();
    if(value.createdAt?.toDate){
     events.push({app,at:value.createdAt.toDate().toISOString(),timezone:typeof value.timezone==='string'?value.timezone:'Unknown'});
    }
   }
-  return {app,total:total.data().count,today:today.data().count,events};
+  return {app,total:allTime.data().count,period:periodCount.data().count,events};
  }));
  const counts={},events=[];
  for(const result of results){
-  counts[result.app]={total:result.total,today:result.today};
+  counts[result.app]={total:result.total};
+  counts[result.app][selected?'range':'today']=result.period;
   events.push(...result.events);
  }
  events.sort((a,b)=>b.at.localeCompare(a.at));
