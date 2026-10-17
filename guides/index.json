@@ -169,7 +169,7 @@
           "title": "Illustrated Quick Starter Guide - PDF",
           "ext": "pdf",
           "mime": "application/pdf",
-          "size": 58086,
+          "size": 40461,
           "date": "2026-10-17T13:00:00Z",
           "original": "marker-quick-starter.pdf",
           "path": "guides/the-marker/marker-quick-starter.pdf"
@@ -179,7 +179,7 @@
           "title": "Complete Illustrated User Guide - PDF",
           "ext": "pdf",
           "mime": "application/pdf",
-          "size": 83275,
+          "size": 91085,
           "date": "2026-10-17T13:00:00Z",
           "original": "marker-user-guide.pdf",
           "path": "guides/the-marker/marker-user-guide.pdf"
@@ -188,4 +188,3 @@
     }
   }
 }
-
