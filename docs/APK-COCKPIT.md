@@ -141,3 +141,9 @@ The owner explicitly requested daily reports. A **one-time Gmail delivery test**
 - GitHub Pages run #227 succeeded for main commit `5a0ccb4`, before the cockpit files were added at `b0a4a68`. The public `/cockpit/` URL subsequently displayed the site's 404 page while the root website worked.
 - Following restoration of GitHub account permissions, this documentation-only update requests a fresh branch-source Pages deployment from current `main`. It intentionally changes no website JavaScript, APK, download links, Firebase, DNS or Pages settings.
 - Deployment success and `/cockpit/` public accessibility must be verified separately; do not declare the preview live solely because this commit was accepted. The preview always shows fictional sample values until an audited Firebase backend is explicitly enabled.
+
+## The Marker added to the click counter — 17 October 2026
+
+- Owner ran `mkc.txt` in Cloud Shell: `PASS: MARKER ADDED + SEVEN COUNTS VERIFIED`. Project `split-it-44dea`; previous ruleset `projects/split-it-44dea/rulesets/16e05720-96fa-4e6b-bbfc-a9fa4d6d899f` (owner backup `mkc-backup-20261017-160804.txt`); new ruleset `projects/split-it-44dea/rulesets/ae8f2309-49d8-432b-a182-6274323c761b`. Only change: `marker` added to the allowed app list (one place); every other character verified identical before publishing.
+- Public counts read back for all seven apps (marker 0).
+- Website: `marker` added to the click tracker, the Publish cockpit and both reporters; the daily report now shows **seven** apps ("ALL SEVEN"). The ChatGPT email task must be updated by the owner to expect seven rows.
