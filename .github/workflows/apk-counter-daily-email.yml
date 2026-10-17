@@ -3,9 +3,8 @@
 name: Cuberoot APK Daily Gmail Summary
 
 on:
-  schedule:
-    - cron: '17 9 * * *'
-      timezone: 'America/Toronto'
+  # Legacy SMTP sender kept manual-only; no app password is configured.
+  # Automatic email delivery uses the scheduled ChatGPT Gmail task instead.
   workflow_dispatch:
 
 permissions:
