@@ -15,7 +15,7 @@ const firebase={
  appId:'1:153404639150:web:d3ad24b871ce0239a9aa3f'
 };
 const OWNER_UID='EJoRDnKQiGcDgw8RP1RRtkyei8K2';
-const APPS=['fidunio','scorecard','fairpot','wire','spendrecorder','cloud-files'];
+const APPS=['fidunio','scorecard','fairpot','wire','spendrecorder','cloud-files','marker'];
 let session;
 function setup(){
  if(session)return session;

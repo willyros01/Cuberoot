@@ -1,4 +1,4 @@
-const APPS = {fidunio:'FIDUNIO',scorecard:'The Scorecard',fairpot:'Fairpot',wire:'Wire',spendrecorder:'SpendRecorder','cloud-files':'Cloud Files'};
+const APPS = {fidunio:'FIDUNIO',scorecard:'The Scorecard',fairpot:'Fairpot',wire:'Wire',spendrecorder:'SpendRecorder','cloud-files':'Cloud Files',marker:'The Marker'};
 function el(tag, attrs={}, ...children) {
  const n=document.createElement(tag);
  for(const [k,v] of Object.entries(attrs)){if(k==='text')n.textContent=v;else if(k.startsWith('on'))n.addEventListener(k.slice(2),v);else n.setAttribute(k,v);}

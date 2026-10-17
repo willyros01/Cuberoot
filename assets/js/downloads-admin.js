@@ -1,17 +1,17 @@
-import {cockpit} from './downloads-ui.js?v=2.1.1';
+import {cockpit} from './downloads-ui.js?v=2.1.2';
 
 // Firebase's large SDK is intentionally NOT a static import. Only the
 // private sign-in prompt is visible before the owner is authenticated.
 let reportPromise;
 function reportModule(){
- if(!reportPromise)reportPromise=import('./apk-firebase-report.js?v=3').catch(error=>{
+ if(!reportPromise)reportPromise=import('./apk-firebase-report.js?v=4').catch(error=>{
   reportPromise=null;
   throw error;
  });
  return reportPromise;
 }
 
-const APPS=['FIDUNIO','The Scorecard','Fairpot','Wire','SpendRecorder','Cloud Files'];
+const APPS=['FIDUNIO','The Scorecard','Fairpot','Wire','SpendRecorder','Cloud Files','The Marker'];
 export function downloadsTab(){
  const root=document.createElement('section');
  root.className='dc';

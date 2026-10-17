@@ -12,7 +12,7 @@ const firebase={
  messagingSenderId:'153404639150',
  appId:'1:153404639150:web:d3ad24b871ce0239a9aa3f'
 };
-const allowed=new Set(['fidunio','scorecard','fairpot','wire','spendrecorder','cloud-files']);
+const allowed=new Set(['fidunio','scorecard','fairpot','wire','spendrecorder','cloud-files','marker']);
 let db;
 function database(){
  if(!db)db=getFirestore(initializeApp(firebase,'cuberoot-public-apk-clicks'));

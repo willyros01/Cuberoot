@@ -1,7 +1,7 @@
 // Independent of home.js and of the normal anchor download action.
 // Never cancel, redirect, await or retry a download click.
 import {DOWNLOADS_ENDPOINT} from './downloads-config.js?v=2.0.0';
-const allowed=new Set(['fidunio','scorecard','fairpot','wire','spendrecorder','cloud-files']);
+const allowed=new Set(['fidunio','scorecard','fairpot','wire','spendrecorder','cloud-files','marker']);
 if(DOWNLOADS_ENDPOINT) {
  document.addEventListener('click',event=>{
   try {

@@ -32,6 +32,7 @@ APPS = (
     ("wire", "Wire"),
     ("spendrecorder", "SpendRecorder"),
     ("cloud-files", "Cloud Files"),
+    ("marker", "The Marker"),
 )
 ROOT = f"projects/{PROJECT}/databases/(default)/documents"
 MAX_RECENT_PER_APP = 2
