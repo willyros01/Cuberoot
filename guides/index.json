@@ -150,7 +150,7 @@
           "ext": "html",
           "mime": "text/html",
           "size": 10242,
-          "date": "2026-10-17",
+          "date": "2026-10-17T13:00:00Z",
           "original": "index.html",
           "path": "marker/quick-start/index.html"
         },
@@ -160,7 +160,7 @@
           "ext": "html",
           "mime": "text/html",
           "size": 27100,
-          "date": "2026-10-17",
+          "date": "2026-10-17T13:00:00Z",
           "original": "index.html",
           "path": "marker/guide/index.html"
         },
@@ -170,7 +170,7 @@
           "ext": "pdf",
           "mime": "application/pdf",
           "size": 58086,
-          "date": "2026-10-17",
+          "date": "2026-10-17T13:00:00Z",
           "original": "marker-quick-starter.pdf",
           "path": "guides/the-marker/marker-quick-starter.pdf"
         },
@@ -180,7 +180,7 @@
           "ext": "pdf",
           "mime": "application/pdf",
           "size": 83275,
-          "date": "2026-10-17",
+          "date": "2026-10-17T13:00:00Z",
           "original": "marker-user-guide.pdf",
           "path": "guides/the-marker/marker-user-guide.pdf"
         }
@@ -188,3 +188,4 @@
     }
   }
 }
+
