@@ -140,6 +140,51 @@
           "path": "guides/spendrecorder/expense-ledger-user-guide.pdf"
         }
       ]
+    },
+    "the-marker": {
+      "name": "The Marker",
+      "docs": [
+        {
+          "id": "ee5e754ff102abad9a8d22308797a1bc",
+          "title": "Illustrated Quick Starter Guide - large print",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 10242,
+          "date": "2026-10-17",
+          "original": "index.html",
+          "path": "marker/quick-start/index.html"
+        },
+        {
+          "id": "ec9ce778e04ab48b64db51f0b2cd8c7b",
+          "title": "Complete Illustrated User Guide - large print",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 27100,
+          "date": "2026-10-17",
+          "original": "index.html",
+          "path": "marker/guide/index.html"
+        },
+        {
+          "id": "8aea2834e0b0712d4c35bda0311a6db5",
+          "title": "Illustrated Quick Starter Guide - PDF",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 58086,
+          "date": "2026-10-17",
+          "original": "marker-quick-starter.pdf",
+          "path": "guides/the-marker/marker-quick-starter.pdf"
+        },
+        {
+          "id": "e14a32b4066dacc8720c23a3b9aedc1a",
+          "title": "Complete Illustrated User Guide - PDF",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 83275,
+          "date": "2026-10-17",
+          "original": "marker-user-guide.pdf",
+          "path": "guides/the-marker/marker-user-guide.pdf"
+        }
+      ]
     }
   }
 }

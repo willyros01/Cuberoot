@@ -22,3 +22,9 @@ Each app’s current migration notes stay in its own repository and platform bra
 ## APK cockpit — 15 October 2026
 
 The large-text no-login design preview is `/cockpit/`; its data is explicitly fictional. The same view appears in the unlocked Publish admin under APK downloads. The Firebase connection is not activated: `assets/js/downloads-config.js` has an empty endpoint, so no tracking requests occur. APK URLs, bytes, publishing and native download behavior remain unchanged. See `docs/APK-COCKPIT.md` for status and the remaining Firebase connection work. The earlier Cloudflare design is superseded and must not be activated.
+
+## The Marker public launch documentation - 17 October 2026
+
+The Marker is listed after The Scorecard with its working web-app URL and companion/standalone positioning. Public illustrated large-print guides are at `marker/quick-start/` and `marker/guide/`, with downloadable PDFs in `guides/the-marker/` and four entries in `guides/index.json`. Both guides are based on `willyros01/marker` main commit `da488b4` (web 0.5.4). Illustrations reconstruct selected controls using fictional data.
+
+Coverage includes both account modes, courses and photo verification, guests and group golfers, games, both scoring layouts, corrections, totals, 18-hole posting eligibility, waiting/checking/posted/refused states, sharing, local history/deletion and troubleshooting. No native Marker release is advertised. Photo-reading availability depends on the service and allowance; this publication does not claim a new live photo test. App code, Scorecard code, Firebase, APK publishers and reporting remain untouched. Refresh these guides when the Marker interface changes.

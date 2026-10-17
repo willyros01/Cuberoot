@@ -29,6 +29,14 @@
       "availability": "Web app available · Public iPhone and iPad App Store release in preparation · Android test APK available"
     },
     {
+      "name": "The Marker",
+      "slug": "the-marker",
+      "icon": "flag",
+      "description": "Your hole-by-hole golf companion for one to four players. Use it with The Scorecard to select golfers from your groups and post eligible finished rounds, or use it on its own without an account to keep and share your scorecard. Choose saved courses, enter the club’s card by hand or read course details from a photo, then score each hole with simple, large controls.",
+      "url": "https://willyros01.github.io/marker/",
+      "availability": "Web app available · Works with or without a Scorecard account"
+    },
+    {
       "name": "Wire",
       "slug": "wire",
       "icon": "news",
