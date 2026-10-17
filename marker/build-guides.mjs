@@ -45,7 +45,7 @@ try {
   }
   const ixPath=path.join(root,"guides/index.json");
   const index=JSON.parse(await fs.readFile(ixPath,"utf8"));
-  for(const item of index["the-marker"].docs){
+  for(const item of index.apps["the-marker"].docs){
     if(item.ext!=="pdf")continue;
     const stat=await fs.stat(path.join(root,item.path));
     item.size=stat.size;
