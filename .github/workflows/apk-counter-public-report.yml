@@ -27,18 +27,18 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Offline tests - six apps, DST and fail closed
+      - name: Offline tests - seven apps, DST and fail closed
         run: |
           python3 -m py_compile build/apk-counter/public-report.py
           python3 build/apk-counter/public-report.py --self-test
 
   report:
-    if: github.event_name != 'push' && github.repository == 'willyros01/Cuberoot'
+    if: github.repository == 'willyros01/Cuberoot'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Read six real Firebase counts and update dedicated report issue
+      - name: Read seven real Firebase counts and update dedicated report issue
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 build/apk-counter/public-report.py
