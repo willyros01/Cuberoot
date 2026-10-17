@@ -5,8 +5,10 @@ on:
     paths:
       - 'build/apk-counter/public-report.py'
       - '.github/workflows/apk-counter-public-report.yml'
+  # Report just after Toronto midnight. GitHub can delay scheduled runs,
+  # so leave >9 hours before the 09:17 ChatGPT Gmail send.
   schedule:
-    - cron: '17 8 * * *'
+    - cron: '17 0 * * *'
       timezone: 'America/Toronto'
   workflow_dispatch:
 
