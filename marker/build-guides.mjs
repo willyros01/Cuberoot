@@ -32,7 +32,11 @@ try {
     const page=await browser.newPage({ viewport:{width:1280,height:920}, deviceScaleFactor:1 });
     await page.goto(pathToFileURL(path.join(root,filename)).href,{waitUntil:"load"});
     await page.emulateMedia({media:"print"});
-    await page.evaluate(async()=>{ await document.fonts.ready; await Promise.all([...document.images].map(x=>x.decode().catch(()=>{}))); });
+    await page.evaluate(async()=>{ await document.fonts.ready; 
+      // Eager-load images that would otherwise remain deferred below the viewport.
+      for (const img of document.images) img.loading = "eager";
+      await Promise.all([...document.images].map(x=>x.decode().catch(()=>{}))); 
+    });
     const output = filename.includes("quick-start")?
        "guides/the-marker/marker-quick-starter.pdf":"guides/the-marker/marker-user-guide.pdf";
     await page.pdf({path:path.join(root,output),format:"A4",printBackground:true,
