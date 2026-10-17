@@ -1,0 +1,45 @@
+name: Publish Marker Android APK
+
+# Every successful Marker Android build records logs/android/last-run.json on the marker ci-logs branch.
+# This workflow polls that verified result every 5 minutes and publishes only successful APKs.
+# Schedule is required because repository GitHub tokens cannot write to another repo.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-marker-apk.yml'
+      - 'build/publish-marker.sh'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cuberoot-marker-apk
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Verify Android SDK for signature verification
+        run: |
+          test -n "${ANDROID_HOME:-}"
+          test -d "$ANDROID_HOME/platforms"
+      - name: Publish latest successful Marker Android APK
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bash build/publish-marker.sh

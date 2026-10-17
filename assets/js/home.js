@@ -198,6 +198,32 @@ async function addFidunioDownload(box) {
   }
 }
 
+// The Marker: shown only when Cuberoot hosts the verified, permanently signed APK.
+async function addMarkerDownload(box) {
+  try {
+    const metaRes = await fetch('downloads/marker-build.json', { cache: 'no-store' });
+    if (!metaRes.ok) return;
+    const meta = await metaRes.json();
+    if (!Number.isSafeInteger(meta.run_id) || meta.run_id < 1 ||
+        !/^[a-f0-9]{64}$/.test(meta.apk_sha256 || '') || !/^[a-f0-9]{64}$/.test(meta.signer_sha256 || '')) return;
+    const url = 'downloads/marker.apk?build=' + meta.run_id;
+    const head = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+    if (!head.ok) return;
+    const row = [...box.querySelectorAll('.app-row')].find(node =>
+      node.querySelector('h3')?.textContent === 'The Marker');
+    if (!row) return;
+    const details = row.querySelector('h3')?.parentElement;
+    if (!details) return;
+    details.appendChild(el('div', { class: 'actions' },
+      el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'marker-' + meta.run_id + '.apk',
+        'aria-label': 'Download The Marker Android APK' },
+        el('span', { class: 'apk-small', text: 'Download' }),
+        el('span', { class: 'apk-large', text: 'Android APK' }) )));
+  } catch (_) {
+    // Never advertise an absent or unverified Marker APK.
+  }
+}
+
 async function loadApps() {
   const box = document.getElementById('app-list');
   try {
@@ -219,6 +245,7 @@ async function loadApps() {
     await addFairpotDownload(box);
     await addCloudFilesDownload(box);
     await addScorecardDownload(box);
+    await addMarkerDownload(box);
     await addSpendRecorderDownload(box);
     await addWireDownload(box);
   } catch (e) {
