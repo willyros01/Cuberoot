@@ -9,6 +9,7 @@ const root = process.cwd();
 const screenDir = path.join(root, "marker/assets/screens");
 const scenes = ["choose","signin","setup","course","manual","photo","verify","players","games",
                 "one","all","card","totals","post","status","share","history","help","menu"];
+// Rebuild after print sizing refinement.
 const guides = ["marker/quick-start/index.html", "marker/guide/index.html"];
 await fs.mkdir(screenDir, { recursive: true });
 const browser = await chromium.launch({ headless: true });
