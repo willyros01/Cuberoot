@@ -1,13 +1,13 @@
 {
   "app": "The Marker",
   "channel": "android-test",
-  "version": "0.6.0",
-  "source_sha": "dccf8246b9b3d4fb600d211f8222ccdb12560eba",
-  "run_id": 39100303360,
-  "artifact_id": 12125484407,
+  "version": "0.6.1",
+  "source_sha": "536b6cd4b11ae35971dd146e63813cfcb9decf7e",
+  "run_id": 39104888405,
+  "artifact_id": 12128505418,
   "origin": "github-actions-artifact",
-  "apk_sha256": "550af2020edda7e5f619217d115caa7d6c293894efe7bb637ba23582a4ba8390",
+  "apk_sha256": "a828b5fae13d35011091fe1931302c4a9579fec86bc6a44a301b194cfeceb87c",
   "signer_sha256": "0f0da069f2c8b2842beb4d242415d70069a6bb3137fc90a75e6d1619ad32deff",
-  "apk_bytes": 4281673,
-  "published_at": "2026-10-18T05:24:18.642Z"
+  "apk_bytes": 4283201,
+  "published_at": "2026-10-18T06:42:40.105Z"
 }
