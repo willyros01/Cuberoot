@@ -16,10 +16,11 @@ const browser = await chromium.launch({ headless: true });
 try {
   for (const scene of scenes) {
     const page = await browser.newPage({ viewport: { width: 430, height: 800 }, deviceScaleFactor: 2 });
+    const errors=[]; page.on("pageerror", error=>errors.push(error.message));
     const uri = pathToFileURL(path.join(root,"marker/screens/index.html")).href + "?view=" + scene;
     await page.goto(uri, { waitUntil: "load" });
     const result = await page.locator("#app").innerText();
-    if (!result.trim() || result.includes("could not start")) throw new Error("Fixture failed: " + scene);
+    if (!result.trim() || result.includes("could not start")) throw new Error("Fixture failed: " + scene+" "+errors.join("; "));
     await page.screenshot({ path:path.join(screenDir, scene+".png"), fullPage: true,
       animations: "disabled" });
     await page.close();

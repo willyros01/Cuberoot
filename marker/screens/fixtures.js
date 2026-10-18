@@ -1,3 +1,4 @@
+(()=>{
 // Documentation snapshot from willyros01/marker main 9b6cc89 (0.6.4).
 // No live service, sign-in, browser storage, or action listeners. Fictional fixtures only.
 const model=(()=>{
@@ -2592,3 +2593,5 @@ default:throw new Error('Unknown documentation view: '+view);
 }
 app.innerHTML=html;
 document.title='The Marker '+view+' - documentation example (0.6.4)';
+
+})();
