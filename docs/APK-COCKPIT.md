@@ -1,50 +1,61 @@
-## VERIFIED cron-job.org Cuberoot APK email trigger — October 18, 2026
+## Canonical cron-job.org APK email configuration — CONFIRMED October 18, 2026
 
-**Canonical trigger. Do not replace it with the GitHub Actions workflow-dispatch URL.**
-This is the verified production-style endpoint, using the same repository-dispatch
-method as the working Wire news cron job:
+**This section supersedes the earlier incorrect repository-dispatch URL and timing-race analysis.**
+The owner provided a screenshot of the **actual cloned cron-job.org job**, and GitHub run
+metadata/logs independently confirm the following configuration and successful trigger.
+Use this as the durable canonical reference; **do not substitute a different endpoint**:
 
-- **URL:** `https://api.github.com/repos/willyros01/Cuberoot/dispatches`
-- **Method:** `POST`
-- **JSON body:** `{"event_type":"apk-email"}`
-- **Headers:** `Accept: application/vnd.github+json`, `Content-Type: application/json`,
-  `Authorization: Bearer <existing private GitHub fine-grained token>`.
-  The GitHub API version header `X-GitHub-Api-Version: 2022-11-28` is optional/consistent
-  with the working Wire job. Never write the actual PAT in this document.
-- **Schedule:** Every day **09:17 America/Toronto**, cron expression `17 9 * * *`,
-  with the job's **own** timezone set to `America/Toronto`. The daily email counts
-  events from *previous day's* 09:17 to *current day's* 09:17 Toronto time,
-  exclusive at the ending boundary, including the prior afternoon and overnight.
-- **Token:** Existing GitHub fine-grained PAT named `wire-scheduler`, selected
-  repositories `willyros01/balita` **and** `willyros01/Cuberoot`, repository
-  permissions **Actions: Read and write** plus **Contents: Read and write**,
-  **Metadata: Read-only**. Do not regenerate or disclose the token.
-- **Workflow:** `.github/workflows/apk-counter-daily-email.yml` on `main`, event
-  `repository_dispatch` filtered for `apk-email`, with `verify` and `send` jobs.
-  The verified Resend sender and seven-app Firestore read-only counts are unchanged.
-- **HTTP 204 observed:** User's cron-job.org screenshot at **2026-10-18
-  18:11:22 UTC** shows the request was successfully accepted by GitHub, using
-  the canonical repository-dispatch URL. This proves API acceptance, **not**
-  a matching GitHub workflow run or email delivery.
-- **Root cause of the apparent missing run at 18:11:22 UTC:** The new
-  `repository_dispatch` listener was committed **four seconds later** at
-  **2026-10-18 18:11:26 UTC**, commit
-  `64a7abe98a62df6195e1af070f980996851e1601`. The GitHub workflow run
-  for that push began at 18:11:28 UTC. Thus the 204 was produced **before**
-  the event listener existed on `main`, so no corresponding
-  `repository_dispatch` workflow run appeared. This is a verified timing
-  race, not evidence that the URL or permissions are invalid.
-- **Current verification boundary:** GitHub source file and offline workflow
-  checks PASS; the original manually triggered Resend email with correct
-  seven-app 09:17-to-09:17 counts PASS. As of this note there is **no confirmed
-  post-commit cron-job.org `repository_dispatch` run** and **no proven unattended
-  09:17 email**. Keep job disabled until an external run after commit
-  `64a7abe98a62` shows `repository_dispatch`, both jobs pass, and delivery is
-  checked. A single controlled post-commit trigger is meaningful verification,
-  not a speculative change. Do not guess new URLs or add another token.
-- **User operating rule:** Diagnose from run timestamps, HTTP status, workflow
-  registration and exact request before changes. Do not enable knowingly
-  failing schedules or treat HTTP acceptance as full delivery confirmation.
+| Setting | Correct verified value |
+|---|---|
+| Cron job | `Cuberoot Daily APK Email` (clone of working Wire cron) |
+| **URL (CANONICAL)** | `https://api.github.com/repos/willyros01/Cuberoot/actions/workflows/386014186/dispatches` |
+| HTTP method | `POST` |
+| JSON request body | `{"ref":"main"}` |
+| Accept header | `application/vnd.github+json` |
+| Content-Type header | `application/json` |
+| Authorization | `Bearer <existing private fine-grained GitHub PAT>` (never disclose/store plaintext) |
+| Time zone | `America/Toronto` |
+| Frequency | Daily at 09:17 Toronto time (`17 9 * * *`) |
+| Cron account token name | Existing `wire-scheduler`, **not** an Actions repository secret |
+| Token access | Repositories `willyros01/balita` and `willyros01/Cuberoot`; Actions/Contents Read and write; Metadata Read-only |
+| GitHub event | `workflow_dispatch` |
+| GitHub workflow | `.github/workflows/apk-counter-daily-email.yml` on `main`, workflow ID `386014186` |
+| Expected GitHub API response | `HTTP 204 No Content` |
+
+**Proof of end-to-end GitHub trigger:**
+- Owner's cron-job.org TEST RUN screenshot at approximately **2026-10-18 14:11 Toronto**
+  showed `HTTP 204 No Content`. The owner later shared a screenshot of the exact saved
+  cron job's **numeric workflow URL** above. This establishes the correct configuration,
+  without inventing or guessing a URL.
+- GitHub Actions run **39153010746** was created **2026-10-18 18:11:21 UTC**
+  (`workflow_id=386014186`, `event=workflow_dispatch`, `main`, workflow
+  `Cuberoot APK Daily Email`). Both **verify** and **send** jobs completed **SUCCESS**
+  by 18:11:54 UTC: `https://github.com/willyros01/Cuberoot/actions/runs/39153010746`.
+- The successful send log confirmed `PASS: Resend accepted 2026-10-18 email
+  ID=01a15009-c1a7-78f0-8a96-e13cb82b6438`. This was the **same already
+  delivered email ID**, due to the sender's duplicate-protection key, so a second
+  distinct email was **not** expected. The corrected October 18 email had already
+  been confirmed in the owner's Gmail Inbox.
+- The earlier assistant conclusion that the accepted cron request did not
+  trigger a workflow because a `repository_dispatch` listener was committed four
+  seconds later was **incorrect**: an actual `workflow_dispatch` run exists at
+  18:11:21 UTC, preceding that later commit. **No missing-run defect was present
+  for the numeric workflow endpoint.** The assistant overlooked the matching run.
+- The unrelated `repository_dispatch` handler was added afterward and is
+  **not used by this working cron configuration**. Do not switch to
+  `https://api.github.com/repos/willyros01/Cuberoot/dispatches`, nor replace
+  the request body with `{"event_type":"apk-email"}`.
+- Owner's screenshot at approximately **14:17 Toronto** showed **Enable job ON**,
+  **Save responses in job history ON**, and daily **09:17** next-execution
+  preview. This establishes the visible editor state; **we cannot inspect whether
+  the final enabled state was saved in cron-job.org**. Do not assert unattended
+  delivery until the first actual scheduled 09:17 run is checked.
+- Counts: seven apps; continuous prior-day 09:17 through current-day 09:17
+  Toronto time (exclusive end), with cumulative totals frozen at cutoff.
+  The corrected count email with The Marker 9/9 was confirmed delivered.
+- Owner's explicit operating rule: **do evidence-based root-cause analysis
+  before changes; do not guess, retest blindly, or enable known-broken jobs**.
+  Reuse this verified canonical endpoint without requesting another token.
 
 ---
 
