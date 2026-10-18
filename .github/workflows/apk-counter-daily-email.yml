@@ -1,33 +1,42 @@
-# Original private Firestore read-only reporter. ONE encrypted GitHub secret.
-# No Cloud Shell GitHub CLI login or separate Actions enable variable.
-name: Cuberoot APK Daily Gmail Summary
+# cron-job.org sends GitHub workflow_dispatch. GitHub does not schedule emails.
+# Uses one Resend API key; from onboarding@resend.dev to owner's Resend-login email.
+name: Cuberoot APK Daily Email
 
 on:
-  # Legacy SMTP sender kept manual-only; no app password is configured.
-  # Automatic email delivery uses the scheduled ChatGPT Gmail task instead.
+  push:
+    paths:
+      - '.github/workflows/apk-counter-daily-email.yml'
+      - 'build/apk-counter/resend-daily.py'
+      - 'build/apk-counter/public-report.py'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: cuberoot-apk-daily-gmail
+  group: cuberoot-apk-email
   cancel-in-progress: false
 
 jobs:
-  daily-email:
-    if: ${{ github.repository == 'willyros01/Cuberoot' }}
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 5
     steps:
-      - name: Read source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Send authenticated daily click summary
-        env:
-          APK_COUNTER_MAIL_CONFIG: ${{ secrets.APK_COUNTER_MAIL_CONFIG }}
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Verify all seven apps, timezone and email send logic (offline)
         run: |
-          if [ -z "$APK_COUNTER_MAIL_CONFIG" ]; then
-            echo "Daily email not configured. Add APK_COUNTER_MAIL_CONFIG under repository Actions secrets."
-            exit 0
-          fi
-          python3 build/apk-counter/daily-email.py
+          python3 -m py_compile build/apk-counter/public-report.py build/apk-counter/resend-daily.py
+          python3 build/apk-counter/public-report.py --self-test
+          python3 build/apk-counter/resend-daily.py --self-test
+
+  send:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.repository == 'willyros01/Cuberoot' }}
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Send verified APK report via Resend
+        env:
+          CUBEROOT_RESEND_API_KEY: ${{ secrets.CUBEROOT_RESEND_API_KEY }}
+        run: python3 build/apk-counter/resend-daily.py
