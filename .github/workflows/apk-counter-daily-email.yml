@@ -1,8 +1,13 @@
-# cron-job.org triggers workflow_dispatch; no GitHub scheduling.
-# Gmail SMTP via a single 16-character app password secret; no Google Cloud project.
+# cron-job.org triggers workflow_dispatch. No GitHub scheduled trigger.
+# Gmail SMTP needs one 16-character app password secret, not a Cloud project.
 name: Cuberoot APK Daily Gmail Summary
 
 on:
+  push:
+    paths:
+      - '.github/workflows/apk-counter-daily-email.yml'
+      - 'build/apk-counter/smtp-daily.py'
+      - 'build/apk-counter/public-report.py'
   workflow_dispatch:
 
 permissions:
@@ -13,19 +18,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Read source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Verify seven-app counting and SMTP sender (offline)
+        run: |
+          python3 -m py_compile build/apk-counter/smtp-daily.py
+          python3 build/apk-counter/public-report.py --self-test
+          python3 build/apk-counter/smtp-daily.py --self-test
+
   daily-email:
-    if: ${{ github.repository == 'willyros01/Cuberoot' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.repository == 'willyros01/Cuberoot' }}
+    needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Read source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Verify seven-app counting and SMTP sender
-        run: |
-          python3 -m py_compile build/apk-counter/smtp-daily.py
-          python3 build/apk-counter/public-report.py --self-test
-          python3 build/apk-counter/smtp-daily.py --self-test
-      - name: Send verified daily email via Gmail SMTP
+      - name: Send verified seven-app report via Gmail SMTP
         env:
           CUBEROOT_GMAIL_APP_PASSWORD: ${{ secrets.CUBEROOT_GMAIL_APP_PASSWORD }}
         run: python3 build/apk-counter/smtp-daily.py
