@@ -21,7 +21,7 @@ try {
     await page.goto(uri, { waitUntil: "load" });
     const result = await page.locator("#app").innerText();
     if (!result.trim() || result.includes("could not start")) throw new Error("Fixture failed: " + scene+" "+errors.join("; "));
-    await page.screenshot({ path:path.join(screenDir, scene+".png"), fullPage: true,
+    await page.screenshot({ path:path.join(screenDir, scene+".png"), fullPage: !["manual","photo"].includes(scene),
       animations: "disabled" });
     await page.close();
   }

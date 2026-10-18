@@ -2569,7 +2569,7 @@ case 'choose':demoUser=null;current=null;html=screenStart();break;
 case 'start-member':current=null;S.mine={editable:[{hidden:false}],correctable:[]};html=screenStart();break;
 case 'signin':html=screenSignIn();break;
 case 'setup':html=screenSetup();break;
-case 'date':cal.open=true;cal.month='2026-10';html=screenSetup();break;
+case 'date':cal.open=true;cal.month='2026-10';html=top('Set up the round','Date')+'<main class=body>'+datePicker(S.setup.date)+'</main>';break;
 case 'course':html=screenCourse();break;
 case 'manual':case 'photo':S.cs.manual=manual;html=screenManualCourse();break;
 case 'verify':S.cs.manual=manual;S.cs.readings=[{course:course.name,holesRead:holes.map((_,i)=>i+1),parOut:36,parIn:36,tees:course.tees.map(t=>({...t,out:holes.slice(0,9).reduce((s,h)=>s+h.yards,0),in:holes.slice(9).reduce((s,h)=>s+h.yards,0),total:holes.reduce((s,h)=>s+h.yards,0)}))}];html=screenReview();break;

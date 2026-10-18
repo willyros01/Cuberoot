@@ -16,3 +16,17 @@
   .source-figure figcaption{font-size:14px}
   .chapter{break-before:page}
 }
+
+/* Print each illustrated lesson as a screen page followed by readable steps. */
+.print-steps{display:none}
+@media print{
+ .toc{break-before:page;font-size:17pt;line-height:1.8}
+ .toc a{display:block;font-size:17pt;margin:0 0 8px}
+ .tutorial{display:block!important}
+ .source-figure{width:100%;max-width:none;margin:0 auto;break-inside:avoid}
+ .source-figure .source-image{display:block;width:auto;height:auto;max-width:100%;max-height:650px;margin:0 auto;border-width:2px}
+ .source-figure figcaption{font-size:12pt;text-align:center}
+ .print-steps{display:block;break-before:page;font-size:26pt;line-height:1.2;margin:0 0 20px}
+ .tutorial ol{margin:0;padding-left:1.4em;orphans:3;widows:3}
+ .tutorial li{break-inside:avoid;orphans:3;widows:3}
+}
