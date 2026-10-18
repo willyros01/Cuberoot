@@ -30,7 +30,7 @@ jobs:
           python3 build/apk-counter/resend-daily.py --self-test
 
   send:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.repository == 'willyros01/Cuberoot' }}
+    if: ${{ github.repository == 'willyros01/Cuberoot' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[apk-email-test-once]'))) }}
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 10
