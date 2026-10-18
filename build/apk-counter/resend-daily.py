@@ -88,8 +88,9 @@ def send_email(api_key, subject, body, idempotency_key, pause=time.sleep):
                 except (ValueError, AttributeError):
                     code = None
                 if code == "invalid_idempotent_request":
-                    print("PASS: report for date was already accepted under this key")
-                    return "already-accepted"
+                    # The service reports a different body was previously
+                    # submitted with this key. Do NOT mark it as a success.
+                    raise RuntimeError("A report with this date key already exists with different content; check Resend delivery history") from None
                 if code == "concurrent_idempotent_requests" and attempt < 3:
                     pause(2 ** (attempt + 1))
                     continue
