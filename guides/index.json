@@ -149,8 +149,8 @@
           "title": "Illustrated Quick Starter Guide - large print",
           "ext": "html",
           "mime": "text/html",
-          "size": 10242,
-          "date": "2026-10-17T13:00:00Z",
+          "size": 16909,
+          "date": "2026-10-18T18:45:00Z",
           "original": "index.html",
           "path": "marker/quick-start/index.html"
         },
@@ -159,8 +159,8 @@
           "title": "Complete Illustrated User Guide - large print",
           "ext": "html",
           "mime": "text/html",
-          "size": 27100,
-          "date": "2026-10-17T13:00:00Z",
+          "size": 30359,
+          "date": "2026-10-18T18:45:00Z",
           "original": "index.html",
           "path": "marker/guide/index.html"
         },
@@ -169,8 +169,8 @@
           "title": "Illustrated Quick Starter Guide - PDF",
           "ext": "pdf",
           "mime": "application/pdf",
-          "size": 805902,
-          "date": "2026-10-17T13:00:00Z",
+          "size": 1366403,
+          "date": "2026-10-18T18:45:00Z",
           "original": "marker-quick-starter.pdf",
           "path": "guides/the-marker/marker-quick-starter.pdf"
         },
@@ -179,8 +179,8 @@
           "title": "Complete Illustrated User Guide - PDF",
           "ext": "pdf",
           "mime": "application/pdf",
-          "size": 1760773,
-          "date": "2026-10-17T13:00:00Z",
+          "size": 2895459,
+          "date": "2026-10-18T18:45:00Z",
           "original": "marker-user-guide.pdf",
           "path": "guides/the-marker/marker-user-guide.pdf"
         }
