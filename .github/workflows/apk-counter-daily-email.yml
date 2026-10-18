@@ -1,4 +1,5 @@
-# cron-job.org sends GitHub workflow_dispatch. GitHub does not schedule emails.
+# cron-job.org sends repository_dispatch, like the already-working Wire scheduler.
+# Manual workflow_dispatch remains available. GitHub does not schedule these emails.
 # Uses one Resend API key; from onboarding@resend.dev to owner's Resend-login email.
 name: Cuberoot APK Daily Email
 
@@ -9,6 +10,8 @@ on:
       - 'build/apk-counter/resend-daily.py'
       - 'build/apk-counter/public-report.py'
   workflow_dispatch:
+  repository_dispatch:
+    types: [apk-email]
 
 permissions:
   contents: read
@@ -30,7 +33,7 @@ jobs:
           python3 build/apk-counter/resend-daily.py --self-test
 
   send:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.repository == 'willyros01/Cuberoot' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' || (github.event_name == 'repository_dispatch' && github.event.action == 'apk-email')) && github.repository == 'willyros01/Cuberoot' }}
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 10
