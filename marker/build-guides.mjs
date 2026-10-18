@@ -8,8 +8,8 @@ import { pathToFileURL } from "node:url";
 const root = process.cwd();
 const screenDir = path.join(root, "marker/assets/screens");
 const scenes = ["choose","signin","setup","course","manual","photo","verify","players","games",
-                "one","all","card","totals","post","status","share","history","help","menu"];
-// Rebuild after print sizing refinement.
+                "one","all","typed","card","fixing","date","corrections","correct","repost","start-member","totals","post","status","share","history","help","menu"];
+// Source snapshot: Marker 0.6.4, main 9b6cc89; refreshed 18 October 2026.
 const guides = ["marker/quick-start/index.html", "marker/guide/index.html"];
 await fs.mkdir(screenDir, { recursive: true });
 const browser = await chromium.launch({ headless: true });
@@ -20,7 +20,7 @@ try {
     await page.goto(uri, { waitUntil: "load" });
     const result = await page.locator("#app").innerText();
     if (!result.trim() || result.includes("could not start")) throw new Error("Fixture failed: " + scene);
-    await page.screenshot({ path:path.join(screenDir, scene+".png"), fullPage: false,
+    await page.screenshot({ path:path.join(screenDir, scene+".png"), fullPage: true,
       animations: "disabled" });
     await page.close();
   }
@@ -29,6 +29,7 @@ try {
     // Static images are generated from the actual Marker stylesheet, not by AI.
     html = html.replace(/<iframe class="source-screen"[^>]*src="\.\.\/screens\/\?view=([^"]+)"[^>]*><\/iframe>/g,
       (_,view) => '<a href="../screens/?view='+view+'" target="_blank" rel="noopener"><img class="source-image" loading="lazy" src="../assets/screens/'+view+'.png" alt="The Marker '+view+' screen — source-matched interface"></a>');
+    html = html.replace(/(assets\/screens\/[^"?]+\.png)(?:\?v=[^" ]+)?/g, "$1?v=0.6.4");
     await fs.writeFile(path.join(root,filename),html);
     const page=await browser.newPage({ viewport:{width:1280,height:920}, deviceScaleFactor:1 });
     await page.goto(pathToFileURL(path.join(root,filename)).href,{waitUntil:"load"});
@@ -47,9 +48,10 @@ try {
   const ixPath=path.join(root,"guides/index.json");
   const index=JSON.parse(await fs.readFile(ixPath,"utf8"));
   for(const item of index.apps["the-marker"].docs){
-    if(item.ext!=="pdf")continue;
+
     const stat=await fs.stat(path.join(root,item.path));
     item.size=stat.size;
+    item.date="2026-10-18T18:45:00Z";
   }
   await fs.writeFile(ixPath,JSON.stringify(index,null,2)+"\n");
 } finally { await browser.close(); }
