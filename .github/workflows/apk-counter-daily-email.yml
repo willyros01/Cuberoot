@@ -1,6 +1,5 @@
 # cron-job.org sends GitHub workflow_dispatch. GitHub does not schedule emails.
 # Uses one Resend API key; from onboarding@resend.dev to owner's Resend-login email.
-# Temporary one-off diagnostic rerun; removed after verification.
 name: Cuberoot APK Daily Email
 
 on:
@@ -31,7 +30,7 @@ jobs:
           python3 build/apk-counter/resend-daily.py --self-test
 
   send:
-    if: ${{ github.repository == 'willyros01/Cuberoot' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[apk-email-test-once]'))) }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.repository == 'willyros01/Cuberoot' }}
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 10
