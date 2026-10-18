@@ -1,3 +1,53 @@
+## VERIFIED cron-job.org Cuberoot APK email trigger — October 18, 2026
+
+**Canonical trigger. Do not replace it with the GitHub Actions workflow-dispatch URL.**
+This is the verified production-style endpoint, using the same repository-dispatch
+method as the working Wire news cron job:
+
+- **URL:** `https://api.github.com/repos/willyros01/Cuberoot/dispatches`
+- **Method:** `POST`
+- **JSON body:** `{"event_type":"apk-email"}`
+- **Headers:** `Accept: application/vnd.github+json`, `Content-Type: application/json`,
+  `Authorization: Bearer <existing private GitHub fine-grained token>`.
+  The GitHub API version header `X-GitHub-Api-Version: 2022-11-28` is optional/consistent
+  with the working Wire job. Never write the actual PAT in this document.
+- **Schedule:** Every day **09:17 America/Toronto**, cron expression `17 9 * * *`,
+  with the job's **own** timezone set to `America/Toronto`. The daily email counts
+  events from *previous day's* 09:17 to *current day's* 09:17 Toronto time,
+  exclusive at the ending boundary, including the prior afternoon and overnight.
+- **Token:** Existing GitHub fine-grained PAT named `wire-scheduler`, selected
+  repositories `willyros01/balita` **and** `willyros01/Cuberoot`, repository
+  permissions **Actions: Read and write** plus **Contents: Read and write**,
+  **Metadata: Read-only**. Do not regenerate or disclose the token.
+- **Workflow:** `.github/workflows/apk-counter-daily-email.yml` on `main`, event
+  `repository_dispatch` filtered for `apk-email`, with `verify` and `send` jobs.
+  The verified Resend sender and seven-app Firestore read-only counts are unchanged.
+- **HTTP 204 observed:** User's cron-job.org screenshot at **2026-10-18
+  18:11:22 UTC** shows the request was successfully accepted by GitHub, using
+  the canonical repository-dispatch URL. This proves API acceptance, **not**
+  a matching GitHub workflow run or email delivery.
+- **Root cause of the apparent missing run at 18:11:22 UTC:** The new
+  `repository_dispatch` listener was committed **four seconds later** at
+  **2026-10-18 18:11:26 UTC**, commit
+  `64a7abe98a62df6195e1af070f980996851e1601`. The GitHub workflow run
+  for that push began at 18:11:28 UTC. Thus the 204 was produced **before**
+  the event listener existed on `main`, so no corresponding
+  `repository_dispatch` workflow run appeared. This is a verified timing
+  race, not evidence that the URL or permissions are invalid.
+- **Current verification boundary:** GitHub source file and offline workflow
+  checks PASS; the original manually triggered Resend email with correct
+  seven-app 09:17-to-09:17 counts PASS. As of this note there is **no confirmed
+  post-commit cron-job.org `repository_dispatch` run** and **no proven unattended
+  09:17 email**. Keep job disabled until an external run after commit
+  `64a7abe98a62` shows `repository_dispatch`, both jobs pass, and delivery is
+  checked. A single controlled post-commit trigger is meaningful verification,
+  not a speculative change. Do not guess new URLs or add another token.
+- **User operating rule:** Diagnose from run timestamps, HTTP status, workflow
+  registration and exact request before changes. Do not enable knowingly
+  failing schedules or treat HTTP acceptance as full delivery confirmation.
+
+---
+
 ## Daily email missed runs — October 17, 2026
 
 - Owner reported **no unattended Gmail messages** from daily APK summary since original one-time test. Gmail Sent confirmed just the original Oct 14 test before repair.
