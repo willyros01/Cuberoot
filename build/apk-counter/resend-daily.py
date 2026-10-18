@@ -96,7 +96,17 @@ def send_email(api_key, subject, body, idempotency_key, pause=time.sleep):
                     continue
                 raise RuntimeError("Resend returned conflict; verify existing delivery") from None
             if exc.code not in (408, 425, 429, 500, 502, 503, 504):
-                raise RuntimeError("Resend rejected request: HTTP " + str(exc.code)) from None
+                # Show only the provider's short public error category/message.
+                # Never log the Authorization header or secret.
+                details = ""
+                try:
+                    error_data = json.loads(exc.read(4096))
+                    category = str(error_data.get("name", ""))[:80]
+                    message = str(error_data.get("message", ""))[:240]
+                    details = (" (" + category + ": " + message + ")") if category or message else ""
+                except (ValueError, AttributeError, TypeError):
+                    pass
+                raise RuntimeError("Resend rejected request: HTTP " + str(exc.code) + details) from None
             last_error = "Resend temporarily unavailable: HTTP " + str(exc.code)
         except (urllib.error.URLError, TimeoutError):
             last_error = "Resend connection timeout"
