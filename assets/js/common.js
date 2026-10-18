@@ -24,6 +24,7 @@ export const ICONS = {
   fidunio: '<polygon points="12,2 21,7 21,17 12,22 3,17 3,7"/><path d="M12 22V12M21 7l-9 5-9-5"/>',
   split: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18M12 12l7-5"/>',
   flag: '<path d="M7 21V3"/><path d="M7 4h11l-2.5 4L18 12H7"/><path d="M4 21h8"/>',
+  scorecard: '<rect x="5" y="2.5" width="14" height="19" rx="2"/><path d="M11 10V5l3.5 1.2L11 7.4"/><path d="M8 10.5h8M8.5 14h7M8.5 17.5h4.5"/>',
   news: '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h10M7 13h10M7 17h6"/>',
   receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
   chat: '<path d="M4 5h16v11H9l-5 4z"/><rect x="9" y="8.5" width="6" height="4.5" rx="1"/>',
