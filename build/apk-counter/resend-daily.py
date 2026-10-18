@@ -27,31 +27,45 @@ FROM_EMAIL = "Cuberoot APK Report <onboarding@resend.dev>"
 RESEND_URL = "https://api.resend.com/emails"
 
 
+def current_day_window(now=None):
+    """Today in Toronto, midnight through execution time (not yesterday)."""
+    now_utc = now or dt.datetime.now(dt.timezone.utc)
+    if now_utc.tzinfo is None:
+        raise ValueError("Timestamp must be timezone-aware")
+    now_utc = now_utc.astimezone(dt.timezone.utc)
+    local = now_utc.astimezone(counts.TZ)
+    day = local.date()
+    start = dt.datetime.combine(day, dt.time.min, tzinfo=counts.TZ).astimezone(dt.timezone.utc)
+    return day, start, now_utc, local
+
+
 def build_report(now=None):
-    day, start, end = counts.bounds(now)
+    day, start, end, local = current_day_window(now)
     if len(counts.APPS) != 7 or len({slug for slug, _ in counts.APPS}) != 7:
         raise ValueError("Seven unique applications required")
     lines = [
         "CUBEROOT APK DOWNLOAD REPORT",
-        "Reporting day: " + day.isoformat() + " (America/Toronto)",
+        "Reporting date: " + day.isoformat() + " (America/Toronto)",
+        "Period: TODAY SO FAR (midnight through " + local.strftime("%I:%M %p %Z") + ")",
         "",
-        f"{'APP':<27} {'YESTERDAY':>10} {'LIFETIME':>11}",
+        f"{'APP':<27} {'TODAY':>10} {'LIFETIME':>11}",
     ]
     day_total = lifetime_total = 0
     for slug, label in counts.APPS:
-        yesterday = counts.count(slug, start, end)
+        today = counts.count(slug, start, end)
         lifetime = counts.count(slug)
         if any(type(value) is not int or value < 0 or value > 2**53-1
-               for value in (yesterday, lifetime)) or yesterday > lifetime:
+               for value in (today, lifetime)) or today > lifetime:
             raise ValueError("Invalid count for " + slug)
-        day_total += yesterday
+        day_total += today
         lifetime_total += lifetime
-        lines.append(f"{label:<27} {yesterday:>10,} {lifetime:>11,}")
+        lines.append(f"{label:<27} {today:>10,} {lifetime:>11,}")
     if max(day_total, lifetime_total) > 2**53-1:
         raise ValueError("Totals exceed safe integer range")
     lines.extend([
         f"{'ALL SEVEN':<27} {day_total:>10,} {lifetime_total:>11,}",
         "",
+        "Today's count is partial: it covers clicks from midnight to report time.",
         "Recorded APK-link clicks, not confirmed downloads or installations.",
         "All-time counts are measured when this report is prepared.",
         "Source: Cuberoot / split-it-44dea Firebase public aggregates.",
@@ -121,9 +135,10 @@ def main():
     key = os.environ.get("CUBEROOT_RESEND_API_KEY", "").strip()
     if not key.startswith("re_"):
         raise ValueError("Missing or invalid CUBEROOT_RESEND_API_KEY GitHub secret")
-    date = counts.bounds()[0].isoformat()
+    now = dt.datetime.now(dt.timezone.utc)
+    date = current_day_window(now)[0].isoformat()
     try:
-        report_date, report_body = build_report()
+        report_date, report_body = build_report(now)
         if report_date != date:
             raise ValueError("Toronto date changed during report calculation")
     except Exception:
@@ -146,9 +161,16 @@ def main():
 def selftest():
     from unittest.mock import patch
     now = dt.datetime.fromisoformat("2026-10-18T13:30:00+00:00")
+    current, start, end, local = current_day_window(now)
+    assert current.isoformat() == "2026-10-18"
+    assert start == dt.datetime.fromisoformat("2026-10-18T04:00:00+00:00")
+    assert end == now and local.hour == 9
+    assert current_day_window(dt.datetime.fromisoformat("2026-11-01T15:00:00+00:00"))[1] == dt.datetime.fromisoformat("2026-11-01T04:00:00+00:00")
+    assert current_day_window(dt.datetime.fromisoformat("2026-03-08T15:00:00+00:00"))[1] == dt.datetime.fromisoformat("2026-03-08T05:00:00+00:00")
     with patch.object(counts, "count", side_effect=[2, 12] * 7) as calls:
         day, body = build_report(now)
-        assert day == "2026-10-17" and calls.call_count == 14
+        assert day == "2026-10-18" and calls.call_count == 14
+        assert "TODAY SO FAR" in body and "YESTERDAY" not in body
         assert body.count("\n") >= 14 and "ALL SEVEN" in body
         assert "14" in body and "84" in body
         assert all(label in body for _, label in counts.APPS)
@@ -170,7 +192,7 @@ def selftest():
     with patch("urllib.request.urlopen", return_value=MockResponse()) as request:
         assert send_email("re_test", "test", "body", "test-unique") == "accepted-email-id"
         assert request.call_args.args[0].get_header("Idempotency-key") == "test-unique"
-    print("PASS: seven apps / date / zero / totals / fail-closed / idempotency tests")
+    print("PASS: seven apps / same-day Toronto cutoff / DST / zero / totals / fail-closed / idempotency tests")
 
 
 if __name__ == "__main__":
