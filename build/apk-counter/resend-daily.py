@@ -28,14 +28,17 @@ RESEND_URL = "https://api.resend.com/emails"
 
 
 def current_day_window(now=None):
-    """Toronto midnight through 09:17 AM, even if GitHub starts late."""
+    """Continuous reporting day: previous 09:17 to current 09:17 Toronto."""
     now_utc = now or dt.datetime.now(dt.timezone.utc)
     if now_utc.tzinfo is None:
         raise ValueError("Timestamp must be timezone-aware")
     now_utc = now_utc.astimezone(dt.timezone.utc)
     local = now_utc.astimezone(counts.TZ)
     day = local.date()
-    start = dt.datetime.combine(day, dt.time.min, tzinfo=counts.TZ).astimezone(dt.timezone.utc)
+    # Daily windows abut exactly at the same Toronto wall-clock time;
+    # no afternoon, evening, or overnight click is ever omitted.
+    previous_day = day - dt.timedelta(days=1)
+    start = dt.datetime.combine(previous_day, dt.time(9, 17), tzinfo=counts.TZ).astimezone(dt.timezone.utc)
     scheduled_cutoff = dt.datetime.combine(day, dt.time(9, 17), tzinfo=counts.TZ)
     end = min(now_utc, scheduled_cutoff.astimezone(dt.timezone.utc))
     return day, start, end, end.astimezone(counts.TZ)
@@ -48,9 +51,9 @@ def build_report(now=None):
     lines = [
         "CUBEROOT APK DOWNLOAD REPORT",
         "Reporting date: " + day.isoformat() + " (America/Toronto)",
-        "Period: TODAY (12:00 AM to " + local.strftime("%I:%M %p %Z") + "; excludes clicks at/after cutoff)",
+        "Period: since yesterday 09:17 AM Toronto through " + local.strftime("%I:%M %p %Z") + " today",
         "",
-        f"{'APP':<27} {'TODAY':>10} {'LIFETIME':>11}",
+        f"{'APP':<27} {'SINCE LAST REPORT':>17} {'LIFETIME':>11}",
     ]
     day_total = lifetime_total = 0
     for slug, label in counts.APPS:
@@ -61,13 +64,14 @@ def build_report(now=None):
             raise ValueError("Invalid count for " + slug)
         day_total += today
         lifetime_total += lifetime
-        lines.append(f"{label:<27} {today:>10,} {lifetime:>11,}")
+        lines.append(f"{label:<27} {today:>17,} {lifetime:>11,}")
     if max(day_total, lifetime_total) > 2**53-1:
         raise ValueError("Totals exceed safe integer range")
     lines.extend([
-        f"{'ALL SEVEN':<27} {day_total:>10,} {lifetime_total:>11,}",
+        f"{'ALL SEVEN':<27} {day_total:>17,} {lifetime_total:>11,}",
         "",
-        "Today's count is partial: midnight through the 09:17 AM Toronto cutoff.",
+        "Each report covers the full reporting day ending at 09:17 AM Toronto.",
+        "The count window includes the previous afternoon, evening, and overnight.",
         "Recorded APK-link clicks, not confirmed downloads or installations.",
         "Lifetime counts are also frozen at the 09:17 AM Toronto cutoff.",
         "Source: Cuberoot / split-it-44dea Firebase public aggregates.",
@@ -159,8 +163,10 @@ def main():
         except Exception as exc:
             print("Failure-status email also failed: " + type(exc).__name__, file=sys.stderr)
         raise RuntimeError("Verified report could not be created") from None
+    # V2 is deliberately separate from the previously delivered incorrect
+    # same-day-only email; each corrected reporting day is still duplicate-safe.
     accepted = send_email(key, "Cuberoot APK clicks - " + date,
-                          report_body, "cuberoot-apk-daily-" + date)
+                          report_body, "cuberoot-apk-daily-v2-" + date)
     print("PASS: Resend accepted " + date + " email ID=" + accepted)
     print("API acceptance is not proof of final inbox delivery.")
 
@@ -170,25 +176,31 @@ def selftest():
     now = dt.datetime.fromisoformat("2026-10-18T13:30:00+00:00")
     current, start, end, local = current_day_window(now)
     assert current.isoformat() == "2026-10-18"
-    assert start == dt.datetime.fromisoformat("2026-10-18T04:00:00+00:00")
+    assert start == dt.datetime.fromisoformat("2026-10-17T13:17:00+00:00")
     assert end == dt.datetime.fromisoformat("2026-10-18T13:17:00+00:00")
     assert local.hour == 9 and local.minute == 17
     early = current_day_window(dt.datetime.fromisoformat("2026-10-18T13:00:00+00:00"))
     assert early[2] == dt.datetime.fromisoformat("2026-10-18T13:00:00+00:00")
+    # The previous day's 09:17 endpoint is exactly this day's start.
+    previous = current_day_window(dt.datetime.fromisoformat("2026-10-17T21:00:00+00:00"))
+    assert previous[2] == start
     late = current_day_window(dt.datetime.fromisoformat("2026-10-18T22:00:00+00:00"))
     assert late[2] == end
     fall = current_day_window(dt.datetime.fromisoformat("2026-11-01T15:00:00+00:00"))
-    assert fall[1] == dt.datetime.fromisoformat("2026-11-01T04:00:00+00:00")
+    assert fall[1] == dt.datetime.fromisoformat("2026-10-31T13:17:00+00:00")
     assert fall[2] == dt.datetime.fromisoformat("2026-11-01T14:17:00+00:00")
+    assert (fall[2] - fall[1]).total_seconds() == 25 * 3600
     spring = current_day_window(dt.datetime.fromisoformat("2026-03-08T15:00:00+00:00"))
-    assert spring[1] == dt.datetime.fromisoformat("2026-03-08T05:00:00+00:00")
+    assert spring[1] == dt.datetime.fromisoformat("2026-03-07T14:17:00+00:00")
     assert spring[2] == dt.datetime.fromisoformat("2026-03-08T13:17:00+00:00")
+    assert (spring[2] - spring[1]).total_seconds() == 23 * 3600
     with patch.object(counts, "count", side_effect=[2, 12] * 7) as calls:
         day, body = build_report(now)
         assert day == "2026-10-18" and calls.call_count == 14
-        assert "TODAY (12:00 AM to 09:17 AM EDT" in body and "YESTERDAY" not in body
+        assert "since yesterday 09:17 AM Toronto through 09:17 AM EDT today" in body
         for call in calls.call_args_list:
-            assert call.args[-1] == end  # All yesterday/late-day events excluded
+            assert call.args[-1] == end
+        assert calls.call_args_list[0].args == ("fidunio", start, end)
         assert body.count("\n") >= 14 and "ALL SEVEN" in body
         assert "14" in body and "84" in body
         assert all(label in body for _, label in counts.APPS)
@@ -210,7 +222,7 @@ def selftest():
     with patch("urllib.request.urlopen", return_value=MockResponse()) as request:
         assert send_email("re_test", "test", "body", "test-unique") == "accepted-email-id"
         assert request.call_args.args[0].get_header("Idempotency-key") == "test-unique"
-    print("PASS: seven apps / same-day Toronto cutoff / DST / zero / totals / fail-closed / idempotency tests")
+    print("PASS: seven apps / continuous 09:17-to-09:17 Toronto day / DST / zero / totals / fail-closed / idempotency tests")
 
 
 if __name__ == "__main__":
