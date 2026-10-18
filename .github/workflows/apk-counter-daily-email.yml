@@ -1,5 +1,6 @@
 # cron-job.org sends GitHub workflow_dispatch. GitHub does not schedule emails.
 # Uses one Resend API key; from onboarding@resend.dev to owner's Resend-login email.
+# Temporary one-off diagnostic rerun; removed after verification.
 name: Cuberoot APK Daily Email
 
 on:
