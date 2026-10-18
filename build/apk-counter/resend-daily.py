@@ -69,6 +69,7 @@ def send_email(api_key, subject, body, idempotency_key, pause=time.sleep):
                 "Authorization": "Bearer " + api_key,
                 "Content-Type": "application/json",
                 "Accept": "application/json",
+                "User-Agent": "Cuberoot-APK-Reporter/1.0",
                 "Idempotency-Key": idempotency_key,
             })
         try:
