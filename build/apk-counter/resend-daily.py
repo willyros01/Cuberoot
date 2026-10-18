@@ -28,7 +28,7 @@ RESEND_URL = "https://api.resend.com/emails"
 
 
 def current_day_window(now=None):
-    """Today in Toronto, midnight through execution time (not yesterday)."""
+    """Toronto midnight through 09:17 AM, even if GitHub starts late."""
     now_utc = now or dt.datetime.now(dt.timezone.utc)
     if now_utc.tzinfo is None:
         raise ValueError("Timestamp must be timezone-aware")
@@ -36,7 +36,9 @@ def current_day_window(now=None):
     local = now_utc.astimezone(counts.TZ)
     day = local.date()
     start = dt.datetime.combine(day, dt.time.min, tzinfo=counts.TZ).astimezone(dt.timezone.utc)
-    return day, start, now_utc, local
+    scheduled_cutoff = dt.datetime.combine(day, dt.time(9, 17), tzinfo=counts.TZ)
+    end = min(now_utc, scheduled_cutoff.astimezone(dt.timezone.utc))
+    return day, start, end, end.astimezone(counts.TZ)
 
 
 def build_report(now=None):
@@ -46,14 +48,14 @@ def build_report(now=None):
     lines = [
         "CUBEROOT APK DOWNLOAD REPORT",
         "Reporting date: " + day.isoformat() + " (America/Toronto)",
-        "Period: TODAY SO FAR (midnight through " + local.strftime("%I:%M %p %Z") + ")",
+        "Period: TODAY (12:00 AM to " + local.strftime("%I:%M %p %Z") + "; excludes clicks at/after cutoff)",
         "",
         f"{'APP':<27} {'TODAY':>10} {'LIFETIME':>11}",
     ]
     day_total = lifetime_total = 0
     for slug, label in counts.APPS:
         today = counts.count(slug, start, end)
-        lifetime = counts.count(slug)
+        lifetime = counts.count(slug, None, end)
         if any(type(value) is not int or value < 0 or value > 2**53-1
                for value in (today, lifetime)) or today > lifetime:
             raise ValueError("Invalid count for " + slug)
@@ -65,9 +67,9 @@ def build_report(now=None):
     lines.extend([
         f"{'ALL SEVEN':<27} {day_total:>10,} {lifetime_total:>11,}",
         "",
-        "Today's count is partial: it covers clicks from midnight to report time.",
+        "Today's count is partial: midnight through the 09:17 AM Toronto cutoff.",
         "Recorded APK-link clicks, not confirmed downloads or installations.",
-        "All-time counts are measured when this report is prepared.",
+        "Lifetime counts are also frozen at the 09:17 AM Toronto cutoff.",
         "Source: Cuberoot / split-it-44dea Firebase public aggregates.",
     ])
     return day.isoformat(), "\n".join(lines) + "\n"
@@ -136,7 +138,12 @@ def main():
     if not key.startswith("re_"):
         raise ValueError("Missing or invalid CUBEROOT_RESEND_API_KEY GitHub secret")
     now = dt.datetime.now(dt.timezone.utc)
-    date = current_day_window(now)[0].isoformat()
+    day, start, cutoff, local_cutoff = current_day_window(now)
+    date = day.isoformat()
+    # An early cron trigger must not send a partial report or consume today's
+    # idempotency key. Only start at/after 09:17 Toronto local time.
+    if now.astimezone(counts.TZ).time() < dt.time(9, 17):
+        raise RuntimeError("Too early: daily report requires at least 09:17 Toronto time")
     try:
         report_date, report_body = build_report(now)
         if report_date != date:
@@ -164,13 +171,24 @@ def selftest():
     current, start, end, local = current_day_window(now)
     assert current.isoformat() == "2026-10-18"
     assert start == dt.datetime.fromisoformat("2026-10-18T04:00:00+00:00")
-    assert end == now and local.hour == 9
-    assert current_day_window(dt.datetime.fromisoformat("2026-11-01T15:00:00+00:00"))[1] == dt.datetime.fromisoformat("2026-11-01T04:00:00+00:00")
-    assert current_day_window(dt.datetime.fromisoformat("2026-03-08T15:00:00+00:00"))[1] == dt.datetime.fromisoformat("2026-03-08T05:00:00+00:00")
+    assert end == dt.datetime.fromisoformat("2026-10-18T13:17:00+00:00")
+    assert local.hour == 9 and local.minute == 17
+    early = current_day_window(dt.datetime.fromisoformat("2026-10-18T13:00:00+00:00"))
+    assert early[2] == dt.datetime.fromisoformat("2026-10-18T13:00:00+00:00")
+    late = current_day_window(dt.datetime.fromisoformat("2026-10-18T22:00:00+00:00"))
+    assert late[2] == end
+    fall = current_day_window(dt.datetime.fromisoformat("2026-11-01T15:00:00+00:00"))
+    assert fall[1] == dt.datetime.fromisoformat("2026-11-01T04:00:00+00:00")
+    assert fall[2] == dt.datetime.fromisoformat("2026-11-01T14:17:00+00:00")
+    spring = current_day_window(dt.datetime.fromisoformat("2026-03-08T15:00:00+00:00"))
+    assert spring[1] == dt.datetime.fromisoformat("2026-03-08T05:00:00+00:00")
+    assert spring[2] == dt.datetime.fromisoformat("2026-03-08T13:17:00+00:00")
     with patch.object(counts, "count", side_effect=[2, 12] * 7) as calls:
         day, body = build_report(now)
         assert day == "2026-10-18" and calls.call_count == 14
-        assert "TODAY SO FAR" in body and "YESTERDAY" not in body
+        assert "TODAY (12:00 AM to 09:17 AM EDT" in body and "YESTERDAY" not in body
+        for call in calls.call_args_list:
+            assert call.args[-1] == end  # All yesterday/late-day events excluded
         assert body.count("\n") >= 14 and "ALL SEVEN" in body
         assert "14" in body and "84" in body
         assert all(label in body for _, label in counts.APPS)
