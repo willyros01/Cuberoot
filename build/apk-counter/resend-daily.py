@@ -10,6 +10,7 @@ from __future__ import annotations
 import datetime as dt
 import importlib.util
 import json
+import html
 import os
 from pathlib import Path
 import sys
@@ -79,10 +80,52 @@ def build_report(now=None):
     return day.isoformat(), "\n".join(lines) + "\n"
 
 
-def send_email(api_key, subject, body, idempotency_key, pause=time.sleep):
-    payload = json.dumps({
-        "from": FROM_EMAIL, "to": [TO_EMAIL], "subject": subject, "text": body
-    }, separators=(",", ":")).encode("utf-8")
+def build_html_report(body):
+    """Responsive, large-print HTML; values are taken from validated text report."""
+    import re
+    rows = []
+    for line in body.splitlines():
+        match = re.match(r"^(FIDUNIO|Scorecard|Fairpot|Wire|SpendRecorder|Cloud Files|The Marker|ALL SEVEN)\\s+([\\d,]+)\\s+([\\d,]+)$", line)
+        if match:
+            rows.append((match.group(1), match.group(2), match.group(3)))
+    if len(rows) != 8 or [r[0] for r in rows] != [label for _, label in counts.APPS] + ["ALL SEVEN"]:
+        raise ValueError("HTML table requires exactly seven apps and matching totals")
+    date = re.search(r"Reporting date: (\\d{4}-\\d{2}-\\d{2})", body)
+    if not date:
+        raise ValueError("Missing reporting date")
+    trs = []
+    for i, (name, daily, lifetime) in enumerate(rows):
+        bg = "#e5f1ff" if i == 7 else ("#f3f6fa" if i % 2 else "#ffffff")
+        weight = "700" if i == 7 else "500"
+        trs.append(
+            f'<tr style="background:{bg};font-weight:{weight}">'
+            f'<td style="padding:15px 8px;border-bottom:1px solid #d8dfe8;word-break:normal">{html.escape(name)}</td>'
+            f'<td align="right" style="padding:15px 8px;border-bottom:1px solid #d8dfe8;white-space:nowrap">{daily}</td>'
+            f'<td align="right" style="padding:15px 8px;border-bottom:1px solid #d8dfe8;white-space:nowrap">{lifetime}</td></tr>')
+    return (
+        '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>'
+        '<body style="margin:0;padding:16px 10px;background:#fff;color:#17212f;font-family:Arial,Helvetica,sans-serif">'
+        '<main style="max-width:680px;margin:auto">'
+        '<h1 style="font-size:28px;line-height:1.2;margin:8px 0 12px">Cuberoot APK clicks</h1>'
+        f'<p style="font-size:21px;margin:0 0 12px;font-weight:bold">{date.group(1)} · Toronto</p>'
+        '<p style="font-size:18px;line-height:1.5;margin:0 0 20px">Reporting period: yesterday 9:17 AM to today 9:17 AM Toronto time.</p>'
+        '<table role="table" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:19px;line-height:1.3">'
+        '<thead><tr style="background:#183452;color:#fff;font-size:16px">'
+        '<th align="left" style="width:45%;padding:14px 8px">App</th>'
+        '<th align="right" style="width:27%;padding:14px 5px">Last 24h*</th>'
+        '<th align="right" style="width:28%;padding:14px 8px">Lifetime</th></tr></thead>'
+        '<tbody>' + "".join(trs) + '</tbody></table>'
+        '<p style="font-size:16px;line-height:1.5;margin-top:20px">*9:17 AM to 9:17 AM Toronto reporting window (23 or 25 hours on daylight-saving changes).</p>'
+        '<p style="font-size:17px;line-height:1.5"><strong>Recorded APK-link clicks, not confirmed downloads or installations.</strong></p>'
+        '</main></body></html>'
+    )
+
+
+def send_email(api_key, subject, body, idempotency_key, pause=time.sleep, html_body=None):
+    message = {"from": FROM_EMAIL, "to": [TO_EMAIL], "subject": subject, "text": body}
+    if html_body is not None:
+        message["html"] = html_body
+    payload = json.dumps(message, separators=(",", ":")).encode("utf-8")
     for attempt in range(4):
         request = urllib.request.Request(RESEND_URL, data=payload, method="POST",
             headers={
@@ -166,7 +209,7 @@ def main():
     # V2 is deliberately separate from the previously delivered incorrect
     # same-day-only email; each corrected reporting day is still duplicate-safe.
     accepted = send_email(key, "Cuberoot APK clicks - " + date,
-                          report_body, "cuberoot-apk-daily-v2-" + date)
+                          report_body, "cuberoot-apk-daily-v3-" + date, html_body=build_html_report(report_body))
     print("PASS: Resend accepted " + date + " email ID=" + accepted)
     print("API acceptance is not proof of final inbox delivery.")
 
@@ -215,6 +258,11 @@ def selftest():
         try: build_report(now)
         except ValueError: pass
         else: raise AssertionError("Incomplete count was accepted")
+    with patch.object(counts, "count", side_effect=[0, 0] * 7):
+        _, sample = build_report(now)
+        rendered = build_html_report(sample)
+        assert rendered.count("<tr style=") == 8
+        assert "The Marker" in rendered and "ALL SEVEN" in rendered
     class MockResponse:
         def __enter__(self): return self
         def __exit__(self, *args): return False
