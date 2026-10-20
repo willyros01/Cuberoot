@@ -267,7 +267,7 @@ def selftest():
     with patch.object(counts, "count", side_effect=[0, 0] * 7):
         _, sample = build_report(now)
         rendered = build_html_report(sample)
-        assert rendered.count("<tr style=") == 8
+        assert rendered.split("<tbody>", 1)[1].split("</tbody>", 1)[0].count("<tr style=") == 8
         assert "The Marker" in rendered and "ALL SEVEN" in rendered
         assert "2026-10-18" in rendered
         for corrupted in (__import__("re").sub(r"(?m)^(ALL SEVEN\s+)0(\s+0)$", r"\g<1>1\g<2>", sample),
