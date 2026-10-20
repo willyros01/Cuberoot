@@ -270,7 +270,7 @@ def selftest():
         assert rendered.count("<tr style=") == 8
         assert "The Marker" in rendered and "ALL SEVEN" in rendered
         assert "2026-10-18" in rendered
-        for corrupted in (sample.replace("ALL SEVEN                      0", "ALL SEVEN                      1"),
+        for corrupted in (__import__("re").sub(r"(?m)^(ALL SEVEN\s+)0(\s+0)$", r"\g<1>1\g<2>", sample),
                           sample.replace("The Marker", "The Missing App")):
             try: build_html_report(corrupted)
             except ValueError: pass
