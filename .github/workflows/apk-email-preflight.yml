@@ -1,0 +1,38 @@
+name: Cuberoot APK Email Preflight
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apk-email-preflight.yml'
+      - 'build/apk-counter/resend-daily.py'
+      - 'build/apk-counter/public-report.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Compile and run offline report + email HTML tests
+        run: |
+          python3 -m py_compile build/apk-counter/public-report.py build/apk-counter/resend-daily.py
+          python3 build/apk-counter/public-report.py --self-test
+          python3 build/apk-counter/resend-daily.py --self-test
+      - name: Confirm report rendering includes all seven apps
+        run: |
+          python3 - <<'PY'
+          import importlib.util
+          from unittest.mock import patch
+          p = 'build/apk-counter/resend-daily.py'
+          spec = importlib.util.spec_from_file_location('daily', p)
+          m = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(m)
+          with patch.object(m.counts, 'count', side_effect=[2,12]*7):
+              _, body = m.build_report()
+          html = m.build_html_report(body)
+          assert html.count('<tr style=') == 8
+          assert 'ALL SEVEN' in html and 'The Marker' in html
+          print('PASS: HTML rendered with seven apps and total row')
+          PY
