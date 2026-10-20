@@ -85,12 +85,18 @@ def build_html_report(body):
     import re
     rows = []
     for line in body.splitlines():
-        match = re.match(r"^(FIDUNIO|Scorecard|Fairpot|Wire|SpendRecorder|Cloud Files|The Marker|ALL SEVEN)\\s+([\\d,]+)\\s+([\\d,]+)$", line)
+        match = re.match(r"^(FIDUNIO|Scorecard|Fairpot|Wire|SpendRecorder|Cloud Files|The Marker|ALL SEVEN)\s+([\d,]+)\s+([\d,]+)$", line)
         if match:
             rows.append((match.group(1), match.group(2), match.group(3)))
     if len(rows) != 8 or [r[0] for r in rows] != [label for _, label in counts.APPS] + ["ALL SEVEN"]:
         raise ValueError("HTML table requires exactly seven apps and matching totals")
-    date = re.search(r"Reporting date: (\\d{4}-\\d{2}-\\d{2})", body)
+    # Reject incomplete or internally inconsistent reports before HTML/email delivery.
+    numbers = [(int(d.replace(",", "")), int(l.replace(",", ""))) for _, d, l in rows]
+    if any(d > l for d, l in numbers):
+        raise ValueError("HTML table contains a daily count above its lifetime count")
+    if (sum(d for d, _ in numbers[:7]), sum(l for _, l in numbers[:7])) != numbers[7]:
+        raise ValueError("HTML table ALL SEVEN totals do not equal the seven app sums")
+    date = re.search(r"Reporting date: (\d{4}-\d{2}-\d{2})", body)
     if not date:
         raise ValueError("Missing reporting date")
     trs = []
@@ -263,6 +269,12 @@ def selftest():
         rendered = build_html_report(sample)
         assert rendered.count("<tr style=") == 8
         assert "The Marker" in rendered and "ALL SEVEN" in rendered
+        assert "2026-10-18" in rendered
+        for corrupted in (sample.replace("ALL SEVEN                      0", "ALL SEVEN                      1"),
+                          sample.replace("The Marker", "The Missing App")):
+            try: build_html_report(corrupted)
+            except ValueError: pass
+            else: raise AssertionError("Malformed HTML report was accepted")
     class MockResponse:
         def __enter__(self): return self
         def __exit__(self, *args): return False
