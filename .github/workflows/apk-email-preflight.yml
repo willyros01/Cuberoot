@@ -32,7 +32,7 @@ jobs:
           with patch.object(m.counts, 'count', side_effect=[2,12]*7):
               _, body = m.build_report()
           html = m.build_html_report(body)
-          assert html.count('<tr style=') == 8
+          assert html.split('<tbody>', 1)[1].split('</tbody>', 1)[0].count('<tr style=') == 8
           assert 'ALL SEVEN' in html and 'The Marker' in html
           print('PASS: HTML rendered with seven apps and total row')
           PY
