@@ -1,0 +1,29 @@
+name: Cuberoot APK Email One-Time Delivery Test
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apk-email-delivery-test-20261020.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Validate reporting and email formatting
+        run: |
+          python3 -m py_compile build/apk-counter/public-report.py build/apk-counter/resend-daily.py
+          python3 build/apk-counter/public-report.py --self-test
+          python3 build/apk-counter/resend-daily.py --self-test
+  send:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Send actual seven-app report via existing Resend integration
+        env:
+          CUBEROOT_RESEND_API_KEY: ${{ secrets.CUBEROOT_RESEND_API_KEY }}
+        run: python3 build/apk-counter/resend-daily.py
