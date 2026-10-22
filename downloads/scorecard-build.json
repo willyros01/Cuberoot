@@ -1,12 +1,12 @@
 {
   "app": "The Scorecard",
   "channel": "android-debug-test",
-  "source_sha": "aae5116407ed07dd2081c072bc7e83485fb6b5e7",
-  "run_id": 38320762144,
-  "artifact_id": 11778477150,
+  "source_sha": "9aa766cdca0172f1e84dfb726352cb18d919e5c6",
+  "run_id": 39826847447,
+  "artifact_id": 12447855637,
   "origin": "github-actions-artifact",
-  "apk_sha256": "40e391cc0f65f10ae67d6d25bc1c6368a4e67e8a47c89c8d43485a1d75601289",
+  "apk_sha256": "f720540494e0efcf41e7325b33c9ad8be2a878c104179d1ac85be21fc8b11201",
   "signer_sha256": "40744e5063932de66831717aeb3deea647e681d96e11f7c96434c30cdfef5386",
-  "apk_bytes": 4592875,
-  "published_at": "2026-10-12T23:15:02.212Z"
+  "apk_bytes": 4599635,
+  "published_at": "2026-10-22T17:59:10.325Z"
 }
