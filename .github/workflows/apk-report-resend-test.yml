@@ -1,0 +1,72 @@
+# Reusable, opt-in Cuberoot APK email format test.
+# Manual runs on main; push runs only on the isolated test branch to verify this workflow.
+# No cron or daily email job changes. Uses the existing Resend secret.
+name: Cuberoot APK Email Test (Resend)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - apk-email-format-test-20261023
+    paths:
+      - '.github/workflows/apk-report-resend-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-email:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check source code, counts and email template
+        run: |
+          python3 -m py_compile build/apk-counter/public-report.py build/apk-counter/resend-daily.py
+          python3 build/apk-counter/public-report.py --self-test
+          python3 build/apk-counter/resend-daily.py --self-test
+      - name: Send test with latest completed reporting period via Resend
+        env:
+          CUBEROOT_RESEND_API_KEY: ${{ secrets.CUBEROOT_RESEND_API_KEY }}
+        run: |
+          python3 - <<'PY'
+          import datetime as dt
+          import importlib.util
+          import os
+          from pathlib import Path
+
+          spec = importlib.util.spec_from_file_location(
+              "cuberoot_apk_email_test", Path("build/apk-counter/resend-daily.py"))
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+
+          key = os.environ.get("CUBEROOT_RESEND_API_KEY", "")
+          if not key.startswith("re_"):
+              raise RuntimeError("Existing Resend secret is missing")
+
+          now = dt.datetime.now(dt.timezone.utc).astimezone(module.counts.TZ)
+          date = now.date() if now.time() >= dt.time(9, 17) else now.date() - dt.timedelta(days=1)
+          cutoff = dt.datetime.combine(date, dt.time(9, 17), tzinfo=module.counts.TZ)
+          report_date, body = module.build_report(cutoff.astimezone(dt.timezone.utc))
+          if report_date != date.isoformat():
+              raise RuntimeError("Wrong reporting date")
+          html = module.build_html_report(body)
+
+          if "*9:17 AM to 9:17 AM Toronto reporting window" not in html:
+              raise RuntimeError("The reporting-window explanation is missing")
+          if "Link selections; completion not verified." not in html:
+              raise RuntimeError("The compact completion note is missing")
+          if "font-size:11px;line-height:1.35;color:#788391" not in html:
+              raise RuntimeError("The compact note styling is missing")
+          if "Period*</th>" not in html or html.count('<tr style=') != 9:
+              raise RuntimeError("The seven-app table is incomplete")
+
+          run_id = os.environ["GITHUB_RUN_ID"]
+          attempt = os.environ["GITHUB_RUN_ATTEMPT"]
+          idempotency = f"cuberoot-apk-test-{run_id}-{attempt}"
+          subject = f"Cuberoot APK Downloads - {report_date} (TEST)"
+          email_id = module.send_email(
+              key, subject, body, idempotency, html_body=html)
+          print("PASS: Resend accepted the repeatable test email; ID=" + email_id)
+          print("Check the Gmail inbox separately to verify final delivery.")
+          PY
