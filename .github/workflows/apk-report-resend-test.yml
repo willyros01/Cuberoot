@@ -54,6 +54,10 @@ jobs:
 
           if "*9:17 AM to 9:17 AM Toronto reporting window" not in html:
               raise RuntimeError("The reporting-window explanation is missing")
+          if '<meta name="x-apple-disable-message-reformatting">' not in html:
+              raise RuntimeError("Missing Apple Mail reformatting safeguard")
+          if "*{-webkit-text-size-adjust:100%;text-size-adjust:100%}" not in html:
+              raise RuntimeError("Missing text-sizing safeguard")
           if "Counts show download clicks, not completed downloads." not in html:
               raise RuntimeError("The compact completion note is missing")
           if "font-size:11px;line-height:1.35;color:#788391" not in html:
@@ -64,7 +68,7 @@ jobs:
           run_id = os.environ["GITHUB_RUN_ID"]
           attempt = os.environ["GITHUB_RUN_ATTEMPT"]
           idempotency = f"cuberoot-apk-test-{run_id}-{attempt}"
-          subject = f"Cuberoot APK Downloads - {report_date} (TEST)"
+          subject = f"Cuberoot APK Downloads - {report_date} (iOS MAIL TEST)"
           email_id = module.send_email(
               key, subject, body, idempotency, html_body=html)
           print("PASS: Resend accepted the repeatable test email; ID=" + email_id)
