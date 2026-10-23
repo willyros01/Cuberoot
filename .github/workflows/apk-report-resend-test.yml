@@ -54,7 +54,7 @@ jobs:
 
           if "*9:17 AM to 9:17 AM Toronto reporting window" not in html:
               raise RuntimeError("The reporting-window explanation is missing")
-          if "Link selections; completion not verified." not in html:
+          if "Counts show download clicks, not completed downloads." not in html:
               raise RuntimeError("The compact completion note is missing")
           if "font-size:11px;line-height:1.35;color:#788391" not in html:
               raise RuntimeError("The compact note styling is missing")
