@@ -50,7 +50,7 @@ def build_report(now=None):
     if len(counts.APPS) != 7 or len({slug for slug, _ in counts.APPS}) != 7:
         raise ValueError("Seven unique applications required")
     lines = [
-        "CUBEROOT APK DOWNLOAD ATTEMPTS REPORT",
+        "CUBEROOT APK DOWNLOADS",
         "Reporting date: " + day.isoformat() + " (America/Toronto)",
         "Period: since yesterday 09:17 AM Toronto through " + local.strftime("%I:%M %p %Z") + " today",
         "",
@@ -73,7 +73,7 @@ def build_report(now=None):
         "",
         "Each report covers the full reporting day ending at 09:17 AM Toronto.",
         "The count window includes the previous afternoon, evening, and overnight.",
-        "Recorded APK download attempts (link selections), not confirmed file transfers or installations.",
+        "Counts reflect selections of APK download links. File completion is not tracked separately.",
         "Lifetime counts are also frozen at the 09:17 AM Toronto cutoff.",
         "Source: Cuberoot / split-it-44dea Firebase public aggregates.",
     ])
@@ -112,7 +112,7 @@ def build_html_report(body):
         '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>'
         '<body style="margin:0;padding:16px 10px;background:#fff;color:#17212f;font-family:Arial,Helvetica,sans-serif">'
         '<main style="max-width:680px;margin:auto">'
-        '<h1 style="font-size:28px;line-height:1.2;margin:8px 0 12px">Cuberoot APK download attempts</h1>'
+        '<h1 style="font-size:28px;line-height:1.2;margin:8px 0 12px">Cuberoot APK Downloads</h1>'
         f'<p style="font-size:21px;margin:0 0 12px;font-weight:bold">{date.group(1)} · Toronto</p>'
         '<p style="font-size:18px;line-height:1.5;margin:0 0 20px">Reporting period: yesterday 9:17 AM to today 9:17 AM Toronto time.</p>'
         '<table role="table" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:19px;line-height:1.3">'
@@ -122,7 +122,7 @@ def build_html_report(body):
         '<th align="right" style="width:28%;padding:14px 8px">Lifetime</th></tr></thead>'
         '<tbody>' + "".join(trs) + '</tbody></table>'
         '<p style="font-size:16px;line-height:1.5;margin-top:20px">*9:17 AM to 9:17 AM Toronto reporting window (23 or 25 hours on daylight-saving changes).</p>'
-        '<p style="font-size:17px;line-height:1.5"><strong>Recorded APK download attempts, not confirmed file transfers or installations.</strong></p>'
+        '<p style="font-size:17px;line-height:1.5">Counts reflect selections of APK download links. File completion is not tracked separately.</p>'
         '</main></body></html>'
     )
 
@@ -214,7 +214,7 @@ def main():
         raise RuntimeError("Verified report could not be created") from None
     # V2 is deliberately separate from the previously delivered incorrect
     # same-day-only email; each corrected reporting day is still duplicate-safe.
-    accepted = send_email(key, "Cuberoot APK download attempts - " + date,
+    accepted = send_email(key, "Cuberoot APK Downloads - " + date,
                           report_body, "cuberoot-apk-daily-v3-" + date, html_body=build_html_report(report_body))
     print("PASS: Resend accepted " + date + " email ID=" + accepted)
     print("API acceptance is not proof of final inbox delivery.")
@@ -269,8 +269,8 @@ def selftest():
         rendered = build_html_report(sample)
         assert rendered.split("<tbody>", 1)[1].split("</tbody>", 1)[0].count("<tr style=") == 8
         assert "The Marker" in rendered and "ALL SEVEN" in rendered
-        assert "Cuberoot APK download attempts" in rendered
-        assert "not confirmed file transfers" in rendered
+        assert "Cuberoot APK Downloads" in rendered
+        assert "File completion is not tracked separately" in rendered
         assert "Period*" in rendered
         assert "2026-10-18" in rendered
         for corrupted in (__import__("re").sub(r"(?m)^(ALL SEVEN\s+)0(\s+0)$", r"\g<1>1\g<2>", sample),
