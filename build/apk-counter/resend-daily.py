@@ -73,7 +73,7 @@ def build_report(now=None):
         "",
         "Each report covers the full reporting day ending at 09:17 AM Toronto.",
         "The count window includes the previous afternoon, evening, and overnight.",
-        "Each APK is counted when its download link is selected. We do not separately check whether the file finishes downloading.",
+        "Downloads are counted when links are selected, not when files finish downloading.",
         "Lifetime counts are also frozen at the 09:17 AM Toronto cutoff.",
         "Source: Cuberoot / split-it-44dea Firebase public aggregates.",
     ])
@@ -122,7 +122,7 @@ def build_html_report(body):
         '<th align="right" style="width:28%;padding:14px 8px">Lifetime</th></tr></thead>'
         '<tbody>' + "".join(trs) + '</tbody></table>'
         '<p style="font-size:16px;line-height:1.5;margin-top:20px">*9:17 AM to 9:17 AM Toronto reporting window (23 or 25 hours on daylight-saving changes).</p>'
-        '<p style="font-size:17px;line-height:1.5">Each APK is counted when its download link is selected. We do not separately check whether the file finishes downloading.</p>'
+        '<p style="font-size:17px;line-height:1.5">Downloads are counted when links are selected, not when files finish downloading.</p>'
         '</main></body></html>'
     )
 
@@ -270,7 +270,7 @@ def selftest():
         assert rendered.split("<tbody>", 1)[1].split("</tbody>", 1)[0].count("<tr style=") == 8
         assert "The Marker" in rendered and "ALL SEVEN" in rendered
         assert "Cuberoot APK Downloads" in rendered
-        assert "file finishes downloading" in rendered
+        assert "not when files finish downloading" in rendered
         assert "Period*" in rendered
         assert "2026-10-18" in rendered
         for corrupted in (__import__("re").sub(r"(?m)^(ALL SEVEN\s+)0(\s+0)$", r"\g<1>1\g<2>", sample),
