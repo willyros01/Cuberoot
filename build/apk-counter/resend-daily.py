@@ -122,7 +122,7 @@ def build_html_report(body):
         '<th align="right" style="width:28%;padding:14px 8px">Lifetime</th></tr></thead>'
         '<tbody>' + "".join(trs) + '</tbody></table>'
         '<p style="font-size:16px;line-height:1.5;margin-top:20px">*9:17 AM to 9:17 AM Toronto reporting window (23 or 25 hours on daylight-saving changes).</p>'
-        '<p style="font-size:17px;line-height:1.5">Downloads are counted when links are selected, not when files finish downloading.</p>'
+        '<p style="font-size:12px;line-height:1.4;color:#687384;margin:8px 0 0">Downloads are counted when links are selected, not when files finish downloading.</p>'
         '</main></body></html>'
     )
 
