@@ -1,0 +1,58 @@
+name: One-time Cuberoot APK Resend format test
+on:
+  push:
+    branches:
+      - apk-email-format-test-20261023
+    paths:
+      - '.github/workflows/apk-report-resend-test-20261023.yml'
+permissions:
+  contents: read
+jobs:
+  email-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Validate unchanged report and new email formatting
+        run: |
+          python3 -m py_compile build/apk-counter/public-report.py build/apk-counter/resend-daily.py
+          python3 build/apk-counter/public-report.py --self-test
+          python3 build/apk-counter/resend-daily.py --self-test
+      - name: Send the approved one-time email using existing Resend secret
+        env:
+          CUBEROOT_RESEND_API_KEY: ${{ secrets.CUBEROOT_RESEND_API_KEY }}
+        run: |
+          python3 - <<'PY'
+          import datetime
+          import importlib.util
+          import os
+          from pathlib import Path
+
+          script = Path("build/apk-counter/resend-daily.py")
+          spec = importlib.util.spec_from_file_location("cuberoot_apk_resend", script)
+          report = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(report)
+          key = os.environ.get("CUBEROOT_RESEND_API_KEY", "")
+          if not key.startswith("re_"):
+              raise RuntimeError("Existing Resend secret not available on test branch")
+          # Reproduce the Oct 23 09:17 EDT production cutoff exactly.
+          now = datetime.datetime.fromisoformat("2026-10-23T13:17:00+00:00")
+          date, body = report.build_report(now)
+          if date != "2026-10-23":
+              raise RuntimeError("Wrong reporting date")
+          html = report.build_html_report(body)
+          if "*9:17 AM to 9:17 AM Toronto reporting window" not in html:
+              raise RuntimeError("Missing reporting-window footnote")
+          if "Link selections; completion not verified." not in html:
+              raise RuntimeError("Missing short completion note")
+          if "font-size:11px;line-height:1.35;color:#788391" not in html:
+              raise RuntimeError("Incorrect disclaimer styling")
+          if "Period*</th>" not in html:
+              raise RuntimeError("Missing period footnote indicator")
+          subject = "Cuberoot APK Downloads - 2026-10-23 (RESEND TEST)"
+          email_id = report.send_email(
+              key, subject, body,
+              "cuberoot-apk-format-test-20261023-one-time",
+              html_body=html)
+          print("PASS: Resend accepted one-time test email; ID=" + email_id)
+          PY
