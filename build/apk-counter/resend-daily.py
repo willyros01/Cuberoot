@@ -73,7 +73,7 @@ def build_report(now=None):
         "",
         "Each report covers the full reporting day ending at 09:17 AM Toronto.",
         "The count window includes the previous afternoon, evening, and overnight.",
-        "Downloads are counted when links are selected, not when files finish downloading.",
+        "Based on download-link selections; completion not checked.",
         "Lifetime counts are also frozen at the 09:17 AM Toronto cutoff.",
         "Source: Cuberoot / split-it-44dea Firebase public aggregates.",
     ])
@@ -110,7 +110,7 @@ def build_html_report(body):
             f'<td align="right" style="padding:15px 8px;border-bottom:1px solid #d8dfe8;white-space:nowrap">{lifetime}</td></tr>')
     return (
         '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>'
-        '<body style="margin:0;padding:16px 10px;background:#fff;color:#17212f;font-family:Arial,Helvetica,sans-serif">'
+        '<body style="margin:0;padding:16px 10px;background:#fff;color:#17212f;font-family:Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;text-size-adjust:100%">'
         '<main style="max-width:680px;margin:auto">'
         '<h1 style="font-size:28px;line-height:1.2;margin:8px 0 12px">Cuberoot APK Downloads</h1>'
         f'<p style="font-size:21px;margin:0 0 12px;font-weight:bold">{date.group(1)} · Toronto</p>'
@@ -118,11 +118,10 @@ def build_html_report(body):
         '<table role="table" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:19px;line-height:1.3">'
         '<thead><tr style="background:#183452;color:#fff;font-size:16px">'
         '<th align="left" style="width:45%;padding:14px 8px">App</th>'
-        '<th align="right" style="width:27%;padding:14px 5px">Period*</th>'
+        '<th align="right" style="width:27%;padding:14px 5px">Period</th>'
         '<th align="right" style="width:28%;padding:14px 8px">Lifetime</th></tr></thead>'
         '<tbody>' + "".join(trs) + '</tbody></table>'
-        '<p style="font-size:16px;line-height:1.5;margin-top:20px">*9:17 AM to 9:17 AM Toronto reporting window (23 or 25 hours on daylight-saving changes).</p>'
-        '<p style="font-size:12px;line-height:1.4;color:#687384;margin:8px 0 0">Downloads are counted when links are selected, not when files finish downloading.</p>'
+        '<p style="font-size:12px;line-height:1.35;color:#788391;margin:8px 0 0;-webkit-text-size-adjust:100%">Based on download-link selections; completion not checked.</p>'
         '</main></body></html>'
     )
 
@@ -270,8 +269,8 @@ def selftest():
         assert rendered.split("<tbody>", 1)[1].split("</tbody>", 1)[0].count("<tr style=") == 8
         assert "The Marker" in rendered and "ALL SEVEN" in rendered
         assert "Cuberoot APK Downloads" in rendered
-        assert "not when files finish downloading" in rendered
-        assert "Period*" in rendered
+        assert "Based on download-link selections; completion not checked." in rendered
+        assert ">Period</th>" in rendered
         assert "2026-10-18" in rendered
         for corrupted in (__import__("re").sub(r"(?m)^(ALL SEVEN\s+)0(\s+0)$", r"\g<1>1\g<2>", sample),
                           sample.replace("The Marker", "The Missing App")):
