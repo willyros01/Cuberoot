@@ -73,7 +73,7 @@ def build_report(now=None):
         "",
         "Each report covers the full reporting day ending at 09:17 AM Toronto.",
         "The count window includes the previous afternoon, evening, and overnight.",
-        "Counts show download clicks, not completed downloads.",
+        "Counts show download clicks, not necessarily completed downloads.",
         "Lifetime counts are also frozen at the 09:17 AM Toronto cutoff.",
         "Source: Cuberoot / split-it-44dea Firebase public aggregates.",
     ])
@@ -121,8 +121,8 @@ def build_html_report(body):
         '<th align="right" style="width:27%;padding:14px 5px">Period*</th>'
         '<th align="right" style="width:28%;padding:14px 8px">Lifetime</th></tr></thead>'
         '<tbody>' + "".join(trs) + '</tbody></table>'
-        '<p style="font-size:12px;line-height:1.35;color:#788391;margin:10px 0 0;-webkit-text-size-adjust:none!important;text-size-adjust:none!important">*9:17 AM to 9:17 AM Toronto reporting window (23 or 25 hours on daylight-saving changes).</p>'
-        '<p style="font-size:11px;line-height:1.35;color:#788391;margin:5px 0 0;-webkit-text-size-adjust:none!important;text-size-adjust:none!important">Counts show download clicks, not completed downloads.</p>'
+        '<p style="font-size:16px;line-height:1.4;color:#687384;margin:10px 0 0;-webkit-text-size-adjust:none!important;text-size-adjust:none!important>*9:17 AM to 9:17 AM Toronto reporting window (23 or 25 hours on daylight-saving changes).</p>'
+        '<p style="font-size:15px;line-height:1.4;color:#687384;margin:5px 0 0;-webkit-text-size-adjust:none!important;text-size-adjust:none!important>Counts show download clicks, not necessarily completed downloads.</p>'
         '</main></body></html>'
     )
 
@@ -270,7 +270,7 @@ def selftest():
         assert rendered.split("<tbody>", 1)[1].split("</tbody>", 1)[0].count("<tr style=") == 8
         assert "The Marker" in rendered and "ALL SEVEN" in rendered
         assert "Cuberoot APK Downloads" in rendered
-        assert "Counts show download clicks, not completed downloads." in rendered
+        assert "Counts show download clicks, not necessarily completed downloads." in rendered
         assert "23 or 25 hours on daylight-saving changes" in rendered
         assert ">Period*</th>" in rendered
         assert "2026-10-18" in rendered
