@@ -121,8 +121,8 @@ def build_html_report(body):
         '<th align="right" style="width:27%;padding:14px 5px">Period*</th>'
         '<th align="right" style="width:28%;padding:14px 8px">Lifetime</th></tr></thead>'
         '<tbody>' + "".join(trs) + '</tbody></table>'
-        '<p style="font-size:16px;line-height:1.4;color:#687384;margin:10px 0 0;-webkit-text-size-adjust:none!important;text-size-adjust:none!important>*9:17 AM to 9:17 AM Toronto reporting window (23 or 25 hours on daylight-saving changes).</p>'
-        '<p style="font-size:15px;line-height:1.4;color:#687384;margin:5px 0 0;-webkit-text-size-adjust:none!important;text-size-adjust:none!important>Counts show download clicks, not necessarily completed downloads.</p>'
+        '<p style="font-size:16px;line-height:1.4;color:#687384;margin:10px 0 0;-webkit-text-size-adjust:none!important;text-size-adjust:none!important">*9:17 AM to 9:17 AM Toronto reporting window (23 or 25 hours on daylight-saving changes).</p>'
+        '<p style="font-size:15px;line-height:1.4;color:#687384;margin:5px 0 0;-webkit-text-size-adjust:none!important;text-size-adjust:none!important">Counts show download clicks, not necessarily completed downloads.</p>'
         '</main></body></html>'
     )
 
