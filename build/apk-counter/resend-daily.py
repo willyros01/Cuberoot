@@ -109,7 +109,7 @@ def build_html_report(body):
             f'<td align="right" style="padding:15px 8px;border-bottom:1px solid #d8dfe8;white-space:nowrap">{daily}</td>'
             f'<td align="right" style="padding:15px 8px;border-bottom:1px solid #d8dfe8;white-space:nowrap">{lifetime}</td></tr>')
     return (
-        '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>'
+        '<!doctype html><html><head><meta name="viewport" content="width=device-width"><meta name="x-apple-disable-message-reformatting"><meta name="format-detection" content="date=no,telephone=no,address=no"><style>*{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style></head>'
         '<body style="margin:0;padding:16px 10px;background:#fff;color:#17212f;font-family:Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;text-size-adjust:100%">'
         '<main style="max-width:680px;margin:auto">'
         '<h1 style="font-size:28px;line-height:1.2;margin:8px 0 12px">Cuberoot APK Downloads</h1>'
