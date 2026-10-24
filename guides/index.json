@@ -83,6 +83,46 @@
           "date": "2026-09-25T02:56:09.914Z",
           "original": "wire.admin-guide.v0.17.54.pdf",
           "path": "guides/wire/admin-guide-v0-17-54.pdf"
+        },
+        {
+          "id": "2e753d700ffa3597c003ba991765a1ec",
+          "title": "Quick Start Guide - illustrated large print",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 14485,
+          "date": "2026-10-24T18:37:14.173Z",
+          "original": "index.html",
+          "path": "wire/quick-start/index.html"
+        },
+        {
+          "id": "3593d232117ca1a9001c5bc007e22f17",
+          "title": "Complete User Guide - illustrated large print",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 28901,
+          "date": "2026-10-24T18:37:14.173Z",
+          "original": "index.html",
+          "path": "wire/guide/index.html"
+        },
+        {
+          "id": "66474e35362181da87959fdda28522ee",
+          "title": "Quick Start Guide - PDF large print",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 60909,
+          "date": "2026-10-24T18:37:14.173Z",
+          "original": "wire-quick-start.pdf",
+          "path": "guides/wire/wire-quick-start.pdf"
+        },
+        {
+          "id": "766d51c6f944547029371167e106f4c0",
+          "title": "Complete User Guide - PDF large print",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 83070,
+          "date": "2026-10-24T18:37:14.173Z",
+          "original": "wire-full-user-guide.pdf",
+          "path": "guides/wire/wire-full-user-guide.pdf"
         }
       ]
     },
