@@ -1,12 +1,12 @@
 {
   "app": "FIDUNIO",
   "channel": "android-fcm-beta",
-  "source_sha": "afa47bb1691575026435e468cee672c9eed84d94",
-  "run_id": 40424304088,
-  "artifact_id": 12698343379,
+  "source_sha": "9f38f51be21be9d321b2f004cf756ed6a9213096",
+  "run_id": 40452721643,
+  "artifact_id": 12711650434,
   "origin": "github-actions-artifact",
-  "apk_sha256": "9b0a18d113baaad9baaff3445841d715ce59abe009a8d0b55e55cef9b6ee07dc",
+  "apk_sha256": "0c37c1c29e767b6ee379cc9a8f9ad0fdac68655735db44f9072e29a090f5033d",
   "signer_sha256": "fbff41947e477e0b4df65bd741b550d7b30d7b18636a47c10853d789c4937a1d",
   "apk_bytes": 10101348,
-  "published_at": "2026-10-27T00:12:34.287Z"
+  "published_at": "2026-10-27T05:04:04.736Z"
 }
