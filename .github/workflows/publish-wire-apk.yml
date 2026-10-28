@@ -3,12 +3,9 @@ name: Publish Wire Android APK
 # Wire Android CI signs/uploads the APK and verifies the artifact. This
 # Cuberoot-side workflow retrieves the newest SUCCESSFUL build and publishes
 # only the verified, permanently signed APK at /downloads/wire.apk.
-# Runs automatically every five minutes; no cross-repository token is needed.
-# GitHub scheduled jobs may be delayed, so five minutes is an interval, not an SLA.
+# No timed polling. Manual runs and publisher code changes remain available.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
   push:
     branches: [main]
     paths:
