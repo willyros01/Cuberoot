@@ -32,7 +32,7 @@
       "name": "The Marker",
       "slug": "the-marker",
       "icon": "scorecard",
-      "description": "Your hole-by-hole golf companion for up to four players. Score yourself or ask a caddie to enter scores on a second phone using a six-character code or QR link; no caddie account is needed. Scores reach the golfer's phone, where the golfer can take over, review and post eligible rounds to The Scorecard. The Marker also works independently for keeping and sharing cards, with large scoring controls, saved courses, manual entry and course-card photo reading.",
+      "description": "Your hole-by-hole golf companion for up to four players. Score yourself or ask a caddie to enter scores on a second phone using a six-character code or QR link; no caddie account is needed. Scores reach the golfer's phone, while other golfers can follow the live scorecard in read-only mode using a separate code or QR link. The golfer can take over, review and post eligible rounds to The Scorecard. The Marker also works independently for keeping and sharing cards, with large scoring controls, saved courses, manual entry and course-card photo reading.",
       "availability": "Web app available · Android test APK available · Works with or without a Scorecard account"
     },
     {
