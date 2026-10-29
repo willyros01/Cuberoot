@@ -9,7 +9,7 @@ const root = process.cwd();
 const screenDir = path.join(root, "marker/assets/screens");
 const scenes = ["choose","signin","setup","course","manual","photo","verify","players","games",
                 "one","all","typed","card","fixing","date","corrections","correct","repost","start-member","totals","post","status","share","history","help","menu"];
-// Existing illustrations use Marker 0.6.4 source; caddie text updated for 0.7.1 on 29 October 2026.
+// Existing illustrations: Marker 0.6.4. Text: Caddie 0.7.1 and Follower 0.8.1 (29 Oct 2026).
 const guides = ["marker/quick-start/index.html", "marker/guide/index.html"];
 await fs.mkdir(screenDir, { recursive: true });
 const browser = await chromium.launch({ headless: true });
