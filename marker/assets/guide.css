@@ -30,3 +30,9 @@
  .tutorial ol{margin:0;padding-left:1.4em;orphans:3;widows:3}
  .tutorial li{break-inside:avoid;orphans:3;widows:3}
 }
+
+/* Apple Watch 0.9.8: scalable, large-print source-matched diagrams. */
+.watch-figure{display:block;max-width:950px;width:100%;margin:28px auto 38px}
+.watch-figure .watch-image{display:block;width:100%;height:auto;max-width:100%;border:4px solid #254d3a;border-radius:15px;background:#f6f3ea}
+.watch-figure figcaption{font-size:22px;line-height:1.5;color:#354f40;margin-top:12px}
+@media print{.watch-figure{max-width:170mm;margin:7mm auto 9mm;break-inside:avoid;page-break-inside:avoid}.watch-figure .watch-image{border-width:1.3mm}.watch-figure figcaption{font-size:12pt;line-height:1.35}}
