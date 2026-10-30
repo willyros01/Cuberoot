@@ -1,5 +1,6 @@
 // Documentation-only build. Captures static screen fixtures using the exact Marker CSS
 // and DOM patterns from its app.js, then updates the two public guide PDFs.
+// The Apple Watch (0.9.8) chapters contain source-matched SVG diagrams also included in PDFs.
 import { chromium } from "playwright";
 import fs from "node:fs/promises";
 import path from "node:path";
