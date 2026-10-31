@@ -24,6 +24,27 @@ function addFairpotAppStore(box) {
   })));
 }
 
+// The Scorecard's public iPhone/iPad App Store listing; reuse the official badge.
+function addScorecardAppStore(box) {
+  const row=[...box.querySelectorAll('.app-row')].find(node =>
+    node.querySelector('h3')?.textContent === 'The Scorecard');
+  const details=row?.querySelector('h3')?.parentElement;
+  if(!details)return;
+  const actions=details.querySelector('.actions') ||
+    details.appendChild(el('div',{class:'actions scorecard-store-actions'}));
+  actions.appendChild(el('a',{
+    class:'app-store-badge',
+    href:'https://apps.apple.com/app/id6817462903',
+    target:'_blank',
+    rel:'noopener noreferrer',
+    'aria-label':'Download The Scorecard on the Apple App Store'
+  },el('img',{
+    src:'assets/img/app-store-badge.svg',
+    alt:'Download on the App Store',
+    width:'165',height:'55',loading:'lazy'
+  })));
+}
+
 async function addFairpotDownload(box) {
   const base = 'downloads/fairpot.apk';
   try {
@@ -240,6 +261,7 @@ async function loadApps() {
         el('div', { class: 'avail', text: a.availability || ((av.now || 'Web app now') + ' · ' + (av.soon || 'iOS & Android soon')) })),
       el('a', { class: 'docs', href: 'docs.html?app=' + encodeURIComponent(a.slug), 'aria-label': 'Documentation for ' + a.name, text: 'Docs →' }))));
     addFairpotAppStore(box);
+    addScorecardAppStore(box);
     // Show FIDUNIO first; do not delay its link behind other APK checks.
     await addFidunioDownload(box);
     await addFairpotDownload(box);
