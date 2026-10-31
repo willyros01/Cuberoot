@@ -185,6 +185,16 @@
       "name": "The Marker",
       "docs": [
         {
+          "id": "marker-privacy-20261030",
+          "title": "Privacy and Card Retention - The Marker (large print)",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 12342,
+          "date": "2026-10-31T01:53:01.944Z",
+          "original": "index.html",
+          "path": "marker/privacy/index.html"
+        },
+        {
           "id": "ee5e754ff102abad9a8d22308797a1bc",
           "title": "Illustrated Quick Starter Guide - large print",
           "ext": "html",
