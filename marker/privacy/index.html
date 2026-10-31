@@ -30,7 +30,7 @@
 </nav>
 <h2 id="information">1. Information used</h2>
 <p>Depending on how you use The Marker, the app handles the course, tee, date, golfer names, handicaps, hole scores and totals. If you sign in with The Scorecard, it also uses your email account and Firebase account identifier, group memberships and relevant golfer identifiers. Guest play does not require your Scorecard email-and-password account; limited anonymous sign-in may still be used for online features.</p>
-<p>The Marker uses this information to save a round, synchronize caddie/follower scores when you choose that feature, and post eligible member rounds to The Scorecard. A Caddie/Follower live copy contains the course, tee, players' names, course handicaps and scores needed for the shared view; it does not include the playing group's internal golfer identifiers.</p>
+<p>The Marker uses this information to save a round, synchronize caddie/follower scores when you choose that feature, and post eligible member rounds to The Scorecard. A Caddie/Follower live copy contains the course, tee, players' names, course handicaps and scores needed for the shared view; it also records the account identifier of the person who shared it, but not the playing group's internal golfer identifiers.</p>
 <h2 id="phone">2. Cards saved on your phone or browser</h2>
 <div class="facts">
 <div class="fact"><strong>30 finished cards</strong>The Marker keeps up to the most recent 30 completed/retained cards on that device. Saving another can displace the oldest.</div>
@@ -68,6 +68,7 @@
 <h2 id="providers">7. Services, security, and questions</h2>
 <p>The Marker relies on <b>Google Firebase Authentication and Cloud Firestore</b> for sign-in and golf data, and a <b>Cloudflare Worker</b> for card sharing, posting, cleanup and optional scorecard-photo reading. Course search may use a course-information provider. Providers may process routine connection information under their own policies. The app does not sell card data or use advertising tracking.</p>
 <p>The privacy manifest for the iPhone app declares account email, name, user identifier, app content and optional images used for app functionality, not tracking.</p>
+<p><strong>Children.</strong> The Marker is not directed to children. It does not knowingly collect information from children.</p>
 <p>Questions about The Marker or a specific card can be sent to <a href="mailto:willyros01@gmail.com">willyros01@gmail.com</a>. For Scorecard account deletion and the effect on shared historical rounds, consult <a href="../../scorecard/privacy/">The Scorecard's separate policy</a> or <a href="../../scorecard/support/">Support</a>.</p>
 <p class="muted"><small>This page summarizes the card storage and deletion paths in The Marker source as of 30 October 2026, including the scheduled live-card cleanup. The effective date will change if the policy is revised.</small></p>
 <div class="foot"><p><a href="../quick-start/">Quick Starter</a> · <a href="../guide/">Complete User Guide</a> · <a href="../../docs.html?app=the-marker">Marker documents on Cuberoot</a> · <a href="../../index.html#apps">All apps</a></p></div>
