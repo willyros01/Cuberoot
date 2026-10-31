@@ -111,11 +111,12 @@ async function addScorecardDownload(box) {
     if (!row) return;
     const details = row.querySelector('h3')?.parentElement;
     if (!details) return;
-    details.appendChild(el('div', { class: 'actions' },
-      el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'scorecard-' + meta.run_id + '.apk',
-        'aria-label': 'Download The Scorecard Android APK' },
-        el('span', { class: 'apk-small', text: 'Download' }),
-        el('span', { class: 'apk-large', text: 'Android APK' }) )));
+    const actions=details.querySelector('.actions') ||
+      details.appendChild(el('div', { class: 'actions scorecard-store-actions' }));
+    actions.appendChild(el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'scorecard-' + meta.run_id + '.apk',
+      'aria-label': 'Download The Scorecard Android APK' },
+      el('span', { class: 'apk-small', text: 'Download' }),
+      el('span', { class: 'apk-large', text: 'Android APK' }) ));
   } catch (_) {
     // The download button appears only when the exact APK has been published.
   }
