@@ -45,6 +45,27 @@ function addScorecardAppStore(box) {
   })));
 }
 
+// The Marker's published iPhone/iPad/Apple Watch listing; use the same Apple badge.
+function addMarkerAppStore(box) {
+  const row=[...box.querySelectorAll('.app-row')].find(node =>
+    node.querySelector('h3')?.textContent === 'The Marker');
+  const details=row?.querySelector('h3')?.parentElement;
+  if(!details)return;
+  const actions=details.querySelector('.actions') ||
+    details.appendChild(el('div',{class:'actions marker-store-actions'}));
+  actions.appendChild(el('a',{
+    class:'app-store-badge',
+    href:'https://apps.apple.com/app/id6824006235',
+    target:'_blank',
+    rel:'noopener noreferrer',
+    'aria-label':'Download The Marker on the Apple App Store for iPhone, iPad and Apple Watch'
+  },el('img',{
+    src:'assets/img/app-store-badge.svg',
+    alt:'Download on the App Store',
+    width:'165',height:'55',loading:'lazy'
+  })));
+}
+
 async function addFairpotDownload(box) {
   const base = 'downloads/fairpot.apk';
   try {
@@ -236,11 +257,12 @@ async function addMarkerDownload(box) {
     if (!row) return;
     const details = row.querySelector('h3')?.parentElement;
     if (!details) return;
-    details.appendChild(el('div', { class: 'actions' },
-      el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'marker-' + meta.run_id + '.apk',
+    const actions=details.querySelector('.actions') ||
+      details.appendChild(el('div', { class: 'actions marker-store-actions' }));
+    actions.appendChild(el('a', { class: 'btn app-open android-apk-badge', href: url, download: 'marker-' + meta.run_id + '.apk',
         'aria-label': 'Download The Marker Android APK' },
         el('span', { class: 'apk-small', text: 'Download' }),
-        el('span', { class: 'apk-large', text: 'Android APK' }) )));
+        el('span', { class: 'apk-large', text: 'Android APK' }) ));
   } catch (_) {
     // Never advertise an absent or unverified Marker APK.
   }
@@ -263,6 +285,7 @@ async function loadApps() {
       el('a', { class: 'docs', href: 'docs.html?app=' + encodeURIComponent(a.slug), 'aria-label': 'Documentation for ' + a.name, text: 'Docs →' }))));
     addFairpotAppStore(box);
     addScorecardAppStore(box);
+    addMarkerAppStore(box);
     // Show FIDUNIO first; do not delay its link behind other APK checks.
     await addFidunioDownload(box);
     await addFairpotDownload(box);
