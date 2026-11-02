@@ -1,0 +1,22 @@
+/* The caddie and follow pages: get The Marker app first (Willy, 2 Nov 2026). */
+:root { color-scheme: light dark; --bg: #fbf7ee; --card: #fff; --ink: #14261f; --muted: #4a5a52; --pine: #1f5641; --line: #d5cbb4; --code-bg: #eef4f0; }
+@media (prefers-color-scheme: dark) { :root { --bg: #101713; --card: #19231e; --ink: #f4f2e9; --muted: #b9c4bd; --pine: #80c9aa; --line: #3a4a42; --code-bg: #22312a; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 21px; line-height: 1.5; }
+main { max-width: 640px; margin: 0 auto; padding: 24px 16px 40px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px 20px; }
+.brand { font-size: 15px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--pine); margin: 0 0 6px; }
+h1 { font-family: Georgia, serif; font-size: 34px; line-height: 1.15; margin: 0 0 18px; }
+.step { font-size: 22px; font-weight: 700; margin: 22px 0 12px; }
+.stores { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.store-badge { display: inline-flex; border-radius: 10px; text-decoration: none; }
+.store-badge img { display: block; width: 180px; height: 60px; }
+.apk-badge { box-sizing: border-box; width: 180px; height: 60px; padding: 4px 8px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: #000; color: #fff; border: 1px solid #a6a6a6; border-radius: 10px; text-decoration: none; line-height: 1; white-space: nowrap; }
+.apk-badge .small { font-size: 13px; }
+.apk-badge .large { font-size: 21px; font-weight: 600; }
+.store-badge:focus-visible, .apk-badge:focus-visible, a:focus-visible { outline: 3px solid var(--pine); outline-offset: 4px; }
+.code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 48px; font-weight: 800; letter-spacing: 6px; text-align: center; background: var(--code-bg); border-radius: 14px; padding: 14px 8px; margin: 8px 0 12px; overflow-wrap: anywhere; }
+.note { color: var(--muted); font-size: 19px; margin: 10px 0 0; }
+.web { margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 18px; color: var(--muted); }
+a { color: var(--pine); font-weight: 700; }
+[hidden] { display: none !important; }
