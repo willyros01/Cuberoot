@@ -1,8 +1,55 @@
-const target = new URL('https://willyros01.github.io/scorecard/');
-if (window.location.search) {
-  target.search = window.location.search;
-  window.location.replace(target.href);
-} else {
-  document.querySelector('[data-web-link]').href = target.href;
-  document.querySelector('[data-status]').hidden = false;
-}
+/* The Scorecard's join page (www.cuberoot-systems.com/scorecard/join/).
+ *
+ * Invitations, approval emails and Forgot password links all come here
+ * (Batch 2, Willy 23 Oct 2026: the app first, the web app only as a fallback).
+ * On a phone with The Scorecard installed, tapping the link opens the app
+ * directly and this page is never shown. Otherwise:
+ *   - on a phone: get the app first (App Store / Android); each button also
+ *     copies the link, so the new app can pick it up when first opened;
+ *   - on a computer: straight on to the web app, with the same link.
+ * The link is never used up here: only the app (or the web app) uses it, when
+ * joining is finished. */
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var web = new URL('https://willyros01.github.io/scorecard/');
+  web.search = window.location.search;
+  $('[data-web-link]').href = web.href;
+
+  var ua = navigator.userAgent || '';
+  var android = /Android|Silk|Kindle/i.test(ua);
+  var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  var hasLink = !!window.location.search;
+
+  /* A computer: the web app, as before. */
+  if (!android && !ios) { if (hasLink) window.location.replace(web.href); return; }
+
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('join')) { $('[data-title]').textContent = 'You are invited'; }
+  else if (params.get('mode') === 'signIn' || params.get('apply')) {
+    $('[data-title]').textContent = params.get('reset') === '1' || /reset%3D1/.test(window.location.search) ? 'Choose a new password' : 'Welcome to The Scorecard';
+  }
+  if (!hasLink) $('[data-lead]').textContent = 'Install the app, then open the link from your email or message again.';
+
+  /* Put this phone's store first, and hide the other one. */
+  var apk = $('[data-apk]'), store = $('[data-ios]');
+  if (android) store.hidden = true; else apk.hidden = true;
+
+  /* The signed Android download, as on the home page. */
+  fetch('../../downloads/scorecard-build.json', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (meta) {
+      if (meta && Number.isSafeInteger(meta.run_id) && meta.run_id > 0) {
+        apk.href = '../../downloads/scorecard.apk?build=' + meta.run_id;
+        apk.setAttribute('download', 'scorecard-' + meta.run_id + '.apk');
+      }
+    })
+    .catch(function () { /* the plain download link stays */ });
+
+  /* Copy and continue: the link goes on the clipboard as the store opens. */
+  function copyLink() {
+    if (!hasLink || !navigator.clipboard) return;
+    navigator.clipboard.writeText(window.location.href).then(function () { $('[data-copied]').hidden = false; }, function () {});
+  }
+  apk.addEventListener('click', copyLink);
+  store.addEventListener('click', copyLink);
+})();
