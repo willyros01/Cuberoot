@@ -38,6 +38,22 @@
   }
   if (!hasLink) $('[data-lead]').textContent = 'Install the app, then open the link from your email or message again.';
 
+  /* Android and Fire (Willy, 5 Nov 2026): a link opened in the browser (from
+     a saved file, say) never reaches the app by itself. This button hands it
+     to The Scorecard directly; without the app, Android goes to the download. */
+  if (android && hasLink) {
+    var here = 'www.cuberoot-systems.com/scorecard/join/' + window.location.search;
+    var fallback = 'https://www.cuberoot-systems.com/downloads/scorecard.apk';
+    $('[data-open]').href = 'intent://' + here + '#Intent;scheme=https;package=io.github.willyros01.scorecard;S.browser_fallback_url=' + encodeURIComponent(fallback) + ';end';
+    $('[data-open-box]').hidden = false;
+    $('[data-get-step]').hidden = true;
+    $('[data-lead]').textContent = 'Your link opens in The Scorecard app.';
+    $('[data-then]').textContent = 'After installing';
+  }
+  if (ios && hasLink) {
+    $('[data-ios-open]').hidden = false;
+  }
+
   /* Put this phone's store first, and hide the other one. */
   var apk = $('[data-apk]'), store = $('[data-ios]');
   if (android) store.hidden = true; else apk.hidden = true;
