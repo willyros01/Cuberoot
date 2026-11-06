@@ -54,7 +54,23 @@ now = time.time() * 1000
 day = lambda ms: time.strftime("%Y-%m-%d", time.gmtime(int(ms) / 1000)) if ms else "never"
 guests = [u for u in users if not u.get("email") and not u.get("providerUserInfo")]
 old = [u for u in guests if u["localId"] not in members and now - int(u.get("lastLoginAt") or u.get("createdAt") or 0) > 30 * 86400000]
-note(f"STEP 13 — guest sign-ins in no group, unused 30+ days: {len(old)}")
+# Safety (Willy, 6 Nov: no data corruption): a guest that any golfer is linked
+# to, or that owns a group, is KEPT, so no golfer or group points at a removed
+# sign-in.
+def everyDoc(coll):
+    res, t = [], ""
+    while True:
+        j = call(f"{FS}/{coll}?pageSize=300" + (f"&pageToken={t}" if t else ""))
+        res += j.get("documents", []); t = j.get("nextPageToken", "")
+        if not t: return res
+sv = lambda d, k: ((d.get("fields") or {}).get(k) or {}).get("stringValue", "")
+linked = {sv(d, "linkedUid") for d in everyDoc("golfers")} - {""}
+owners = {sv(d, "ownerUid") for d in everyDoc("associations")} - {""}
+kept = [u for u in old if u["localId"] in linked or u["localId"] in owners]
+old = [u for u in old if u not in kept]
+note(f"STEP 13 — guest sign-ins in no group, unused 30+ days, linked to nothing: {len(old)}")
+note(f"kept because a golfer or group points at them: {len(kept)}")
+for u in kept: note(f"  KEPT {u['localId']}")
 for u in old: note(f"  {u['localId']}  made {day(u.get('createdAt'))}  last used {day(u.get('lastLoginAt'))}")
 docs = []
 for u in old:
@@ -79,7 +95,9 @@ def summary():
     print("\n================ SUMMARY ================")
     print(f"Sign-ins in total:                       {len(users)}")
     print(f"Guest sign-ins (no email):               {len(guests)}")
-    print(f"  in no group, unused 30+ days:          {len(old)}")
+    print(f"  in no group, unused 30+ days:          {len(old) + len(kept)}")
+    print(f"  kept (a golfer or group points at it): {len(kept)}")
+    print(f"  to be removed:                         {len(old)}")
     print(f"  their own small records:               {len(docs)}")
     print(f"Accounts with an email:                  {len(withEmail)}")
     print(f"  missing from the account-email list:   {len(missing)}")
