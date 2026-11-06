@@ -1,82 +1,116 @@
 #!/bin/bash
-# gst.txt — The Scorecard: old guest sign-ins that belong to no group (step 13),
-# and the account-email list check (step 29).
-# Prepared by Claude for Willy, 6 Nov 2026.
-#   bash gst.txt        LIST ONLY. Changes nothing.
-#   bash gst.txt go     Removes exactly what the list shows, after a backup.
-# A guest = a sign-in with no email. Only guests in NO group, and not used for
-# 30 days, are touched. Their own small records (terms, preferences, group
-# list) go first in ONE database commit (all or nothing); then the sign-ins.
+# gst.txt — The Scorecard, two clean-ups (prepared by Claude for Willy, 6 Nov 2026)
+#   Step 13: old guest sign-ins (no email) that belong to no group and have
+#            not been used for 30 days.
+#   Step 29: accounts with an email that are missing from the account-email list.
+#
+#   bash gst.txt       LIST ONLY. Changes nothing. The full list goes to a file;
+#                      the screen shows a short summary, last, so it stays visible.
+#   bash gst.txt go    Does exactly what the list shows, after saving a backup:
+#                      the guests' own small records in ONE commit (all or
+#                      nothing), then the guest sign-ins; the missing
+#                      account-email entries in ONE commit.
 set -u
 gcloud config set project scorecard-f41b8 >/dev/null 2>&1
 P=scorecard-f41b8
 MODE="${1:-list}"
-TOKEN="$(gcloud auth print-access-token)" || { echo "STOPPED: not signed in to gcloud"; exit 1; }
+TOKEN="${GST_TOKEN:-$(gcloud auth print-access-token 2>/dev/null)}"
+[ -n "$TOKEN" ] || { echo "STOPPED: not signed in to gcloud. Nothing changed."; exit 1; }
 export P MODE TOKEN
 python3 - <<'PY'
-import json, os, sys, time, urllib.request
+import json, os, sys, time, urllib.request, urllib.error
 P, MODE, TOKEN = os.environ["P"], os.environ["MODE"], os.environ["TOKEN"]
+FSB = os.environ.get("GST_FS", "https://firestore.googleapis.com/v1")
+AUB = os.environ.get("GST_AUTH", "https://identitytoolkit.googleapis.com/v1")
 H = {"Authorization": "Bearer " + TOKEN, "Content-Type": "application/json", "x-goog-user-project": P}
-def call(url, body=None, method=None):
-    req = urllib.request.Request(url, data=json.dumps(body).encode() if body is not None else None, headers=H, method=method or ("POST" if body is not None else "GET"))
+stamp = time.strftime("%Y%m%d-%H%M%S")
+LIST = f"gst-list-{stamp}.txt"
+out = open(LIST, "w")
+def note(line=""): out.write(line + "\n")
+def stop(msg):
+    out.close()
+    print(f"\nSTOPPED. Nothing was changed.\nWhy: {msg}\nThe details so far are in {LIST}"); sys.exit(1)
+def call(url, body=None):
+    req = urllib.request.Request(url, data=json.dumps(body).encode() if body is not None else None, headers=H, method="POST" if body is not None else "GET")
     try:
         with urllib.request.urlopen(req) as r: return json.loads(r.read() or b"{}")
     except urllib.error.HTTPError as e:
-        print("STOPPED, nothing changed:", e.code, e.read()[:300].decode(errors="replace")); sys.exit(1)
-FS = f"https://firestore.googleapis.com/v1/projects/{P}/databases/(default)/documents"
+        stop(f"Google answered {e.code}: {e.read()[:200].decode(errors='replace')}")
+    except Exception as e:
+        stop(f"no answer from Google ({e})")
+FS = f"{FSB}/projects/{P}/databases/(default)/documents"
+print("Working… (reading sign-ins and groups; this takes about a minute)")
 # every sign-in
 users, tok = [], ""
 while True:
-    j = call(f"https://identitytoolkit.googleapis.com/v1/projects/{P}/accounts:batchGet?maxResults=1000" + (f"&nextPageToken={tok}" if tok else ""))
+    j = call(f"{AUB}/projects/{P}/accounts:batchGet?maxResults=1000" + (f"&nextPageToken={tok}" if tok else ""))
     users += j.get("users", []); tok = j.get("nextPageToken", "")
     if not tok: break
 # every membership in every group
 members = set()
 for d in call(f"{FS}:runQuery", {"structuredQuery": {"from": [{"collectionId": "members", "allDescendants": True}], "select": {"fields": []}}}):
-    if "document" in d: members.add(d["document"]["name"].split("/")[-1])
+    if isinstance(d, dict) and "document" in d: members.add(d["document"]["name"].split("/")[-1])
 now = time.time() * 1000
-guests = [u for u in users if not u.get("email") and not u.get("providerUserInfo")]
-old = [u for u in guests if u["localId"] not in members and now - int(u.get("lastLoginAt", u.get("createdAt", "0"))) > 30 * 86400000]
 day = lambda ms: time.strftime("%Y-%m-%d", time.gmtime(int(ms) / 1000)) if ms else "never"
-print(f"sign-ins: {len(users)}   guests: {len(guests)}   guests in no group, unused 30+ days: {len(old)}")
-for u in old: print(f"  {u['localId'][:8]}…  made {day(u.get('createdAt'))}  last used {day(u.get('lastLoginAt'))}")
-# their own small records
+guests = [u for u in users if not u.get("email") and not u.get("providerUserInfo")]
+old = [u for u in guests if u["localId"] not in members and now - int(u.get("lastLoginAt") or u.get("createdAt") or 0) > 30 * 86400000]
+note(f"STEP 13 — guest sign-ins in no group, unused 30+ days: {len(old)}")
+for u in old: note(f"  {u['localId']}  made {day(u.get('createdAt'))}  last used {day(u.get('lastLoginAt'))}")
 docs = []
 for u in old:
     for parent in (f"users/{u['localId']}/terms", f"users/{u['localId']}/prefs", f"userGroups/{u['localId']}/groups"):
-        j = call(f"{FS}/{parent}?pageSize=300")
-        docs += [(d["name"], d["updateTime"]) for d in j.get("documents", [])]
-print(f"their own records (terms, preferences, group list): {len(docs)}")
-# Step 29: every account with an email must be in the account-email list,
-# so the application form can say "this email already has an account".
-def ekey(e): return e.strip().lower()
-have = set()
-tok = ""
+        docs += [(d["name"], d["updateTime"]) for d in call(f"{FS}/{parent}?pageSize=300").get("documents", [])]
+note(f"their own small records: {len(docs)}")
+for n, _ in docs: note("  " + n.split("/documents/")[1])
+# step 29
+have, tok = set(), ""
 while True:
-    j = call(f"{FS}/accountEmails?pageSize=300&mask.fieldPaths=__none__" + (f"&pageToken={tok}" if tok else ""))
+    j = call(f"{FS}/accountEmails?pageSize=300" + (f"&pageToken={tok}" if tok else ""))
     have |= {d["name"].split("/")[-1] for d in j.get("documents", [])}
     tok = j.get("nextPageToken", "")
     if not tok: break
-missing = [u for u in users if u.get("email") and ekey(u["email"]) not in have]
-print(f"accounts with an email: {sum(1 for u in users if u.get('email'))}   missing from the account-email list: {len(missing)}")
-for u in missing: print(f"  {u['email']}")
+withEmail = [u for u in users if u.get("email")]
+missing = [u for u in withEmail if u["email"].strip().lower() not in have]
+note(f"\nSTEP 29 — accounts with an email: {len(withEmail)}; missing from the account-email list: {len(missing)}")
+for u in missing: note("  " + u["email"])
+out.close()
+
+def summary():
+    print("\n================ SUMMARY ================")
+    print(f"Sign-ins in total:                       {len(users)}")
+    print(f"Guest sign-ins (no email):               {len(guests)}")
+    print(f"  in no group, unused 30+ days:          {len(old)}")
+    print(f"  their own small records:               {len(docs)}")
+    print(f"Accounts with an email:                  {len(withEmail)}")
+    print(f"  missing from the account-email list:   {len(missing)}")
+    for u in missing[:10]: print(f"     {u['email']}")
+    print(f"The full list is in the file {LIST}")
 if MODE != "go":
-    print("\nLIST ONLY: nothing was changed. To remove exactly these, type:  bash gst.txt go"); sys.exit(0)
-if not old and not missing: print("Nothing to do."); sys.exit(0)
-stamp = time.strftime("%Y%m%d-%H%M%S")
-with open(f"gst-backup-{stamp}.json", "w") as f: json.dump({"signIns": old, "records": [call("https://firestore.googleapis.com/v1/" + n) for n, _ in docs]}, f)
-print(f"backup saved: gst-backup-{stamp}.json")
+    summary()
+    print("\nLIST ONLY: nothing was changed.")
+    print("To do exactly this, type:  bash gst.txt go")
+    sys.exit(0)
+
+if not old and not missing:
+    summary(); print("\nNothing to do. Nothing was changed."); sys.exit(0)
+backup = f"gst-backup-{stamp}.json"
+json.dump({"guestSignIns": old, "records": [call(f"{FSB}/{n}") for n, _ in docs], "missingEmails": [u["email"] for u in missing]}, open(backup, "w"))
+done = []
 if docs:
-    if len(docs) > 500: print("STOPPED, nothing changed: more than 500 records"); sys.exit(1)
+    if len(docs) > 500: stop("more than 500 records; ask Claude for a split run")
     r = call(f"{FS}:commit", {"writes": [{"delete": n, "currentDocument": {"updateTime": t}} for n, t in docs]})
-    print(f"records removed in one commit at {r.get('commitTime')}")
-if missing:
-    r = call(f"{FS}:commit", {"writes": [{"update": {"name": f"projects/{P}/databases/(default)/documents/accountEmails/{ekey(u['email'])}", "fields": {"at": {"timestampValue": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}}}, "currentDocument": {"exists": False}} for u in missing]})
-    print(f"account-email list: {len(missing)} added in one commit at {r.get('commitTime')}")
+    done.append(f"guests' small records removed in one commit: {len(docs)}")
+removed, notRemoved = 0, []
 ids = [u["localId"] for u in old]
 for i in range(0, len(ids), 1000):
-    r = call(f"https://identitytoolkit.googleapis.com/v1/projects/{P}/accounts:batchDelete", {"localIds": ids[i:i+1000], "force": True})
-    errs = r.get("errors", [])
-    print(f"sign-ins removed: {len(ids[i:i+1000]) - len(errs)}" + (f"; NOT removed: {len(errs)} {errs[:3]}" if errs else ""))
-print("DONE")
+    r = call(f"{AUB}/projects/{P}/accounts:batchDelete", {"localIds": ids[i:i+1000], "force": True})
+    errs = r.get("errors", []); notRemoved += errs; removed += len(ids[i:i+1000]) - len(errs)
+if ids: done.append(f"guest sign-ins removed: {removed}" + (f"; NOT removed: {len(notRemoved)}" if notRemoved else ""))
+if missing:
+    at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    call(f"{FS}:commit", {"writes": [{"update": {"name": f"projects/{P}/databases/(default)/documents/accountEmails/{u['email'].strip().lower()}", "fields": {"at": {"timestampValue": at}}}, "currentDocument": {"exists": False}} for u in missing]})
+    done.append(f"account-email entries added in one commit: {len(missing)}")
+summary()
+print(f"\nBackup saved: {backup}")
+print("DONE:"); [print("  " + d) for d in done]
 PY
