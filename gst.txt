@@ -1,0 +1,65 @@
+#!/bin/bash
+# gst.txt — The Scorecard: old guest sign-ins that belong to no group (step 13).
+# Prepared by Claude for Willy, 6 Nov 2026.
+#   bash gst.txt        LIST ONLY. Changes nothing.
+#   bash gst.txt go     Removes exactly what the list shows, after a backup.
+# A guest = a sign-in with no email. Only guests in NO group, and not used for
+# 30 days, are touched. Their own small records (terms, preferences, group
+# list) go first in ONE database commit (all or nothing); then the sign-ins.
+set -u
+gcloud config set project scorecard-f41b8 >/dev/null 2>&1
+P=scorecard-f41b8
+MODE="${1:-list}"
+TOKEN="$(gcloud auth print-access-token)" || { echo "STOPPED: not signed in to gcloud"; exit 1; }
+export P MODE TOKEN
+python3 - <<'PY'
+import json, os, sys, time, urllib.request
+P, MODE, TOKEN = os.environ["P"], os.environ["MODE"], os.environ["TOKEN"]
+H = {"Authorization": "Bearer " + TOKEN, "Content-Type": "application/json", "x-goog-user-project": P}
+def call(url, body=None, method=None):
+    req = urllib.request.Request(url, data=json.dumps(body).encode() if body is not None else None, headers=H, method=method or ("POST" if body is not None else "GET"))
+    try:
+        with urllib.request.urlopen(req) as r: return json.loads(r.read() or b"{}")
+    except urllib.error.HTTPError as e:
+        print("STOPPED, nothing changed:", e.code, e.read()[:300].decode(errors="replace")); sys.exit(1)
+FS = f"https://firestore.googleapis.com/v1/projects/{P}/databases/(default)/documents"
+# every sign-in
+users, tok = [], ""
+while True:
+    j = call(f"https://identitytoolkit.googleapis.com/v1/projects/{P}/accounts:batchGet?maxResults=1000" + (f"&nextPageToken={tok}" if tok else ""))
+    users += j.get("users", []); tok = j.get("nextPageToken", "")
+    if not tok: break
+# every membership in every group
+members = set()
+for d in call(f"{FS}:runQuery", {"structuredQuery": {"from": [{"collectionId": "members", "allDescendants": True}], "select": {"fields": []}}}):
+    if "document" in d: members.add(d["document"]["name"].split("/")[-1])
+now = time.time() * 1000
+guests = [u for u in users if not u.get("email") and not u.get("providerUserInfo")]
+old = [u for u in guests if u["localId"] not in members and now - int(u.get("lastLoginAt", u.get("createdAt", "0"))) > 30 * 86400000]
+day = lambda ms: time.strftime("%Y-%m-%d", time.gmtime(int(ms) / 1000)) if ms else "never"
+print(f"sign-ins: {len(users)}   guests: {len(guests)}   guests in no group, unused 30+ days: {len(old)}")
+for u in old: print(f"  {u['localId'][:8]}…  made {day(u.get('createdAt'))}  last used {day(u.get('lastLoginAt'))}")
+# their own small records
+docs = []
+for u in old:
+    for parent in (f"users/{u['localId']}/terms", f"users/{u['localId']}/prefs", f"userGroups/{u['localId']}/groups"):
+        j = call(f"{FS}/{parent}?pageSize=300")
+        docs += [(d["name"], d["updateTime"]) for d in j.get("documents", [])]
+print(f"their own records (terms, preferences, group list): {len(docs)}")
+if MODE != "go":
+    print("\nLIST ONLY: nothing was changed. To remove exactly these, type:  bash gst.txt go"); sys.exit(0)
+if not old: print("Nothing to remove."); sys.exit(0)
+stamp = time.strftime("%Y%m%d-%H%M%S")
+with open(f"gst-backup-{stamp}.json", "w") as f: json.dump({"signIns": old, "records": [call("https://firestore.googleapis.com/v1/" + n) for n, _ in docs]}, f)
+print(f"backup saved: gst-backup-{stamp}.json")
+if docs:
+    if len(docs) > 500: print("STOPPED, nothing changed: more than 500 records"); sys.exit(1)
+    r = call(f"{FS}:commit", {"writes": [{"delete": n, "currentDocument": {"updateTime": t}} for n, t in docs]})
+    print(f"records removed in one commit at {r.get('commitTime')}")
+ids = [u["localId"] for u in old]
+for i in range(0, len(ids), 1000):
+    r = call(f"https://identitytoolkit.googleapis.com/v1/projects/{P}/accounts:batchDelete", {"localIds": ids[i:i+1000], "force": True})
+    errs = r.get("errors", [])
+    print(f"sign-ins removed: {len(ids[i:i+1000]) - len(errs)}" + (f"; NOT removed: {len(errs)} {errs[:3]}" if errs else ""))
+print("DONE")
+PY
