@@ -15,6 +15,14 @@
   web.search = window.location.search;
   $('[data-web-link]').href = web.href;
 
+  /* A password reset or email check from an older app (2.30.0) still goes to
+     Firebase's own page, as before, so nothing breaks while phones update. */
+  var mode0 = new URLSearchParams(window.location.search).get('mode');
+  if (mode0 && mode0 !== 'signIn') {
+    window.location.replace('https://scorecard-f41b8.firebaseapp.com/__/auth/action' + window.location.search);
+    return;
+  }
+
   var ua = navigator.userAgent || '';
   var android = /Android|Silk|Kindle/i.test(ua);
   var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
