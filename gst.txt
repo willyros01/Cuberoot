@@ -1,5 +1,6 @@
 #!/bin/bash
-# gst.txt — The Scorecard: old guest sign-ins that belong to no group (step 13).
+# gst.txt — The Scorecard: old guest sign-ins that belong to no group (step 13),
+# and the account-email list check (step 29).
 # Prepared by Claude for Willy, 6 Nov 2026.
 #   bash gst.txt        LIST ONLY. Changes nothing.
 #   bash gst.txt go     Removes exactly what the list shows, after a backup.
@@ -46,9 +47,22 @@ for u in old:
         j = call(f"{FS}/{parent}?pageSize=300")
         docs += [(d["name"], d["updateTime"]) for d in j.get("documents", [])]
 print(f"their own records (terms, preferences, group list): {len(docs)}")
+# Step 29: every account with an email must be in the account-email list,
+# so the application form can say "this email already has an account".
+def ekey(e): return e.strip().lower()
+have = set()
+tok = ""
+while True:
+    j = call(f"{FS}/accountEmails?pageSize=300&mask.fieldPaths=__none__" + (f"&pageToken={tok}" if tok else ""))
+    have |= {d["name"].split("/")[-1] for d in j.get("documents", [])}
+    tok = j.get("nextPageToken", "")
+    if not tok: break
+missing = [u for u in users if u.get("email") and ekey(u["email"]) not in have]
+print(f"accounts with an email: {sum(1 for u in users if u.get('email'))}   missing from the account-email list: {len(missing)}")
+for u in missing: print(f"  {u['email']}")
 if MODE != "go":
     print("\nLIST ONLY: nothing was changed. To remove exactly these, type:  bash gst.txt go"); sys.exit(0)
-if not old: print("Nothing to remove."); sys.exit(0)
+if not old and not missing: print("Nothing to do."); sys.exit(0)
 stamp = time.strftime("%Y%m%d-%H%M%S")
 with open(f"gst-backup-{stamp}.json", "w") as f: json.dump({"signIns": old, "records": [call("https://firestore.googleapis.com/v1/" + n) for n, _ in docs]}, f)
 print(f"backup saved: gst-backup-{stamp}.json")
@@ -56,6 +70,9 @@ if docs:
     if len(docs) > 500: print("STOPPED, nothing changed: more than 500 records"); sys.exit(1)
     r = call(f"{FS}:commit", {"writes": [{"delete": n, "currentDocument": {"updateTime": t}} for n, t in docs]})
     print(f"records removed in one commit at {r.get('commitTime')}")
+if missing:
+    r = call(f"{FS}:commit", {"writes": [{"update": {"name": f"projects/{P}/databases/(default)/documents/accountEmails/{ekey(u['email'])}", "fields": {"at": {"timestampValue": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}}}, "currentDocument": {"exists": False}} for u in missing]})
+    print(f"account-email list: {len(missing)} added in one commit at {r.get('commitTime')}")
 ids = [u["localId"] for u in old]
 for i in range(0, len(ids), 1000):
     r = call(f"https://identitytoolkit.googleapis.com/v1/projects/{P}/accounts:batchDelete", {"localIds": ids[i:i+1000], "force": True})
