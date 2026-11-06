@@ -1,0 +1,20 @@
+name: Scorecard join page tests (Android, Fire, iPhone, computer)
+on:
+  push:
+    paths: [scorecard/join/**, build/tests/join-page.mjs, .github/workflows/join-page-tests.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  join:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: |
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund playwright@1.49.1
+          npx playwright install --with-deps chromium webkit
+      - run: node build/tests/join-page.mjs .
