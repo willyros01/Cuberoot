@@ -1,0 +1,52 @@
+#!/bin/bash
+# chk.txt — The Scorecard: READ-ONLY check after gst.txt (Claude for Willy, 6 Nov 2026).
+#   bash chk.txt     Changes nothing. Shows a short result at the end.
+# Checks: (1) the two Apple test emails are in the account-email list;
+#         (2) every golfer linked to a sign-in points at a sign-in that exists.
+set -u
+gcloud config set project scorecard-f41b8 >/dev/null 2>&1
+P=scorecard-f41b8
+TOKEN="${GST_TOKEN:-$(gcloud auth print-access-token 2>/dev/null)}"
+[ -n "$TOKEN" ] || { echo "STOPPED: not signed in to gcloud."; exit 1; }
+export P TOKEN
+python3 - <<'PY'
+import json, os, sys, urllib.request, urllib.error
+P, TOKEN = os.environ["P"], os.environ["TOKEN"]
+FSB = os.environ.get("GST_FS", "https://firestore.googleapis.com/v1")
+AUB = os.environ.get("GST_AUTH", "https://identitytoolkit.googleapis.com/v1")
+H = {"Authorization": "Bearer " + TOKEN, "Content-Type": "application/json", "x-goog-user-project": P}
+def call(url, body=None):
+    req = urllib.request.Request(url, data=json.dumps(body).encode() if body is not None else None, headers=H, method="POST" if body is not None else "GET")
+    try:
+        with urllib.request.urlopen(req) as r: return json.loads(r.read() or b"{}")
+    except urllib.error.HTTPError as e:
+        print(f"STOPPED (nothing changed): Google answered {e.code}"); sys.exit(1)
+FS = f"{FSB}/projects/{P}/databases/(default)/documents"
+def every(coll):
+    out, t = [], ""
+    while True:
+        j = call(f"{FS}/{coll}?pageSize=300" + (f"&pageToken={t}" if t else ""))
+        out += j.get("documents", []); t = j.get("nextPageToken", "")
+        if not t: return out
+print("Checking… (about 20 seconds)")
+ids = {d["name"].split("/")[-1] for d in every("accountEmails")}
+want = ["willyros01+apple02@gmail.com", "willyros01+apple03@gmail.com"]
+ok1 = all(w in ids for w in want)
+users, t = [], ""
+while True:
+    j = call(f"{AUB}/projects/{P}/accounts:batchGet?maxResults=1000" + (f"&nextPageToken={t}" if t else ""))
+    users += j.get("users", []); t = j.get("nextPageToken", "")
+    if not t: break
+live = {u["localId"] for u in users}
+golfers = every("golfers")
+sv = lambda d, k: ((d.get("fields") or {}).get(k) or {}).get("stringValue", "")
+linked = [(sv(d, "name"), sv(d, "linkedUid")) for d in golfers if sv(d, "linkedUid")]
+broken = [n for n, u in linked if u not in live]
+print("\n============ CHECK RESULT ============")
+for w in want: print(f"{'OK     ' if w in ids else 'MISSING'}  {w} in the account-email list")
+print(f"Golfers linked to a sign-in:           {len(linked)}")
+print(f"  pointing at a sign-in that is gone:  {len(broken)}")
+for n in broken: print(f"     {n}")
+print("\nRESULT: " + ("ALL GOOD" if ok1 and not broken else "PROBLEM — send Claude this screen"))
+print("READ-ONLY: nothing was changed.")
+PY
