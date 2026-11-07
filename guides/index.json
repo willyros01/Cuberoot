@@ -68,6 +68,16 @@
           "date": "2026-10-12",
           "original": "scorecard-android-quick-start.html",
           "path": "guides/the-scorecard/android-quick-start.html"
+        },
+        {
+          "id": "scorecard-code-guide-20261107",
+          "title": "Illustrated Application & Code Documentation — web, iOS and Android",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 0,
+          "date": "2026-11-07",
+          "original": "index.html",
+          "path": "scorecard/code-guide/index.html"
         }
       ]
     },
@@ -233,6 +243,16 @@
           "date": "2026-10-30T21:35:08.819Z",
           "original": "marker-user-guide.pdf",
           "path": "guides/the-marker/marker-user-guide.pdf"
+        },
+        {
+          "id": "marker-code-guide-20261107",
+          "title": "Illustrated Application & Code Documentation — Caddie, Follower and Apple Watch",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 0,
+          "date": "2026-11-07",
+          "original": "index.html",
+          "path": "marker/code-guide/index.html"
         }
       ]
     }
