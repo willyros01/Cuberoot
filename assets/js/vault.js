@@ -239,8 +239,8 @@ export function titleFromFilename(filename, appName) {
   return base || String(filename);
 }
 
-const MIME = { html: 'text/html', htm: 'text/html', pdf: 'application/pdf', md: 'text/plain; charset=utf-8', markdown: 'text/plain; charset=utf-8',
-  txt: 'text/plain; charset=utf-8', html: 'text/plain; charset=utf-8', png: 'image/png', jpg: 'image/jpeg',
+const MIME = { pdf: 'application/pdf', md: 'text/plain; charset=utf-8', markdown: 'text/plain; charset=utf-8',
+  txt: 'text/plain; charset=utf-8', png: 'image/png', jpg: 'image/jpeg',
   jpeg: 'image/jpeg', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', zip: 'application/zip' };
 export function fileKind(filename) {
