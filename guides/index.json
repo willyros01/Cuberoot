@@ -78,6 +78,16 @@
           "date": "2026-11-07",
           "original": "index.html",
           "path": "scorecard/code-guide/index.html"
+        },
+        {
+          "id": "scorecard-js-reference-20261107",
+          "title": "JavaScript Function Reference — detailed code and technical notes",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 0,
+          "date": "2026-11-07",
+          "original": "index.html",
+          "path": "scorecard/javascript-reference/index.html"
         }
       ]
     },
@@ -253,6 +263,16 @@
           "date": "2026-11-07",
           "original": "index.html",
           "path": "marker/code-guide/index.html"
+        },
+        {
+          "id": "marker-js-reference-20261107",
+          "title": "JavaScript Function Reference — detailed code and technical notes",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 0,
+          "date": "2026-11-07",
+          "original": "index.html",
+          "path": "marker/javascript-reference/index.html"
         }
       ]
     }
