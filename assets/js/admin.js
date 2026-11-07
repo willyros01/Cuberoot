@@ -3,7 +3,7 @@
 import { SITE } from './config.js?v=1.3.0';
 import { el, icon, hydrateIcons, formatDate, formatSize, connectionNotice } from './common.js?v=1.3.0';
 import { GitHubRepo } from './github.js?v=1.3.0';
-import * as V from './vault.js?v=1.3.0';
+import * as V from './vault.js?v=1.3.1';
 import { downloadsTab } from './downloads-admin.js?v=2.1.5';
 
 hydrateIcons();
@@ -503,7 +503,7 @@ function docsTab() {
 }
 
 function addSection(appName) {
-  const input = el('input', { type: 'file', multiple: true, hidden: true, accept: '.pdf,.md,.markdown,.txt,.docx,.xlsx,.png,.jpg,.jpeg,.zip' });
+  const input = el('input', { type: 'file', multiple: true, hidden: true, accept: '.html,.htm,.pdf,.md,.markdown,.txt,.docx,.xlsx,.png,.jpg,.jpeg,.zip' });
   const addFiles = files => {
     const name = ui.app === '__new' ? ui.newApp : appName;
     for (const f of files) ui.pending.push({ file: f, title: V.titleFromFilename(f.name, name), public: false });
