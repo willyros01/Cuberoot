@@ -1,7 +1,7 @@
 // Documentation library: sign in, decrypt the lists, open documents. All in the browser.
 import { SITE } from './config.js?v=1.3.0';
 import { init, el, icon, formatDate, formatSize, connectionNotice } from './common.js?v=1.3.0';
-import { openReader, decryptIndex, decryptDoc, indexPath, docPath, PUBLIC_INDEX } from './vault.js?v=1.3.0';
+import { openReader, decryptIndex, decryptDoc, indexPath, docPath, PUBLIC_INDEX } from './vault.js?v=1.3.1';
 
 init();
 { const n = connectionNotice(); if (n) document.getElementById('signin-form').prepend(n); }
