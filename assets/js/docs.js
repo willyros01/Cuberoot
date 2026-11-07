@@ -57,7 +57,7 @@ async function render() {
       el('div', { class: 'appdocs-head' }, el('a', { href: 'index.html#apps' }, el('b', { text: '← All apps' })),
         el('h1', { text: 'Documents' })),
       el('div', { class: 'all-apps' }, names.map(a => {
-        const n = a.slug === 'the-scorecard' ? 2 : (pubApps[a.slug] ? pubApps[a.slug].docs.length : 0);
+        const n = a.slug === 'the-scorecard' ? 2 + (pubApps[a.slug] ? pubApps[a.slug].docs.length : 0) : (pubApps[a.slug] ? pubApps[a.slug].docs.length : 0);
         return el('a', { class: 'panel', href: 'docs.html?app=' + encodeURIComponent(a.slug) }, a.name, el('span', { text: n ? `${n} public` : 'Sign in to see' }));
       })),
       moreBox('', ''));
