@@ -57,7 +57,8 @@ JS
   codesign -dv "$APP" 2> "$TMP/signature.txt"
   grep -q 'Authority=Developer ID Application:' "$TMP/signature.txt"
   grep -q 'TeamIdentifier=VXMLKHF72B' "$TMP/signature.txt"
-  lipo "$APP/Contents/MacOS/ate-desktop" -verify_arch arm64 x86_64
+  EXECUTABLE=$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$APP/Contents/Info.plist")
+  lipo "$APP/Contents/MacOS/$EXECUTABLE" -verify_arch arm64 x86_64
   spctl --assess --type execute "$APP"
   hdiutil detach "$TMP/mount" -quiet
   DEST=ate-mac.dmg
