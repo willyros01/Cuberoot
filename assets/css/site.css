@@ -500,6 +500,8 @@ dialog::backdrop { background: rgba(42,50,66,.45); }
   outline: 3px solid var(--blue); outline-offset: 4px;
 }
 
-/* ATE keeps readable labels and a real Android logo. */
-.app-row.ate-row{grid-template-columns:64px minmax(0,1fr) auto}.ate-row .app-art{width:64px;height:64px;border-radius:12px}.ate-android-download{display:inline-flex;align-items:center;gap:12px;background:#111;color:#fff}.ate-android-download img{width:30px;height:30px}
-@media(max-width:700px){.app-row.ate-row{grid-template-columns:54px minmax(0,1fr)}.ate-row .app-art{width:54px;height:54px}.ate-row .docs{grid-column:2}}
+/* App artwork uses the same icon column as the other app rows. */
+.app-row .app-art { width: 40px; height: 40px; object-fit: contain; border-radius: 8px; }
+@media (max-width: 900px) {
+  .app-row .app-art { width: 30px; height: 30px; margin-top: 4px; }
+}
