@@ -12,5 +12,23 @@
     "signature": "unsigned",
     "verification": "ci-installed-and-launched",
     "published_at": "2026-11-11T19:52:12.754Z"
+  },
+  "mac": {
+    "app": "ATE",
+    "platform": "mac-universal",
+    "version": "0.4.1",
+    "run_id": 43103034568,
+    "source_sha": "465e0ef847044340769a7708c75823ba9f4308d2",
+    "binary_source_sha": "c0e502ede069d1d5ef5e6218b8bc53b047fb386d",
+    "signing_source_sha": "61584530cb7cc4bec7210cc7297ad8bdf0af2708",
+    "notarization_id": "06073ae2-3718-46f1-a9c2-9866b9606821",
+    "file": "ate-mac.dmg",
+    "sha256": "effb04191554bf0359f03c43489832e8b0c3609d38fe18837c793fb437766136",
+    "bytes": 5737577,
+    "team_id": "VXMLKHF72B",
+    "signature": "developer-id",
+    "notarization": "Accepted",
+    "stapled": true,
+    "published_at": "2026-11-11T21:28:53.962Z"
   }
 }
