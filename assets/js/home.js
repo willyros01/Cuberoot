@@ -276,7 +276,7 @@ async function addATEDownload(box) {
     const row=box.querySelector('.ate-row');if(!row)return;
     const details=row.querySelector('h3').parentElement;
     const actions=details.querySelector('.actions')||details.appendChild(el('div',{class:'actions'}));
-    actions.appendChild(el('a',{class:'btn ate-android-download',href:'downloads/ate.apk?build='+meta.run_id,download:'ate-'+meta.version+'-'+meta.run_id+'.apk','aria-label':'Download ATE Android APK'},el('img',{src:'ate/assets/android.svg',alt:'Android logo',width:30,height:30}),'Android APK'));
+    actions.appendChild(el('a',{class:'btn app-open android-apk-badge',href:'downloads/ate.apk?build='+meta.run_id,download:'ate-'+meta.version+'-'+meta.run_id+'.apk','aria-label':'Download ATE Android APK'},el('span',{class:'apk-small',text:'Download'}),el('span',{class:'apk-large',text:'Android APK'})));
     row.querySelector('.avail').textContent='Android APK available · iPhone/iPad TestFlight · Mac and Windows downloads coming';
   }catch{}
 }
