@@ -1,4 +1,5 @@
 name: Publish ATE desktop installers
+# ATE 0.4.1 Mac recovery run 43103034568: publish only the verified, stapled Developer ID installer.
 on:
   workflow_dispatch:
   schedule:
