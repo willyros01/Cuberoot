@@ -57,7 +57,7 @@ JS
   codesign -dv "$APP" 2> "$TMP/signature.txt"
   grep -q 'Authority=Developer ID Application:' "$TMP/signature.txt"
   grep -q 'TeamIdentifier=VXMLKHF72B' "$TMP/signature.txt"
-  lipo -verify_arch arm64 x86_64 "$APP/Contents/MacOS/ate-desktop"
+  lipo "$APP/Contents/MacOS/ate-desktop" -verify_arch arm64 x86_64
   spctl --assess --type execute "$APP"
   hdiutil detach "$TMP/mount" -quiet
   DEST=ate-mac.dmg
