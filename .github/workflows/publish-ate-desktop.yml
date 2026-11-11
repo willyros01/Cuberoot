@@ -19,6 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           node --input-type=module <<'JS'
@@ -29,7 +31,13 @@ jobs:
             if(!r.ok)throw Error('Report lookup HTTP '+r.status);
             const report=await r.json();let current={};
             try{current=JSON.parse(readFileSync('downloads/ate-desktop-build.json','utf8'))}catch{}
-            ready=['windows','mac'].some(p=>report[p+'_artifact_id']&&(current[p]?.run_id||0)<report.run_id);
+            let macReady=false;
+            if(report.mac_artifact_id){
+              const jobs=await fetch('https://api.github.com/repos/willyros01/clear-page/actions/runs/'+report.run_id+'/jobs?per_page=100',{headers:{Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json'}});
+              if(!jobs.ok)throw Error('Mac verification job lookup HTTP '+jobs.status);
+              macReady=(await jobs.json()).jobs.some(j=>j.name.includes('mac-release')&&j.name.includes('website')&&j.conclusion==='success');
+            }
+            ready=!!((report.windows_artifact_id&&(current.windows?.run_id||0)<report.run_id)||(macReady&&(current.mac?.run_id||0)<report.run_id));
           }
           appendFileSync(process.env.GITHUB_OUTPUT,'ready='+ready+'\n');
           JS
