@@ -45,8 +45,8 @@
       "name": "SpendRecorder",
       "slug": "spendrecorder",
       "icon": "receipt",
-      "description": "Personal expense tracking, multiple currencies and receipt photos, with your records stored privately on your device.",
-      "availability": "Android signed APK in preparation · iOS TestFlight"
+      "description": "Personal expense tracking with automatic recurring expenses, multiple currencies and receipt photos, stored privately on your device.",
+      "availability": "Signed Android APK available · iOS TestFlight"
     },
     {
       "name": "Cipher",

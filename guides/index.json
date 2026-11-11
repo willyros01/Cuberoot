@@ -180,6 +180,16 @@
       "name": "SpendRecorder",
       "docs": [
         {
+          "id": "spendrecorder-guide-1-1-0",
+          "title": "SpendRecorder 1.1 — User Guide and Automatic Recurring Expenses",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 9166,
+          "date": "2026-11-10",
+          "original": "index.html",
+          "path": "spendrecorder/guide/index.html"
+        },
+        {
           "id": "f1bce04ae40a3a6ec10cfe65b7b2c165",
           "title": "Legacy Expense Ledger — User Guide (archived)",
           "ext": "pdf",
