@@ -277,7 +277,7 @@ async function addATEDownload(box) {
     const details=row.querySelector('h3').parentElement;
     const actions=details.querySelector('.actions')||details.appendChild(el('div',{class:'actions'}));
     actions.appendChild(el('a',{class:'btn app-open android-apk-badge',href:'downloads/ate.apk?build='+meta.run_id,download:'ate-'+meta.version+'-'+meta.run_id+'.apk','aria-label':'Download ATE Android APK'},el('span',{class:'apk-small',text:'Download'}),el('span',{class:'apk-large',text:'Android APK'})));
-    row.querySelector('.avail').textContent='Android APK available · iPhone/iPad TestFlight · Mac and Windows downloads coming';
+    row.querySelector('.avail').textContent='Android APK available · iPhone/iPad & Mac TestFlight · Mac and Windows downloads coming';
   }catch{}
 }
 
@@ -298,7 +298,7 @@ async function addATEDesktopDownloads(box) {
       available.push(platform);
       actions.appendChild(el('a',{class:'btn app-open android-apk-badge',href:'downloads/'+file+'?build='+m.run_id,download:file,'aria-label':'Download ATE '+label+' installer',title:platform==='windows'?'Windows x64 installer; not digitally signed':'For Intel and Apple silicon Macs'},el('span',{class:'apk-small',text:'Download'}),el('span',{class:'apk-large',text:label})));
     }
-    if(available.length){row.querySelector('.avail').textContent='Android APK available · iPhone/iPad TestFlight · '+(available.includes('mac')?'Mac universal available':'Mac download coming')+' · '+(available.includes('windows')?'Windows installer available':'Windows download coming');}
+    if(available.length){row.querySelector('.avail').textContent='Android APK available · iPhone/iPad & Mac TestFlight · '+(available.includes('mac')?'Mac universal available':'Mac download coming')+' · '+(available.includes('windows')?'Windows installer available':'Windows download coming');}
   } catch {}
 }
 

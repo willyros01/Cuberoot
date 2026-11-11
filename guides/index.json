@@ -274,7 +274,7 @@
           "title": "Quick Start Guide - large print",
           "ext": "html",
           "mime": "text/html",
-          "size": 6558,
+          "size": 6590,
           "date": "2026-11-11",
           "original": "index.html",
           "path": "ate/quick-start/index.html"
@@ -284,7 +284,7 @@
           "title": "Full User Guide - large print",
           "ext": "html",
           "mime": "text/html",
-          "size": 13990,
+          "size": 14047,
           "date": "2026-11-11",
           "original": "index.html",
           "path": "ate/guide/index.html"
@@ -294,7 +294,7 @@
           "title": "Quick Start Guide - large-print PDF",
           "ext": "pdf",
           "mime": "application/pdf",
-          "size": 237550,
+          "size": 237538,
           "date": "2026-11-11",
           "original": "ate-quick-start.pdf",
           "path": "guides/ate/ate-quick-start.pdf"
@@ -304,7 +304,7 @@
           "title": "Full User Guide - large-print PDF",
           "ext": "pdf",
           "mime": "application/pdf",
-          "size": 247279,
+          "size": 247293,
           "date": "2026-11-11",
           "original": "ate-user-guide.pdf",
           "path": "guides/ate/ate-user-guide.pdf"

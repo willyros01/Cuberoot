@@ -2,7 +2,7 @@
   "quick": [
     [
       "Get ATE",
-      "<p>ATE means <b>Another Text Editor</b>. It is a simple full-screen text and code editor. No account or sign-in is required.</p><ul><li><b>Android:</b> download the signed APK from the ATE page on Cuberoot. Open the downloaded file and follow Android’s installation prompts. If asked, allow your browser or Files app to install this file; you can turn that permission off afterwards.</li><li><b>iPhone/iPad:</b> ATE is in TestFlight. Accept your invitation, open TestFlight and tap Install or Update. It is not yet an App Store release.</li><li><b>Windows:</b> download the Windows x64 installer from Cuberoot, open it and follow the setup prompts. It installs for your Windows account. The initial installer is unsigned, so Windows may show an unknown-publisher warning.</li><li><b>Mac:</b> a universal build for Intel and Apple silicon is in preparation. Use the download only when it is listed on Cuberoot. Mac TestFlight access is separate from iPad installation.</li></ul>"
+      "<p>ATE means <b>Another Text Editor</b>. It is a simple full-screen text and code editor. No account or sign-in is required.</p><ul><li><b>Android:</b> download the signed APK from the ATE page on Cuberoot. Open the downloaded file and follow Android’s installation prompts. If asked, allow your browser or Files app to install this file; you can turn that permission off afterwards.</li><li><b>iPhone/iPad:</b> ATE is in TestFlight. Accept your invitation, open TestFlight and tap Install or Update. It is not yet an App Store release.</li><li><b>Windows:</b> download the Windows x64 installer from Cuberoot, open it and follow the setup prompts. It installs for your Windows account. The initial installer is unsigned, so Windows may show an unknown-publisher warning.</li><li><b>Mac:</b> native Mac TestFlight is available for Intel and Apple silicon. Accept the invitation in TestFlight on your Mac. The website installer awaits Developer ID signing.</li></ul>"
     ],
     [
       "Write or open a file",
@@ -32,7 +32,7 @@
   "full": [
     [
       "About ATE and platform availability",
-      "<p>ATE is a local plain-text and code editor with CodeMirror, syntax colors, automatic indentation, search/replace and optional Vim key bindings. It does not run your code. You can edit without creating an account.</p><p>Android is distributed as a signed APK from Cuberoot. iOS/iPadOS is currently an invitation-only TestFlight build. The Windows x64 installer is available from Cuberoot. The universal Mac release for Intel and Apple silicon is in preparation; its download appears only after signing and notarization.</p>"
+      "<p>ATE is a local plain-text and code editor with CodeMirror, syntax colors, automatic indentation, search/replace and optional Vim key bindings. It does not run your code. You can edit without creating an account.</p><p>Android is distributed as a signed APK from Cuberoot. iOS/iPadOS is currently an invitation-only TestFlight build. The Windows x64 installer is available from Cuberoot. Native Mac TestFlight is available for Intel and Apple silicon. Its website installer appears only after Developer ID signing and notarization.</p>"
     ],
     [
       "The editor and Menu",
