@@ -3,14 +3,14 @@
   "windows": {
     "app": "ATE",
     "platform": "windows-x64",
-    "version": "0.4.0",
-    "run_id": 43047238630,
-    "source_sha": "ef1715db044b6edafa971736d986899b6041c76e",
+    "version": "0.4.1",
+    "run_id": 43088542493,
+    "source_sha": "c0e502ede069d1d5ef5e6218b8bc53b047fb386d",
     "file": "ate-windows.exe",
-    "sha256": "316ea8435de8c0e8cd9da6ed458226004452cf1be0bf161baec35571044376f9",
-    "bytes": 2141917,
+    "sha256": "1aa3cb360916c12d00700fa74faf0ade5474541cf5e4ae70e945a04f00621159",
+    "bytes": 2141606,
     "signature": "unsigned",
     "verification": "ci-installed-and-launched",
-    "published_at": "2026-11-11T15:28:54.721Z"
+    "published_at": "2026-11-11T19:52:12.754Z"
   }
 }
