@@ -8,6 +8,7 @@ on:
     paths: ['build/publish-ate-desktop.sh', '.github/workflows/publish-ate-desktop.yml']
 permissions:
   contents: write
+  pages: write
 concurrency:
   group: cuberoot-ate-desktop
   cancel-in-progress: false
@@ -55,3 +56,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: bash build/publish-ate-desktop.sh
+      - name: Request Pages deployment of the published installers
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail --silent --show-error --request POST \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header 'Accept: application/vnd.github+json' \
+            'https://api.github.com/repos/willyros01/Cuberoot/pages/builds' > "$RUNNER_TEMP/pages-build.json"
