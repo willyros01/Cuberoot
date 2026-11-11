@@ -281,6 +281,24 @@ async function addATEDownload(box) {
   }catch{}
 }
 
+
+async function addATEDesktopDownloads(box) {
+  try {
+    const response=await fetch('downloads/ate-desktop-build.json',{cache:'no-store'});if(!response.ok)return;
+    const meta=await response.json();if(meta.app!=='ATE')return;
+    const row=box.querySelector('.ate-row');if(!row)return;
+    const details=row.querySelector('h3').parentElement;
+    const actions=details.querySelector('.actions')||details.appendChild(el('div',{class:'actions'}));
+    for(const [platform,label,file] of [['mac','Mac universal','ate-mac.dmg'],['windows','Windows','ate-windows.exe']]){
+      const m=meta[platform];
+      if(!m||m.file!==file||!Number.isSafeInteger(m.run_id)||m.run_id<1||!/^\\d+\\.\\d+\\.\\d+$/.test(m.version||'')||! /^[a-f0-9]{64}$/.test(m.sha256||''))continue;
+      if(platform==='mac'&&(m.signature!=='developer-id'||m.team_id!=='VXMLKHF72B'||m.notarization!=='Accepted'||m.stapled!==true))continue;
+      if(platform==='windows'&&m.verification!=='ci-installed-and-launched')continue;
+      actions.appendChild(el('a',{class:'btn app-open android-apk-badge',href:'downloads/'+file+'?build='+m.run_id,download:file,'aria-label':'Download ATE '+label+' installer',title:platform==='windows'?'Windows x64 installer; not digitally signed':'For Intel and Apple silicon Macs'},el('span',{class:'apk-small',text:'Download'}),el('span',{class:'apk-large',text:label})));
+    }
+  } catch {}
+}
+
 async function loadApps() {
   const box = document.getElementById('app-list');
   try {
@@ -308,6 +326,7 @@ async function loadApps() {
     await addSpendRecorderDownload(box);
     await addWireDownload(box);
     await addATEDownload(box);
+    await addATEDesktopDownloads(box);
   } catch (e) {
     box.replaceChildren(el('p', { class: 'muted', text: 'The app list could not be loaded. Please refresh the page.' }));
   }

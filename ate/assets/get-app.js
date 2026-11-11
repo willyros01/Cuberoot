@@ -10,3 +10,18 @@ async function download(){
  }catch{}
 }
 download();
+
+async function desktopDownloads(){
+ try{
+  const response=await fetch('/downloads/ate-desktop-build.json',{cache:'no-store'});if(!response.ok)return;
+  const meta=await response.json();if(meta.app!=='ATE')return;
+  for(const [p,label,file] of [['mac','Mac universal','ate-mac.dmg'],['windows','Windows x64','ate-windows.exe']]){
+   const m=meta[p];if(!m||m.file!==file||!Number.isSafeInteger(m.run_id)||m.run_id<1||!/^\\d+\\.\\d+\\.\\d+$/.test(m.version||'')||!/^[a-f0-9]{64}$/.test(m.sha256||''))continue;
+   if(p==='mac'&&(m.signature!=='developer-id'||m.team_id!=='VXMLKHF72B'||m.notarization!=='Accepted'||m.stapled!==true))continue;
+   if(p==='windows'&&m.verification!=='ci-installed-and-launched')continue;
+   const link=document.getElementById(p+'-download');link.href='/downloads/'+file+'?build='+m.run_id;link.download=file;link.hidden=false;
+   document.getElementById(p+'-status').textContent=label+' available · Version '+m.version+(p==='mac'?' · Signed and notarized':' · Unsigned installer');
+  }
+ }catch{}
+}
+desktopDownloads();
