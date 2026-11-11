@@ -53,6 +53,16 @@
       "slug": "cipher",
       "icon": "chat",
       "description": "End-to-end encrypted messaging."
+    },
+    {
+      "name": "Another Text Editor (ATE)",
+      "slug": "ate",
+      "icon": "doc",
+      "iconSrc": "ate/assets/icon.png",
+      "url": "ate/",
+      "actionLabel": "Downloads & guides →",
+      "description": "A clear space for text and code: large adjustable text, keyword colors, automatic indentation, search and replace, select/copy, and optional Vim controls. No account required.",
+      "availability": "iPhone/iPad TestFlight · Android APK in preparation · Mac and Windows downloads coming"
     }
   ],
   "availability": {

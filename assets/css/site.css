@@ -499,3 +499,7 @@ dialog::backdrop { background: rgba(42,50,66,.45); }
 .app-row .android-apk-badge:focus-visible {
   outline: 3px solid var(--blue); outline-offset: 4px;
 }
+
+/* ATE keeps readable labels and a real Android logo. */
+.app-row.ate-row{grid-template-columns:64px minmax(0,1fr) auto}.ate-row .app-art{width:64px;height:64px;border-radius:12px}.ate-row h3{font-size:30px}.ate-row p{font-size:24px}.ate-row .avail,.ate-row .docs{font-size:23px}.ate-android-download{display:inline-flex;align-items:center;gap:12px;background:#111;color:#fff}.ate-android-download img{width:30px;height:30px}
+@media(max-width:700px){.app-row.ate-row{grid-template-columns:54px minmax(0,1fr)}.ate-row .app-art{width:54px;height:54px}.ate-row .docs{grid-column:2}}

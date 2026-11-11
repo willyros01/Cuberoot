@@ -1,0 +1,90 @@
+{
+  "quick": [
+    [
+      "Get ATE",
+      "<p>ATE means <b>Another Text Editor</b>. It is a simple full-screen text and code editor. No account or sign-in is required.</p><ul><li><b>Android:</b> download the signed APK from the ATE page on Cuberoot. Open the downloaded file and follow Android\u2019s installation prompts. If asked, allow your browser or Files app to install this file; you can turn that permission off afterwards.</li><li><b>iPhone/iPad:</b> ATE is in TestFlight. Accept your invitation, open TestFlight and tap Install or Update. It is not yet an App Store release.</li><li><b>Mac and Windows:</b> desktop downloads are coming; no desktop installer is available yet.</li></ul>"
+    ],
+    [
+      "Write or open a file",
+      "<ol><li>Open ATE and tap the large editing area to write.</li><li>To open an existing file, tap <b>Menu \u2192 Open</b> and choose a plain-text file from your device or an available file provider.</li><li>Use <b>Menu \u2192 New</b> for a blank document. Confirm replacement only after saving anything you need.</li></ol>"
+    ],
+    [
+      "Choose readable text",
+      "<p>Tap <b>Menu</b>. Use <b>Text size</b> or A\u2212 / A+ to set the display from <b>10 to 54 pt</b>; the default is 27 pt. Choose Light or Dark, and Text or Icons for buttons. These settings change your view, not the contents of your file. Tap <b>Done</b> to return.</p>"
+    ],
+    [
+      "Save a separate copy",
+      "<ol><li>In Menu, enter a <b>File name</b>, such as <code>notes.txt</code> or <code>script.py</code>. Tap Done.</li><li>Tap <b>Save file</b>. On iPhone/iPad, choose <b>Save to Files</b> in the system share sheet. On Android, choose a file/storage app if offered, or another destination from the share sheet.</li><li>Finish the system save/share action and check the destination. ATE saves/shares a copy; it does not overwrite the original opened file.</li></ol><p class=\"note\">A local recovery draft is helpful, but it is not an independent backup. Save a file copy before clearing app data or uninstalling ATE.</p>"
+    ],
+    [
+      "Find, replace and copy",
+      "<p><b>Menu \u2192 Search / Replace</b> opens Find and Replace fields. Use Next or Previous to move between matches. Replace changes one match; Replace all changes the document. Undo mistakes with Ctrl+Z or Command+Z.</p><p>For copying the whole document, choose <b>Menu \u2192 Select all</b>, reopen Menu and choose <b>Copy</b>. Paste in your other app. Copy does not remove text.</p>"
+    ],
+    [
+      "Close your document",
+      "<p>Tap <b>Close</b>, then choose <b>Keep editing</b>, <b>Save and close</b>, or <b>Close without saving</b>. Closing without saving removes the recovery draft and clears the editor; files already saved on the device remain.</p><p><b>iPhone/iPad:</b> no extra \u201cEditor closed\u201d page appears. Use the Home gesture to leave the app. <b>Android:</b> Close also leaves the app; Android Back closes an open panel first, or opens the closing choices.</p>"
+    ],
+    [
+      "Try Vim only if you want it",
+      "<p>With a hardware keyboard, choose <b>Menu \u2192 Editing \u2192 Vim</b>. Press <code>i</code> to type and <code>Esc</code> or <code>Ctrl+[</code> for Normal mode. Type <code>/word</code>, press Enter, then <code>n</code> for the next match or <code>N</code> for the opposite direction. Type <code>:</code> in Normal mode for a command. Return to <b>Standard</b> for ordinary editing.</p>"
+    ]
+  ],
+  "full": [
+    [
+      "About ATE and platform availability",
+      "<p>ATE is a local plain-text and code editor with CodeMirror, syntax colors, automatic indentation, search/replace and optional Vim key bindings. It does not run your code. You can edit without creating an account.</p><p>Android is distributed as a signed APK from Cuberoot. iOS/iPadOS is currently an invitation-only TestFlight build. Mac and Windows versions are planned for download; those installers are not available yet.</p>"
+    ],
+    [
+      "The editor and Menu",
+      "<p>The top row contains <b>ATE</b>, <b>Menu</b>, <b>Close</b> and <b>Save file</b>. The editing area fills the available space. Word and character counts appear at the bottom. Menu holds New, Open, Search / Replace, Go to line, Select all, Copy and Help, plus file and display settings. Tap <b>Done</b> to leave Menu.</p><p>With Text buttons, commands display words. With Icons, the same commands use symbols with accessible labels. Full screen hides the main toolbar; <b>Exit full screen</b> restores it.</p>"
+    ],
+    [
+      "New documents and file names",
+      "<p>Choose <b>Menu \u2192 New</b> to start over. If the current editor contains text, ATE asks before replacing it. Choose Keep editing to cancel. New does not save the previous document.</p><p>Enter the document\u2019s name in Menu. A name without an extension receives <code>.txt</code> when saving. Typical names are <code>shopping.txt</code>, <code>notes.md</code>, <code>page.html</code> and <code>script.py</code>. ATE keeps one active document at a time.</p>"
+    ],
+    [
+      "Open files safely",
+      "<p>Choose <b>Menu \u2192 Open</b>. If a document is already open, confirm replacing it only when you no longer need its current in-memory contents. The system file picker can show local storage and supported providers.</p><p>ATE imports plain text, including common code, Markdown, CSV, JSON and log files. It does not preserve Word, PDF or rich-text formatting. Files larger than <b>10 MB</b> and content containing null characters are refused. Cancelling the file picker keeps the current document.</p>"
+    ],
+    [
+      "Save and share",
+      "<p><b>Save file</b> opens the native system share sheet with a text-file copy. iPhone/iPad: choose <b>Save to Files</b>, choose a folder, then complete Save. Android: select a compatible file/storage app if one is available, or choose another share destination. Available destinations depend on installed apps.</p><p>Opening a file does not grant ATE an overwrite link to that original. Save creates or shares a copy. ATE\u2019s message that the share sheet closed does not prove the destination saved it; check the destination yourself.</p><p>If save/share is cancelled or reports an error, keep editing and try again. <b>Save and close</b> retains a recovery draft as an additional precaution.</p>"
+    ],
+    [
+      "Recovery, privacy and backups",
+      "<p>ATE automatically stores a recovery draft locally on the same device. Reopening the app can restore that draft. Text size, appearance, button style and editing mode are remembered separately.</p><p>There is no ATE cloud synchronization, online account or cross-device draft backup. Clearing app/site data or uninstalling can remove local recovery data. Save independent copies in Files or another chosen destination. Share sheets and file providers may send content to destinations you select.</p>"
+    ],
+    [
+      "Text size, colors and full screen",
+      "<p>Choose <b>Menu \u2192 Text size</b>, or A\u2212 / A+, from <b>10 to 54 pt</b>. The default is <b>27 pt</b>. Direct size entry accepts whole-number points. The setting changes display size only.</p><p>Use Light/Dark for the editing theme and Text/Icons for button labels. Choose Full screen for more room, then Exit full screen to restore controls. On-screen keyboards naturally reduce the visible editing area.</p>"
+    ],
+    [
+      "Language colors and indentation",
+      "<p>Choose Plain text, JavaScript, HTML, CSS or Python in Menu. Recognized file extensions select a language automatically; you can change it. Other formats remain editable as plain text.</p><p>New lines receive language-aware indentation, using <b>four spaces</b>. Indent and Unindent affect the current line or selected lines. On a hardware keyboard, Tab indents and Shift+Tab unindents. Syntax colors are a reading aid, not a compiler or guarantee that code is correct.</p>"
+    ],
+    [
+      "Search and replace",
+      "<ol><li>Choose <b>Menu \u2192 Search / Replace</b>, or Ctrl+F / Command+F.</li><li>Enter text in Find. Use Next and Previous; searches wrap through the document.</li><li>Enable Match case to distinguish capital letters. By word matches whole words. Leave Regexp off for ordinary text; turn it on only when you intend a regular expression.</li><li>Enter replacement text. Replace changes the selected match; Replace all changes all matches. Undo immediately if the result is wrong.</li><li>Use the panel\u2019s close button to return to the document.</li></ol>"
+    ],
+    [
+      "Go to line, select and copy",
+      "<p><b>Menu \u2192 Go to line</b> jumps to the line number you enter. <b>Select all</b> selects the whole document. Copy uses the current selection, so select text first. To copy everything, Select all, then reopen Menu and choose Copy.</p><p>If clipboard permission is unavailable, ATE displays a Copy text box for manual selection and your device\u2019s Copy command. The system clipboard and Vim\u2019s internal yank register are separate.</p>"
+    ],
+    [
+      "Hardware keyboard reference",
+      "<div class=\"guide-table-wrap\"><table class=\"guide-table\"><tr><th>Action</th><th>Windows / Android</th><th>Mac / iPad keyboard</th></tr><tr><td>Save copy</td><td>Ctrl+S</td><td>Command+S</td></tr><tr><td>Find</td><td>Ctrl+F</td><td>Command+F</td></tr><tr><td>Select all</td><td>Ctrl+A</td><td>Command+A</td></tr><tr><td>Copy</td><td>Ctrl+C</td><td>Command+C</td></tr><tr><td>Undo</td><td>Ctrl+Z</td><td>Command+Z</td></tr><tr><td>Indent / unindent</td><td>Tab / Shift+Tab</td><td>Tab / Shift+Tab</td></tr></table></div>"
+    ],
+    [
+      "Optional Vim mode",
+      "<p>Choose <b>Menu \u2192 Editing \u2192 Vim</b>. Vim works best with a hardware keyboard. Standard remains the default. In Normal mode, commands move or change text. Press <code>i</code> to enter Insert mode and type. Press <code>Esc</code> or <code>Ctrl+[</code> to return to Normal mode. Choose Standard to switch back.</p><p>In Normal mode, <code>:</code> opens the visible command line. Enter runs the command; Escape cancels it. This is embedded Vim key-binding support, not a complete Vim installation or a terminal.</p><div class=\"guide-table-wrap\"><table class=\"guide-table\"><tr><th>Command</th><th>Meaning</th></tr><tr><td>/word then Enter</td><td>Search forward for word</td></tr><tr><td>n / N</td><td>Repeat search in the same / opposite direction</td></tr><tr><td>:25</td><td>Go to line 25</td></tr><tr><td>:s/old/new/</td><td>Replace first match on current line</td></tr><tr><td>:%s/old/new/g</td><td>Replace all matches in the document</td></tr><tr><td>ggVG</td><td>Select the whole document</td></tr><tr><td>y / p</td><td>Yank / paste using Vim\u2019s register</td></tr><tr><td>u / Ctrl+R</td><td>Undo / redo</td></tr><tr><td>:w</td><td>Open Save/share for a copy</td></tr><tr><td>:q</td><td>Open the document-closing choices</td></tr><tr><td>:wq</td><td>Save/share, then close if the save action completes</td></tr></table></div><p>For a system clipboard copy to another app, use Menu \u2192 Copy. Vim\u2019s <code>y</code> does not by itself copy to the device clipboard.</p>"
+    ],
+    [
+      "Close, discard and leave the app",
+      "<p>Choose <b>Close</b> or Vim <code>:q</code> for three choices:</p><ul><li><b>Keep editing:</b> cancel closing.</li><li><b>Save and close:</b> open Save/share, then clear the active editor if that action completes. A recovery draft is retained.</li><li><b>Close without saving:</b> discard the local recovery draft, clear the active document and its undo history, close panels and dismiss keyboard focus. Existing saved files are kept.</li></ul><p>No extra \u201cEditor closed\u201d page is shown. On <b>iPhone/iPad</b>, use the Home gesture to leave ATE; iOS has no supported app-quit control. On <b>Android</b>, closing the document also leaves the app. Android Back closes an open dialog first, or opens the closing choices when the editor is active.</p>"
+    ],
+    [
+      "Update and troubleshoot",
+      "<p><b>Android updates:</b> download the latest signed APK from Cuberoot and install over the existing ATE app. Keep the same signing identity; uninstalling first may remove recovery data. <b>iOS updates:</b> open TestFlight and tap Update for ATE.</p><p><b>App missing from TestFlight:</b> check the invitation and the Apple Account used in TestFlight. This is not a public App Store download. <b>No saved file:</b> confirm the share-sheet destination and completed action; ATE does not overwrite the opened file automatically.</p><p><b>Cannot type in Vim:</b> press <code>i</code>, or change Editing to Standard. <b>Cannot find Escape:</b> try Ctrl+[ on a hardware keyboard. <b>Unexpected replacement:</b> Undo, then check Match case, By word and Regexp. <b>Opened file looks wrong:</b> ensure it is plain text, not a PDF/Word document or a binary file.</p><p>For the current app version, open Menu \u2192 Help. Keep a saved file copy before troubleshooting storage or reinstalling.</p>"
+    ]
+  ]
+}

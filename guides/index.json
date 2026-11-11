@@ -265,6 +265,51 @@
           "path": "marker/code-guide/index.html"
         }
       ]
+    },
+    "ate": {
+      "name": "Another Text Editor (ATE)",
+      "docs": [
+        {
+          "id": "ate-quick-html-032",
+          "title": "Quick Start Guide - large print",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 5800,
+          "date": "2026-11-11",
+          "original": "index.html",
+          "path": "ate/quick-start/index.html"
+        },
+        {
+          "id": "ate-full-html-032",
+          "title": "Full User Guide - large print",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 12512,
+          "date": "2026-11-11",
+          "original": "index.html",
+          "path": "ate/guide/index.html"
+        },
+        {
+          "id": "ate-quick-pdf-032",
+          "title": "Quick Start Guide - large-print PDF",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 236308,
+          "date": "2026-11-11",
+          "original": "ate-quick-start.pdf",
+          "path": "guides/ate/ate-quick-start.pdf"
+        },
+        {
+          "id": "ate-full-pdf-032",
+          "title": "Full User Guide - large-print PDF",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 245519,
+          "date": "2026-11-11",
+          "original": "ate-user-guide.pdf",
+          "path": "guides/ate/ate-user-guide.pdf"
+        }
+      ]
     }
   }
 }

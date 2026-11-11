@@ -268,19 +268,32 @@ async function addMarkerDownload(box) {
   }
 }
 
+async function addATEDownload(box) {
+  try {
+    const response=await fetch('downloads/ate-build.json',{cache:'no-store'});if(!response.ok)return;
+    const meta=await response.json();
+    if(meta.app!=='ATE'||meta.signer_sha256!=='ef654829950fdf9d59f061c7b0fdc80358373a619fc02fa10480816e0665d6e4'||!Number.isSafeInteger(meta.run_id)||meta.run_id<1||!/^[a-f0-9]{64}$/.test(meta.apk_sha256||''))return;
+    const row=box.querySelector('.ate-row');if(!row)return;
+    const details=row.querySelector('h3').parentElement;
+    const actions=details.querySelector('.actions')||details.appendChild(el('div',{class:'actions'}));
+    actions.appendChild(el('a',{class:'btn ate-android-download',href:'downloads/ate.apk?build='+meta.run_id,download:'ate-'+meta.version+'-'+meta.run_id+'.apk','aria-label':'Download ATE Android APK'},el('img',{src:'ate/assets/android.svg',alt:'Android logo',width:30,height:30}),'Android APK'));
+    row.querySelector('.avail').textContent='Android APK available · iPhone/iPad TestFlight · Mac and Windows downloads coming';
+  }catch{}
+}
+
 async function loadApps() {
   const box = document.getElementById('app-list');
   try {
     const res = await fetch('assets/data/apps.json', { cache: 'no-store' });
     const data = await res.json();
     const av = data.availability || {};
-    box.replaceChildren(...data.apps.map(a => el('div', { class: 'app-row' },
-      icon(a.icon),
+    box.replaceChildren(...data.apps.map(a => el('div', { class: 'app-row'+(a.slug==='ate'?' ate-row':'') },
+      a.iconSrc ? el('img',{class:'app-art',src:a.iconSrc,alt:'',width:64,height:64}) : icon(a.icon),
       el('div', {},
         el('h3', { text: a.name }),
         el('p', { text: a.description }),
         a.url ? el('div', { class: 'actions' },
-          el('a', { class: 'btn app-open', href: a.url, 'aria-label': 'Open ' + a.name, text: 'Open ' + a.name + ' →' })) : null,
+          el('a', { class: 'btn app-open', href: a.url, 'aria-label': 'Open ' + a.name, text: a.actionLabel || ('Open ' + a.name + ' →') })) : null,
         el('div', { class: 'avail', text: a.availability || ((av.now || 'Web app now') + ' · ' + (av.soon || 'iOS & Android soon')) })),
       el('a', { class: 'docs', href: 'docs.html?app=' + encodeURIComponent(a.slug), 'aria-label': 'Documentation for ' + a.name, text: 'Docs →' }))));
     addFairpotAppStore(box);
@@ -294,6 +307,7 @@ async function loadApps() {
     await addMarkerDownload(box);
     await addSpendRecorderDownload(box);
     await addWireDownload(box);
+    await addATEDownload(box);
   } catch (e) {
     box.replaceChildren(el('p', { class: 'muted', text: 'The app list could not be loaded. Please refresh the page.' }));
   }
