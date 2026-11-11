@@ -25,7 +25,7 @@ jobs:
         run: |
           node --input-type=module <<'JS'
           import {readFileSync,appendFileSync} from 'node:fs';
-          const r=await fetch('https://raw.githubusercontent.com/willyros01/clear-page/desktop-releases/ate-desktop-last-run.json',{headers:{'Cache-Control':'no-cache'}});
+          const r=await fetch('https://raw.githubusercontent.com/willyros01/clear-page/desktop-releases/ate-desktop-last-run.json?t='+Date.now(),{headers:{'Cache-Control':'no-cache'}});
           let ready=false;
           if(r.status!==404){
             if(!r.ok)throw Error('Report lookup HTTP '+r.status);
