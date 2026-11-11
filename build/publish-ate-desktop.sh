@@ -54,7 +54,7 @@ JS
   APP="$TMP/mount/ATE.app"
   test -d "$APP"
   codesign --verify --deep --strict "$APP"
-  codesign -dv "$APP" 2> "$TMP/signature.txt"
+  codesign -d --verbose=4 "$APP" 2> "$TMP/signature.txt"
   grep -q 'Authority=Developer ID Application:' "$TMP/signature.txt"
   grep -q 'TeamIdentifier=VXMLKHF72B' "$TMP/signature.txt"
   EXECUTABLE=$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$APP/Contents/Info.plist")
