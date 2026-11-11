@@ -1,0 +1,16 @@
+{
+  "app": "ATE",
+  "windows": {
+    "app": "ATE",
+    "platform": "windows-x64",
+    "version": "0.4.0",
+    "run_id": 43044688913,
+    "source_sha": "4441a7d553aa9ee7c479f0b7358cc49abba1afbf",
+    "file": "ate-windows.exe",
+    "sha256": "7a55648f36faa1a5d87d129cb589795b525f2de4b053cbb1f5f56b88ffe63044",
+    "bytes": 2141576,
+    "signature": "unsigned",
+    "verification": "ci-installed-and-launched",
+    "published_at": "2026-11-11T15:15:35.292Z"
+  }
+}
