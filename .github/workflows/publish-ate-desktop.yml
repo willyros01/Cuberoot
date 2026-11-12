@@ -1,5 +1,5 @@
 name: Publish ATE desktop installers
-# ATE 0.5.3: publish the verified desktop installers and verify the public downloads.
+# ATE 0.5.3 run 43222957484: publish both verified desktop installers and check live downloads.
 on:
   workflow_dispatch:
   schedule:
