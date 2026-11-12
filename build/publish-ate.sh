@@ -14,11 +14,27 @@ if [ "$code" = 404 ]; then echo 'ATE has no signed APK report yet; leaving downl
 [ "$code" = 200 ] || { echo "ATE build report HTTP $code"; exit 1; }
 node - "$TMP/result.json" <<'JS'
 const r = JSON.parse(require('fs').readFileSync(process.argv[2], 'utf8'));
-if (r.workflow !== 'ATE Android APK' || r.branch !== 'android') throw Error('Unexpected build report');
+if (!((r.workflow === 'ATE Android APK' && r.branch === 'android') || (r.workflow === 'ATE Apple and Desktop' && r.branch === 'desktop'))) throw Error('Unexpected build report');
 if (r.outcome === 'success' && (!Number.isSafeInteger(r.run_id) || !/^[a-f0-9]{40}$/.test(r.source_sha || '') ||
     !Number.isSafeInteger(r.artifact_id) || !/^ate\.v[0-9.]+\.apk$/.test(r.apk_name || '')))
   throw Error('Success report is incomplete');
 console.log('ATE APK outcome:', r.outcome, 'run:', r.run_id, 'version:', r.version);
+JS
+# Verify coordinated releases against the actual run and passed Android job.
+node --input-type=module - "$TMP/result.json" <<'JS'
+import {readFileSync} from 'node:fs';
+const report=JSON.parse(readFileSync(process.argv[2],'utf8'));
+if(report.workflow==='ATE Apple and Desktop'){
+ const base='https://api.github.com/repos/willyros01/clear-page/actions/runs/'+report.run_id;
+ const headers={Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json'};
+ async function get(url){const r=await fetch(url,{headers});if(!r.ok)throw Error('APK provenance HTTP '+r.status);return r.json()}
+ const run=await get(base);
+ if(run.head_sha!==report.source_sha||run.head_branch!==report.branch||run.name!==report.workflow)throw Error('Android source provenance mismatch');
+ const {jobs}=await get(base+'/jobs?per_page=100');
+ for(const name of ['browser','android'])if(!jobs.some(j=>j.name===name&&j.conclusion==='success'))throw Error('Android release gate not passed: '+name);
+ const {artifacts}=await get(base+'/artifacts?per_page=100');
+ if(!artifacts.some(a=>a.id===report.artifact_id&&a.name==='ate-android-apk'&&!a.expired))throw Error('Wrong Android APK artifact');
+}
 JS
 J() { node -p "require(process.argv[1]).$1" "$TMP/result.json"; }
 if [ "$(J outcome)" != 'success' ]; then
