@@ -20,7 +20,7 @@ jobs:
           python3 -m py_compile build/apk-counter/public-report.py build/apk-counter/resend-daily.py
           python3 build/apk-counter/public-report.py --self-test
           python3 build/apk-counter/resend-daily.py --self-test
-      - name: Confirm report rendering includes all seven apps
+      - name: Confirm report rendering includes all ten download categories
         run: |
           python3 - <<'PY'
           import importlib.util
@@ -29,10 +29,12 @@ jobs:
           spec = importlib.util.spec_from_file_location('daily', p)
           m = importlib.util.module_from_spec(spec)
           spec.loader.exec_module(m)
-          with patch.object(m.counts, 'count', side_effect=[2,12]*7):
+          assert len(m.counts.APPS) == 10
+          with patch.object(m.counts, 'count', side_effect=[2,12]*10):
               _, body = m.build_report()
           html = m.build_html_report(body)
-          assert html.split('<tbody>', 1)[1].split('</tbody>', 1)[0].count('<tr style=') == 8
-          assert 'ALL SEVEN' in html and 'The Marker' in html
-          print('PASS: HTML rendered with seven apps and total row')
+          assert html.split('<tbody>', 1)[1].split('</tbody>', 1)[0].count('<tr style=') == 11
+          assert all(label in html for _,label in m.counts.APPS)
+          assert 'ALL APPS' in html and 'ATE Mac Universal' in html
+          print('PASS: HTML rendered with ten categories and total row')
           PY
