@@ -10,8 +10,24 @@ if [ "$code" = 404 ]; then echo 'No desktop release report yet.'; exit 0; fi
 [ "$code" = 200 ] || { echo "Report HTTP $code"; exit 1; }
 node - "$TMP/report.json" <<'JS'
 const r=require(process.argv[2]);
-if(r.app!=='ATE'||r.workflow!=='ATE Apple and Desktop'||r.branch!=='desktop'||!Number.isSafeInteger(r.run_id)||r.run_id<1||!/^[a-f0-9]{40}$/.test(r.source_sha)||!/^\d+\.\d+\.\d+$/.test(r.version))throw Error('Unexpected report');
+if(r.app!=='ATE'||!((r.workflow==='ATE Apple and Desktop'&&r.branch==='desktop')||(r.workflow==='ATE Windows website release'&&r.branch==='windows-compiler'))||!Number.isSafeInteger(r.run_id)||r.run_id<1||!/^[a-f0-9]{40}$/.test(r.source_sha)||!/^\d+\.\d+\.\d+$/.test(r.version))throw Error('Unexpected report');
 for(const k of ['windows_artifact_id','mac_artifact_id'])if(r[k]!==null&&(!Number.isSafeInteger(r[k])||r[k]<1))throw Error('Invalid artifact');
+JS
+# The Windows compiler release must have passed its browser/native/installer gates.
+node --input-type=module - "$TMP/report.json" <<'JS'
+import {readFileSync} from 'node:fs';
+const report=JSON.parse(readFileSync(process.argv[2],'utf8'));
+if(report.workflow==='ATE Windows website release'){
+ const base='https://api.github.com/repos/willyros01/clear-page/actions/runs/'+report.run_id;
+ const headers={Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json'};
+ async function get(url){const r=await fetch(url,{headers});if(!r.ok)throw Error('Release provenance HTTP '+r.status);return r.json()}
+ const run=await get(base);
+ if(run.head_sha!==report.source_sha||run.head_branch!==report.branch||run.name!==report.workflow)throw Error('Windows release source mismatch');
+ const {jobs}=await get(base+'/jobs?per_page=100');
+ for(const name of ['browser','windows'])if(!jobs.some(j=>j.name===name&&j.conclusion==='success'))throw Error('Windows release gate not passed: '+name);
+ const {artifacts}=await get(base+'/artifacts?per_page=100');
+ if(!artifacts.some(a=>a.id===report.windows_artifact_id&&a.name==='ate-windows-x64'&&!a.expired))throw Error('Wrong Windows installer artifact');
+}
 JS
 mkdir -p downloads
 if [ -f downloads/ate-desktop-build.json ]; then cp downloads/ate-desktop-build.json "$TMP/meta.json"; else echo '{"app":"ATE"}' > "$TMP/meta.json"; fi
@@ -35,6 +51,7 @@ if(m.app!=='ATE'||m.run_id!==r.run_id||m.source_sha!==r.source_sha||m.version!==
 if(p==='mac'){
  if(m.platform!=='mac-universal'||m.file!=='ATE-'+r.version+'-universal.dmg'||m.signature!=='developer-id'||m.team_id!=='VXMLKHF72B'||m.notarization!=='Accepted'||m.stapled!==true)throw Error('Mac signing/notarization not verified');
 }else if(m.platform!=='windows-x64'||m.file!=='ATE-'+r.version+'-windows-x64-setup.exe'||m.signature!=='unsigned'||m.verification!=='ci-installed-and-launched')throw Error('Windows installer acceptance missing');
+if(p==='windows'&&r.workflow==='ATE Windows website release'&&!(m.optional_c_compiler?.release==='20261104'&&m.optional_c_compiler?.sha256==='552191b5754c49a5a20723276a6fc56541ea1922c4c50b7b669022333fc1b40f'&&m.optional_c_compiler?.verification==='official-download-standard-headers-native-detection'))throw Error('Optional compiler acceptance missing');
 JS
  NAME=$(node -p 'require(process.argv[1]).file' "$TMP/manifest.json")
  ENTRY=$(unzip -Z1 "$TMP/artifact.zip" | awk -v name="$NAME" '$0==name || substr($0,length($0)-length(name),length(name)+1)=="/"name {print}')
