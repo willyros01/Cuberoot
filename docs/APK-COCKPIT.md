@@ -220,10 +220,10 @@ The owner explicitly requested daily reports. A **one-time Gmail delivery test**
 
 ## ATE download reporting and location — TODO (12 November 2026)
 
-Status: **Web portion implemented and browser-verified; Firebase activation pending. Email expansion remains pending.** Owner authorized the web portion on 12 November 2026. Editor/parser development remains paused for owner testing.
+Status: **Web portion published and Firebase counter access activated/verified. Live browser click acceptance and email expansion remain pending.** Owner authorized the web portion on 12 November 2026. Editor/parser development remains paused for owner testing.
 
 - [x] Track **ATE Windows**, **ATE Mac Universal** and **ATE Android** as separate categories, on both the Cuberoot homepage and the ATE download page.
-- [ ] Extend only the download-counter Firebase allowlist/permissions for `ate-windows`, `ate-mac` and `ate`; preserve unrelated application/household rules. Investigation confirmed public aggregate reads for these categories currently return permission denied.
+- [x] Extend only the download-counter Firebase allowlist/permissions for `ate-windows`, `ate-mac` and `ate`; preserve unrelated application/household rules. Investigation confirmed public aggregate reads for these categories currently return permission denied.
 - [ ] Add all three categories to the existing daily email, preserving the seven current categories. Show reporting-period and lifetime counts and reconcile the ten-category grand total. Rename the heading/subject to **Cuberoot Download Clicks**.
 - [x] Capture browser-reported timezone with click timestamp and build, using the existing tracking model. Include the ATE categories in the download cockpit, app filter, date-range totals and recent-click location display.
 - [x] Describe timezone-derived area as approximate and unverified, not GPS or a confirmed physical location. No GPS prompt or persistent visitor identifier is needed. The daily email remains a counts report; location details belong in the cockpit.
@@ -240,3 +240,11 @@ Browser/activation checks passed in [run 43281516238](https://github.com/willyro
 The website code is published at source `4ed43f2ee87faa05b8002a197b8b772d1f21f2c2`. Main-branch browser/activation run [43282988198](https://github.com/willyros01/Cuberoot/actions/runs/43282988198) and Pages deployment [43282988027](https://github.com/willyros01/Cuberoot/actions/runs/43282988027) both passed. Public homepage, ATE page, admin entry, tracker, shared catalog, report adapter, cockpit UI and `atec.txt` were independently fetched and matched the committed files byte-for-byte. Actual Firebase writes/reads for ATE remain unverified and require owner-authenticated activation. The reviewed `atec.txt` Cloud Shell launcher inserts only the three counter category names, backs up the live rules, validates the candidate and checks real counts, with guarded rollback. See [activation and verification details](../build/downloads/README.md). No email was sent; scheduled email expansion remains a separate pending item.
 
 The final browser suite explicitly verifies that owner-readable empty collections are not mistaken for public activation: an unauthenticated aggregate probe must succeed before ATE counts are considered ready. The suite also checks quieter-platform location filtering with 35 newer events from other categories. Per-app recent records remain bounded at five, and the combined view shows at most twenty. Live ATE public readiness was still HTTP 403 during publication verification. The website displays Setup pending rather than zero. No live click writes or email sends were made by the automated tests.
+
+### Firebase activation verified — 12 November 2026
+
+Owner ran `atec.txt` in the authenticated `split-it-44dea` Cloud Shell and provided the successful terminal output. The script reported that only three category names were inserted, other rules remained byte-identical, and no email or synthetic click records were created. The earlier HTTP 403 checkpoint is superseded by this activation.
+
+Independent unauthenticated Firestore aggregation queries then succeeded for all ten categories. Lifetime counts at this check: ATE Android 0, ATE Mac Universal 0, ATE Windows 0, Cloud Files 0, Fairpot 2, FIDUNIO 9, The Marker 24, Scorecard 9, SpendRecorder 1, Wire 1. The ATE zero counts are now real query results, not permission-denied placeholders. The verification performed no writes.
+
+On the next signed-in cockpit Refresh, the public-readiness gate can show actual ATE counts. Remaining acceptance: click one real ATE download button, refresh the cockpit, and verify the matching category/timezone event. A completed public read does not by itself prove a browser write; do not mark this live-click acceptance complete until observed. The daily email remains the existing seven-category report at 09:17 Toronto; its ten-category expansion is still pending.

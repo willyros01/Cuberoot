@@ -38,3 +38,7 @@ Following activation, verify actual click recording separately: note a platform'
 Email expansion to ten categories remains a separate TODO. Its existing seven-app assertions and 09:17 Toronto delivery remain intact.
 
 The readiness test uses public aggregation with no owner Authorization header or cookies. Owner-authenticated access to an empty collection does not count as activation. Platform filtering retains each app’s five recent records even when 35 other events are newer; only the combined display is limited to twenty events.
+
+## Owner activation checkpoint — 12 November 2026
+
+The owner successfully ran `atec.txt`. Independent public aggregation reads now succeed for all ten categories; each ATE category initially returned zero. This supersedes the earlier pending/HTTP 403 state above. No write or email send was performed during independent verification. The next signed-in Refresh can show actual ATE counts. A real download-button click and matching timezone event still need to be observed before claiming end-to-end live write acceptance. The seven-category daily email is unchanged.
