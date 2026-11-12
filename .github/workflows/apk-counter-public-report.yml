@@ -6,7 +6,7 @@ on:
       - 'build/apk-counter/public-report.py'
       - '.github/workflows/apk-counter-public-report.yml'
   # Report just after Toronto midnight. GitHub can delay scheduled runs,
-  # so leave >9 hours before the 09:17 ChatGPT Gmail send.
+  # The Resend daily email queries Firebase directly at its own 09:17 cutoff.
   schedule:
     - cron: '17 0 * * *'
       timezone: 'America/Toronto'
@@ -22,23 +22,23 @@ concurrency:
 
 jobs:
   verify:
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Offline tests - seven apps, DST and fail closed
+      - name: Offline tests - ten categories, DST and fail closed
         run: |
           python3 -m py_compile build/apk-counter/public-report.py
           python3 build/apk-counter/public-report.py --self-test
 
   report:
-    if: github.repository == 'willyros01/Cuberoot'
+    needs: verify
+    if: github.repository == 'willyros01/Cuberoot' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Read seven real Firebase counts and update dedicated report issue
+      - name: Read ten real Firebase counts and update dedicated report issue
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 build/apk-counter/public-report.py

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cuberoot: verified seven-app APK email via Resend, invoked by cron-job.org.
+"""Cuberoot: verified ten-category download email via Resend, invoked by cron-job.org.
 
 No Google Cloud, Gmail password, Google Apps Script, SMTP, or custom sender domain.
 The default Resend testing sender may send only to the Resend account owner's email;
@@ -24,7 +24,7 @@ counts = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(counts)
 
 TO_EMAIL = "willyros01@gmail.com"
-FROM_EMAIL = "Cuberoot APK Report <onboarding@resend.dev>"
+FROM_EMAIL = "Cuberoot Download Report <onboarding@resend.dev>"
 RESEND_URL = "https://api.resend.com/emails"
 
 
@@ -47,10 +47,10 @@ def current_day_window(now=None):
 
 def build_report(now=None):
     day, start, end, local = current_day_window(now)
-    if len(counts.APPS) != 7 or len({slug for slug, _ in counts.APPS}) != 7:
-        raise ValueError("Seven unique applications required")
+    if len(counts.APPS) != 10 or len({slug for slug, _ in counts.APPS}) != 10:
+        raise ValueError("Ten unique download categories required")
     lines = [
-        "CUBEROOT APK DOWNLOADS",
+        "CUBEROOT DOWNLOAD CLICKS",
         "Reporting date: " + day.isoformat() + " (America/Toronto)",
         "Period: since yesterday 09:17 AM Toronto through " + local.strftime("%I:%M %p %Z") + " today",
         "",
@@ -69,7 +69,7 @@ def build_report(now=None):
     if max(day_total, lifetime_total) > 2**53-1:
         raise ValueError("Totals exceed safe integer range")
     lines.extend([
-        f"{'ALL SEVEN':<27} {day_total:>17,} {lifetime_total:>11,}",
+        f"{'ALL APPS':<27} {day_total:>17,} {lifetime_total:>11,}",
         "",
         "Each report covers the full reporting day ending at 09:17 AM Toronto.",
         "The count window includes the previous afternoon, evening, and overnight.",
@@ -83,26 +83,28 @@ def build_report(now=None):
 def build_html_report(body):
     """Responsive, large-print HTML; values are taken from validated text report."""
     import re
+    labels = [label for _, label in counts.APPS] + ["ALL APPS"]
+    pattern = r"^(" + "|".join(re.escape(label) for label in labels) + r")\s+([\d,]+)\s+([\d,]+)$"
     rows = []
     for line in body.splitlines():
-        match = re.match(r"^(FIDUNIO|Scorecard|Fairpot|Wire|SpendRecorder|Cloud Files|The Marker|ALL SEVEN)\s+([\d,]+)\s+([\d,]+)$", line)
+        match = re.match(pattern, line)
         if match:
             rows.append((match.group(1), match.group(2), match.group(3)))
-    if len(rows) != 8 or [r[0] for r in rows] != [label for _, label in counts.APPS] + ["ALL SEVEN"]:
-        raise ValueError("HTML table requires exactly seven apps and matching totals")
+    if len(rows) != len(labels) or [r[0] for r in rows] != labels:
+        raise ValueError("HTML table requires all ten categories and matching totals")
     # Reject incomplete or internally inconsistent reports before HTML/email delivery.
     numbers = [(int(d.replace(",", "")), int(l.replace(",", ""))) for _, d, l in rows]
     if any(d > l for d, l in numbers):
         raise ValueError("HTML table contains a daily count above its lifetime count")
-    if (sum(d for d, _ in numbers[:7]), sum(l for _, l in numbers[:7])) != numbers[7]:
-        raise ValueError("HTML table ALL SEVEN totals do not equal the seven app sums")
+    if (sum(d for d, _ in numbers[:-1]), sum(l for _, l in numbers[:-1])) != numbers[-1]:
+        raise ValueError("HTML table ALL APPS totals do not equal the category sums")
     date = re.search(r"Reporting date: (\d{4}-\d{2}-\d{2})", body)
     if not date:
         raise ValueError("Missing reporting date")
     trs = []
     for i, (name, daily, lifetime) in enumerate(rows):
-        bg = "#e5f1ff" if i == 7 else ("#f3f6fa" if i % 2 else "#ffffff")
-        weight = "700" if i == 7 else "500"
+        bg = "#e5f1ff" if i == len(rows)-1 else ("#f3f6fa" if i % 2 else "#ffffff")
+        weight = "700" if i == len(rows)-1 else "500"
         trs.append(
             f'<tr style="background:{bg};font-weight:{weight}">'
             f'<td style="padding:15px 8px;border-bottom:1px solid #d8dfe8;word-break:normal">{html.escape(name)}</td>'
@@ -112,7 +114,7 @@ def build_html_report(body):
         '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>'
         '<body style="margin:0;padding:16px 10px;background:#fff;color:#17212f;font-family:Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;text-size-adjust:100%">'
         '<main style="max-width:680px;margin:auto">'
-        '<h1 style="font-size:28px;line-height:1.2;margin:8px 0 12px">Cuberoot APK Downloads</h1>'
+        '<h1 style="font-size:28px;line-height:1.2;margin:8px 0 12px">Cuberoot Download Clicks</h1>'
         f'<p style="font-size:21px;margin:0 0 12px;font-weight:bold">{date.group(1)} · Toronto</p>'
         '<p style="font-size:18px;line-height:1.5;margin:0 0 20px">Reporting period: yesterday 9:17 AM to today 9:17 AM Toronto time.</p>'
         '<table role="table" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:19px;line-height:1.3">'
@@ -204,8 +206,8 @@ def main():
     except Exception:
         try:
             accepted = send_email(
-                key, "Cuberoot APK report FAILURE - " + date,
-                "Seven-app APK data could not be verified for " + date +
+                key, "Cuberoot download report FAILURE - " + date,
+                "Ten-category download data could not be verified for " + date +
                 ". No figures were invented. Review GitHub Actions.",
                 "cuberoot-apk-failure-" + date)
             print("Failure-status message accepted by Resend ID=" + accepted)
@@ -214,7 +216,7 @@ def main():
         raise RuntimeError("Verified report could not be created") from None
     # V2 is deliberately separate from the previously delivered incorrect
     # same-day-only email; each corrected reporting day is still duplicate-safe.
-    accepted = send_email(key, "Cuberoot APK Downloads - " + date,
+    accepted = send_email(key, "Cuberoot Download Clicks - " + date,
                           report_body, "cuberoot-apk-daily-v3-" + date, html_body=build_html_report(report_body))
     print("PASS: Resend accepted " + date + " email ID=" + accepted)
     print("API acceptance is not proof of final inbox delivery.")
@@ -243,38 +245,38 @@ def selftest():
     assert spring[1] == dt.datetime.fromisoformat("2026-03-07T14:17:00+00:00")
     assert spring[2] == dt.datetime.fromisoformat("2026-03-08T13:17:00+00:00")
     assert (spring[2] - spring[1]).total_seconds() == 23 * 3600
-    with patch.object(counts, "count", side_effect=[2, 12] * 7) as calls:
+    with patch.object(counts, "count", side_effect=[2, 12] * 10) as calls:
         day, body = build_report(now)
-        assert day == "2026-10-18" and calls.call_count == 14
+        assert day == "2026-10-18" and calls.call_count == 20
         assert "since yesterday 09:17 AM Toronto through 09:17 AM EDT today" in body
         for call in calls.call_args_list:
             assert call.args[-1] == end
         assert calls.call_args_list[0].args == ("fidunio", start, end)
-        assert body.count("\n") >= 14 and "ALL SEVEN" in body
-        assert "14" in body and "84" in body
+        assert body.count("\n") >= 14 and "ALL APPS" in body
+        assert "20" in body and "120" in body
         assert all(label in body for _, label in counts.APPS)
-    with patch.object(counts, "count", side_effect=[0, 0] * 7):
+    with patch.object(counts, "count", side_effect=[0, 0] * 10):
         _, body = build_report(now)
-        assert "ALL SEVEN" in body and "0" in body
-    with patch.object(counts, "count", side_effect=[5, 4] * 7):
+        assert "ALL APPS" in body and "0" in body
+    with patch.object(counts, "count", side_effect=[5, 4] * 10):
         try: build_report(now)
         except ValueError: pass
         else: raise AssertionError("Inconsistent count was accepted")
-    with patch.object(counts, "count", side_effect=[0, 0] * 6 + [ValueError("403")]):
+    with patch.object(counts, "count", side_effect=[0, 0] * 9 + [ValueError("403")]):
         try: build_report(now)
         except ValueError: pass
         else: raise AssertionError("Incomplete count was accepted")
-    with patch.object(counts, "count", side_effect=[0, 0] * 7):
+    with patch.object(counts, "count", side_effect=[0, 0] * 10):
         _, sample = build_report(now)
         rendered = build_html_report(sample)
-        assert rendered.split("<tbody>", 1)[1].split("</tbody>", 1)[0].count("<tr style=") == 8
-        assert "The Marker" in rendered and "ALL SEVEN" in rendered
-        assert "Cuberoot APK Downloads" in rendered
+        assert rendered.split("<tbody>", 1)[1].split("</tbody>", 1)[0].count("<tr style=") == 11
+        assert "The Marker" in rendered and "ALL APPS" in rendered
+        assert "Cuberoot Download Clicks" in rendered
         assert "Counts show download clicks, not necessarily completed downloads." in rendered
         assert "23 or 25 hours on daylight-saving changes" in rendered
         assert ">Period*</th>" in rendered
         assert "2026-10-18" in rendered
-        for corrupted in (__import__("re").sub(r"(?m)^(ALL SEVEN\s+)0(\s+0)$", r"\g<1>1\g<2>", sample),
+        for corrupted in (__import__("re").sub(r"(?m)^(ALL APPS\s+)0(\s+0)$", r"\g<1>1\g<2>", sample),
                           sample.replace("The Marker", "The Missing App")):
             try: build_html_report(corrupted)
             except ValueError: pass
@@ -286,7 +288,7 @@ def selftest():
     with patch("urllib.request.urlopen", return_value=MockResponse()) as request:
         assert send_email("re_test", "test", "body", "test-unique") == "accepted-email-id"
         assert request.call_args.args[0].get_header("Idempotency-key") == "test-unique"
-    print("PASS: seven apps / continuous 09:17-to-09:17 Toronto day / DST / zero / totals / fail-closed / idempotency tests")
+    print("PASS: ten categories / continuous 09:17-to-09:17 Toronto day / DST / zero / totals / fail-closed / idempotency tests")
 
 
 if __name__ == "__main__":

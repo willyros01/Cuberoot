@@ -1,0 +1,62 @@
+name: Verify live ATE downloads and send owner test email
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, ate-download-email]
+    paths: ['.github/workflows/download-email-acceptance.yml']
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify ten-category report and email logic offline
+        run: |
+          python3 -m py_compile build/apk-counter/public-report.py build/apk-counter/resend-daily.py build/apk-counter/send-test.py
+          python3 build/apk-counter/public-report.py --self-test
+          python3 build/apk-counter/resend-daily.py --self-test
+      - name: Prepare real browser verification
+        run: npm install --prefix "$RUNNER_TEMP/download-web" --no-save playwright@1.62.1
+      - name: Generate a sample using the production email formatter
+        run: |
+          python3 - <<'PY'
+          import importlib.util,datetime as dt,os
+          from pathlib import Path
+          from unittest.mock import patch
+          spec=importlib.util.spec_from_file_location('email_preview',Path('build/apk-counter/resend-daily.py'))
+          m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+          with patch.object(m.counts,'count',side_effect=[2,12]*10):
+              _,body=m.build_report(dt.datetime.fromisoformat('2026-11-12T15:00:00+00:00'))
+          Path(os.environ['RUNNER_TEMP']+'/email-layout-sample.html').write_text(m.build_html_report(body))
+          PY
+      - name: Verify mobile and tablet email readability
+        env:
+          PLAYWRIGHT_MODULE: ${{ runner.temp }}/download-web/node_modules/playwright/index.mjs
+          BROWSER_EXECUTABLE: /usr/bin/google-chrome
+          EVIDENCE_DIR: ${{ runner.temp }}/live-download-evidence
+          EMAIL_LAYOUT_FILE: ${{ runner.temp }}/email-layout-sample.html
+        run: node build/apk-counter/email-layout.mjs
+      - name: Verify three real published downloads and counter events
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[download-acceptance]'))
+        env:
+          PLAYWRIGHT_MODULE: ${{ runner.temp }}/download-web/node_modules/playwright/index.mjs
+          BROWSER_EXECUTABLE: /usr/bin/google-chrome
+          EVIDENCE_DIR: ${{ runner.temp }}/live-download-evidence
+        run: node build/downloads/live-check.mjs
+      - name: Send the explicitly requested ten-category test email to the existing owner
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[download-acceptance]'))
+        env:
+          CUBEROOT_RESEND_API_KEY: ${{ secrets.CUBEROOT_RESEND_API_KEY }}
+        run: python3 build/apk-counter/send-test.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-download-evidence
+          path: |
+            ${{ runner.temp }}/live-download-evidence/live-click-verification.json
+            ${{ runner.temp }}/live-download-evidence/email-layout-sample-*.png
