@@ -1,6 +1,7 @@
-// Independent best-effort APK click counter. Does not change download anchors.
+// Independent best-effort download click counter. Does not change anchors.
 // No Firebase Auth or persistent visitor identifiers are used.
-// A record is a CLICK attempt, never proof that an APK was downloaded.
+// A record is a CLICK attempt, never proof that a file was downloaded.
+import {identifyDownload} from './download-apps.js?v=1';
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {getFirestore,doc,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 
@@ -12,18 +13,10 @@ const firebase={
  messagingSenderId:'153404639150',
  appId:'1:153404639150:web:d3ad24b871ce0239a9aa3f'
 };
-const allowed=new Set(['fidunio','scorecard','fairpot','wire','spendrecorder','cloud-files','marker']);
 let db;
 function database(){
  if(!db)db=getFirestore(initializeApp(firebase,'cuberoot-public-apk-clicks'));
  return db;
-}
-function identify(anchor){
- const url=new URL(anchor.href,location.href);
- const match=/^\/downloads\/([a-z-]+)\.apk$/.exec(url.pathname);
- if(url.origin!==location.origin||!match||!allowed.has(match[1]))return null;
- const build=url.searchParams.get('build')||'';
- return {app:match[1],build:/^[0-9]{0,18}$/.test(build)?build:''};
 }
 function timezone(){
  const value=Intl.DateTimeFormat().resolvedOptions().timeZone||'Unknown';
@@ -33,9 +26,9 @@ document.addEventListener('click',event=>{
  try{
   const anchor=event.target?.closest?.('a[download]');
   if(!anchor)return;
-  const item=identify(anchor);
+  const item=identifyDownload(anchor.href,location.href);
   if(!item)return;
-  // Never cancel, preventDefault, change href, or wait for an APK download.
+  // Never cancel, preventDefault, change href, or wait for the download.
   setTimeout(()=>{
    try{
     const id=crypto.randomUUID();

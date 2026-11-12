@@ -1,4 +1,4 @@
-const APPS = {fidunio:'FIDUNIO',scorecard:'The Scorecard',fairpot:'Fairpot',wire:'Wire',spendrecorder:'SpendRecorder','cloud-files':'Cloud Files',marker:'The Marker'};
+import {DOWNLOAD_APPS as APPS,ATE_APPS} from './download-apps.js?v=1';
 function el(tag, attrs={}, ...children) {
  const n=document.createElement(tag);
  for(const [k,v] of Object.entries(attrs)){if(k==='text')n.textContent=v;else if(k.startsWith('on'))n.addEventListener(k.slice(2),v);else n.setAttribute(k,v);}
@@ -6,7 +6,7 @@ function el(tag, attrs={}, ...children) {
  return n;
 }
 export function cockpit({preview=false,load}) {
- const root=el('section',{class:'dc','aria-label':'APK download cockpit'});
+ const root=el('section',{class:'dc','aria-label':'Download click cockpit'});
  const select=el('select',{id:'dc-app'},el('option',{value:'',text:'All apps'}),Object.entries(APPS).map(([value,text])=>el('option',{value,text})));
  const refresh=el('button',{type:'button',class:'dc-refresh',text:'↻  Refresh'});
  const from=el('input',{type:'date',id:'dc-from','aria-label':'From date in Toronto'});
@@ -21,7 +21,7 @@ export function cockpit({preview=false,load}) {
  const dateError=el('p',{class:'dc-range-error',role:'alert',hidden:''});
  const status=el('p',{class:'dc-status',role:'status','aria-live':'polite'});
  const content=el('div',{class:'dc-content'});
- root.append(el('div',{class:'dc-heading'},el('div',{},el('p',{class:'dc-kicker',text:'CUBEROOT / APK ACTIVITY'}),el('h1',{text:'Download cockpit'}),el('p',{class:'dc-subtitle',text:'Your apps. Their reach. One simple view.'})),el('span',{class:'dc-mode',text:preview?'DESIGN PREVIEW':'PRIVATE ADMIN'})));
+ root.append(el('div',{class:'dc-heading'},el('div',{},el('p',{class:'dc-kicker',text:'CUBEROOT / DOWNLOAD ACTIVITY'}),el('h1',{text:'Download cockpit'}),el('p',{class:'dc-subtitle',text:'Your apps. Their reach. One simple view.'})),el('span',{class:'dc-mode',text:preview?'DESIGN PREVIEW':'PRIVATE ADMIN'})));
  if(preview)root.append(el('div',{class:'dc-preview',role:'note'},el('strong',{text:'Sample data — counting is not active.'}),el('span',{text:' This preview opens without login. Real records stay in your admin area.'})));
  root.append(el('div',{class:'dc-toolbar'},el('label',{for:'dc-app'},'Show app',select),refresh),dates,dateError,status,content);
  let selectedRange=null; // Applied dates, not partially edited inputs.
@@ -56,35 +56,39 @@ export function cockpit({preview=false,load}) {
   const slug=select.value;
   const chosen=Object.entries(APPS).filter(([key])=>!slug||key===slug);
   const period=selectedRange?'range':'today';
+  if(data.pending!==undefined&&(!Array.isArray(data.pending)||data.pending.some(key=>!ATE_APPS.includes(key))))throw new Error('Invalid pending categories');
+  const pending=new Set(data.pending||[]);
+  const incomplete=chosen.some(([key])=>pending.has(key));
   // Missing, malformed or incomplete Firebase counts must never render as zero.
   const count=(key,field)=>{
    const value=data.counts[key]?.[field];
    if(!Number.isSafeInteger(value)||value<0)throw new Error('Incomplete Firebase count for '+key);
    return value;
   };
-  const total=chosen.reduce((n,[key])=>n+count(key,'total'),0);
-  const selected=chosen.reduce((n,[key])=>n+count(key,period),0);
+  for(const [key]of chosen)if(!pending.has(key)){count(key,'total');count(key,period);}
+  const total=incomplete?'—':chosen.reduce((n,[key])=>n+count(key,'total'),0).toLocaleString();
+  const selected=incomplete?'—':chosen.reduce((n,[key])=>n+count(key,period),0).toLocaleString();
   const summary=selectedRange
    ?el('div',{class:'dc-totals'},
      el('article',{class:'dc-total dc-total-primary'},
-      el('span',{text:'Clicks in selected dates'}),el('strong',{text:selected.toLocaleString()}),
+      el('span',{text:'Clicks in selected dates'}),el('strong',{text:selected}),
       el('span',{class:'dc-detail',text:dateDescription()})),
      el('article',{class:'dc-total'},el('span',{text:'All-time clicks'}),
-      el('strong',{text:total.toLocaleString()}),
+      el('strong',{text:total}),
       el('span',{class:'dc-detail',text:'Since counting started'})))
    :el('div',{class:'dc-totals'},
      el('article',{class:'dc-total dc-total-primary'},
-      el('span',{text:'Total recorded clicks'}),el('strong',{text:total.toLocaleString()}),
+      el('span',{text:'Total recorded clicks'}),el('strong',{text:total}),
       el('span',{class:'dc-detail',text:preview?'Illustrative totals':'Since counting started'})),
      el('article',{class:'dc-total'},el('span',{text:'Today'}),
-      el('strong',{text:selected.toLocaleString()}),
+      el('strong',{text:selected}),
       el('span',{class:'dc-detail',text:'Calendar day in Toronto'})));
   const apps=el('div',{class:'dc-apps'},chosen.map(([key,name])=>el('article',
    {class:'dc-app','data-app':key},el('span',{class:'dc-app-mark','aria-hidden':'true',
     text:name==='The Scorecard'?'S':name.slice(0,1)}),
    el('div',{},el('h3',{text:name}),
-    el('span',{text:selectedRange?count(key,'total')+' all time':count(key,'today')+' today'})),
-   el('strong',{text:count(key,selectedRange?'range':'total').toLocaleString()}))));
+    el('span',{text:pending.has(key)?'Setup pending':selectedRange?count(key,'total')+' all time':count(key,'today')+' today'})),
+   el('strong',{text:pending.has(key)?'—':count(key,selectedRange?'range':'total').toLocaleString()}))));
   const events=data.events.filter(e=>!slug||e.app===slug);
   const list=el('ol',{class:'dc-events'});
   for(const event of events){
@@ -93,7 +97,7 @@ export function cockpit({preview=false,load}) {
    const area=timezone==='Unknown'?'Unknown':timezone.split('/').slice(1).join(' / ').replaceAll('_',' ')||timezone;
    list.append(el('li',{},el('div',{class:'dc-event-app'},el('strong',{text:APPS[event.app]||'Unknown app'}),el('time',{text:date})),el('div',{class:'dc-event-area'},el('strong',{text:area}),el('span',{text:timezone}))));
   }
-  content.replaceChildren(summary,el('div',{class:'dc-section-heading'},el('h2',{text:'By app'}),el('span',{text:'Recorded clicks'})),apps,el('div',{class:'dc-section-heading'},el('h2',{text:selectedRange?'Downloads in selected dates':'Recent downloads'}),el('span',{text:'Times in Toronto'})),events.length?list:el('p',{class:'dc-empty',text:selectedRange?'No recorded clicks in these dates.':'No recorded clicks for this app yet.'}),el('p',{class:'dc-footnote',text:'Counts represent download-button clicks. Area is based on the browser’s reported timezone, not a verified location. Some clicks may not be recorded.'}));
+  content.replaceChildren(summary,...(incomplete?[el('p',{class:'dc-status',role:'status',text:'ATE counter setup is pending. Available app counts are shown; combined totals will appear when all selected categories are available.'})]:[]),el('div',{class:'dc-section-heading'},el('h2',{text:'By app'}),el('span',{text:'Recorded clicks'})),apps,el('div',{class:'dc-section-heading'},el('h2',{text:selectedRange?'Clicks in selected dates':'Recent clicks'}),el('span',{text:'Times in Toronto'})),events.length?list:el('p',{class:'dc-empty',text:incomplete?'ATE activity will appear after counter setup.':selectedRange?'No recorded clicks in these dates.':'No recorded clicks for this app yet.'}),el('p',{class:'dc-footnote',text:'Counts represent download-button clicks. Area is based on the browser’s reported timezone, not a verified location. Some clicks may not be recorded.'}));
  }
  let data=null,busy=false;
  async function update(){
@@ -136,7 +140,7 @@ export function cockpit({preview=false,load}) {
  select.addEventListener('change',()=>{if(data)render(data);else showPending();});
  refresh.addEventListener('click',update);
  // Schedule the query only AFTER the browser has had a chance to paint the
- // heading, totals placeholders and all six app cards.
+ // heading, totals placeholders and all app cards.
  const afterPaint=()=>setTimeout(()=>{if(root.isConnected)void update();},0);
  if(typeof requestAnimationFrame==='function')requestAnimationFrame(afterPaint);
  else setTimeout(afterPaint,0);

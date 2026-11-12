@@ -1,4 +1,5 @@
-// Cuberoot private APK cockpit: owner Google account; memory-only session.
+// Cuberoot private download cockpit: owner Google account; memory-only session.
+import {DOWNLOAD_APPS,ATE_APPS} from './download-apps.js?v=1';
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {initializeAuth,GoogleAuthProvider,signInWithPopup,inMemoryPersistence,browserPopupRedirectResolver,signOut}
   from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
@@ -15,7 +16,7 @@ const firebase={
  appId:'1:153404639150:web:d3ad24b871ce0239a9aa3f'
 };
 const OWNER_UID='EJoRDnKQiGcDgw8RP1RRtkyei8K2';
-const APPS=['fidunio','scorecard','fairpot','wire','spendrecorder','cloud-files','marker'];
+const APPS=Object.keys(DOWNLOAD_APPS);
 let session;
 function setup(){
  if(session)return session;
@@ -69,6 +70,7 @@ export async function loadOwnerReport(range=null){
  const selected=range?torontoRange(range.from,range.to):null;
  const since=selected?null:Timestamp.fromDate(startOfTorontoDay());
  const results=await Promise.all(APPS.map(async app=>{
+  try{
   const records=collection(db,'cuberoot_apk_clicks_v1',app,'events');
   const period=selected
    ?query(records,where('createdAt','>=',Timestamp.fromDate(selected.start)),
@@ -93,13 +95,20 @@ export async function loadOwnerReport(range=null){
    }
   }
   return {app,total:allTime.data().count,period:periodCount.data().count,events};
+  }catch(error){
+   // Pending ATE activation must not hide the seven existing app reports.
+   // Permission/network failures for established categories still fail closed.
+   if(ATE_APPS.includes(app)&&error?.code==='permission-denied')return {app,pending:true};
+   throw error;
+  }
  }));
- const counts={},events=[];
+ const counts={},events=[],pending=[];
  for(const result of results){
+  if(result.pending){pending.push(result.app);continue;}
   counts[result.app]={total:result.total};
   counts[result.app][selected?'range':'today']=result.period;
   events.push(...result.events);
  }
  events.sort((a,b)=>b.at.localeCompare(a.at));
- return {counts,events:events.slice(0,20)};
+ return {counts,events:events.slice(0,20),pending};
 }
