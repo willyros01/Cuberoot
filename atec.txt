@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Run in the owner's Google Cloud Shell. No passwords or tokens are printed.
+set -euo pipefail
+ATE_COUNTER_SCRIPT=$(mktemp)
+trap 'rm -f "$ATE_COUNTER_SCRIPT"' EXIT
+curl --fail --silent --show-error --location \
+  'https://raw.githubusercontent.com/willyros01/Cuberoot/9e97208bac042972ee36f0a93b6f661c4b918c24/build/downloads/activate-ate-counter.py' \
+  --output "$ATE_COUNTER_SCRIPT"
+printf '%s  %s\n' 'c74b44e8541dd0497a7191979102071a363d7c297e6f6e89113a353acb15f1f0' "$ATE_COUNTER_SCRIPT" | sha256sum --check --status
+python3 "$ATE_COUNTER_SCRIPT"

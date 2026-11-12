@@ -220,15 +220,21 @@ The owner explicitly requested daily reports. A **one-time Gmail delivery test**
 
 ## ATE download reporting and location — TODO (12 November 2026)
 
-Status: **Planned; implementation pending.** Owner requested adding this work to the TODO list while testing ATE 0.5.3. This entry does not authorize starting the paused editor/parser work.
+Status: **Web portion implemented and browser-verified; Firebase activation pending. Email expansion remains pending.** Owner authorized the web portion on 12 November 2026. Editor/parser development remains paused for owner testing.
 
-- [ ] Track **ATE Windows**, **ATE Mac Universal** and **ATE Android** as separate categories, on both the Cuberoot homepage and the ATE download page.
+- [x] Track **ATE Windows**, **ATE Mac Universal** and **ATE Android** as separate categories, on both the Cuberoot homepage and the ATE download page.
 - [ ] Extend only the download-counter Firebase allowlist/permissions for `ate-windows`, `ate-mac` and `ate`; preserve unrelated application/household rules. Investigation confirmed public aggregate reads for these categories currently return permission denied.
 - [ ] Add all three categories to the existing daily email, preserving the seven current categories. Show reporting-period and lifetime counts and reconcile the ten-category grand total. Rename the heading/subject to **Cuberoot Download Clicks**.
-- [ ] Capture browser-reported timezone with click timestamp and build, using the existing tracking model. Include the ATE categories in the download cockpit, app filter, date-range totals and recent-click location display.
-- [ ] Describe timezone-derived area as approximate and unverified, not GPS or a confirmed physical location. No GPS prompt or persistent visitor identifier is needed. The daily email remains a counts report; location details belong in the cockpit.
+- [x] Capture browser-reported timezone with click timestamp and build, using the existing tracking model. Include the ATE categories in the download cockpit, app filter, date-range totals and recent-click location display.
+- [x] Describe timezone-derived area as approximate and unverified, not GPS or a confirmed physical location. No GPS prompt or persistent visitor identifier is needed. The daily email remains a counts report; location details belong in the cockpit.
 - [ ] Verify file-link identification for APK/EXE/DMG, ATE-page script/security-policy loading, click recording, Firebase permissions, cockpit display, email rows/totals and duplicate-send protection before enabling the expanded report.
 
 Keep the existing cron-job.org job, numeric workflow-dispatch endpoint, Resend delivery and **09:17 America/Toronto** schedule. Preserve the continuous previous-day 09:17 to current-day 09:17 reporting window and daylight-saving handling. Tracking must not delay or cancel downloads. Counts represent recorded click attempts, not completed downloads/installations. Do not invent or backfill unrecorded historical ATE clicks. No ATE application rebuild is required.
 
 Implementation reference: `assets/js/apk-firebase-track.js`, `ate/index.html`, `assets/js/apk-firebase-report.js`, `assets/js/downloads-ui.js`, `build/apk-counter/public-report.py`, `build/apk-counter/resend-daily.py`, and the live counter-only Firebase rule allowlist.
+
+### Web portion implementation checkpoint — 12 November 2026
+
+Browser/activation checks passed in [run 43281516238](https://github.com/willyros01/Cuberoot/actions/runs/43281516238). The homepage and ATE page now identify the three exact same-origin download files. The private cockpit has all ten categories, date/app filters and browser-timezone area details. An ATE permission denial displays Setup pending; established categories remain visible, and incomplete combined totals are never shown as zero. Preview data and CI screenshots are explicitly samples.
+
+The website code is ready for Pages publication verification. Actual Firebase writes/reads for ATE remain unverified and require owner-authenticated activation. The reviewed `atec.txt` Cloud Shell launcher inserts only the three counter category names, backs up the live rules, validates the candidate and checks real counts, with guarded rollback. See [activation and verification details](../build/downloads/README.md). No email was sent; scheduled email expansion remains a separate pending item.
