@@ -30,9 +30,11 @@ Following activation, verify actual click recording separately: note a platform'
 
 ## Verification
 
-- Browser integration run [43281516238](https://github.com/willyros01/Cuberoot/actions/runs/43281516238) passed on Chrome. Real site modules and CSP were loaded with fixture Firebase SDK responses; no live click writes were made. The test exercised the actual download event for all three platforms on both pages, one record per click, write-failure behavior, exact path/origin allowlisting, ten-category cockpit totals, pending/active states, app/date filters, Toronto bounds, timezone details and signed-out/error behavior. Screenshot counts are fixtures, not production totals.
+- Final main-branch browser integration run [43282988198](https://github.com/willyros01/Cuberoot/actions/runs/43282988198) passed on Chrome. Real site modules and CSP were loaded with fixture Firebase SDK responses; no live click writes were made. The test exercised the actual download event for all three platforms on both pages, one record per click, write-failure behavior, exact path/origin allowlisting, ten-category cockpit totals, pending/active states, app/date filters, Toronto bounds, timezone details and signed-out/error behavior. Screenshot counts are fixtures, not production totals.
 - Five offline activation tests passed, including unchanged unrelated rules, idempotence, malformed/unknown allowlists, syntax rejection, concurrent changes, successful release flow and rollback after failed permission verification. These do not establish live Firebase activation.
 - Workflow: `.github/workflows/download-web-check.yml`. Browser test: `web-check.mjs`. Tests require Playwright 1.62.1 and Chrome, installed by CI; the Firebase mocks prevent production writes.
-- Live page/module deployment and owner-activated Firebase recording must be recorded separately in `docs/APK-COCKPIT.md`.
+- Pages deployment [43282988027](https://github.com/willyros01/Cuberoot/actions/runs/43282988027) passed at source `4ed43f2ee87faa05b8002a197b8b772d1f21f2c2`. Public page/module/launcher bytes were independently matched to source. Owner-activated Firebase recording is still pending; live ATE readiness returned HTTP 403. Details are in `docs/APK-COCKPIT.md`.
 
 Email expansion to ten categories remains a separate TODO. Its existing seven-app assertions and 09:17 Toronto delivery remain intact.
+
+The readiness test uses public aggregation with no owner Authorization header or cookies. Owner-authenticated access to an empty collection does not count as activation. Platform filtering retains each app’s five recent records even when 35 other events are newer; only the combined display is limited to twenty events.
