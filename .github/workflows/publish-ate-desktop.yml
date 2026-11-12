@@ -1,5 +1,5 @@
 name: Publish ATE desktop installers
-# ATE 0.5.3 run 43222957484: publish both verified desktop installers and check live downloads.
+# ATE 0.5.3 run 43222957484: read the current release report from GitHub's API.
 on:
   workflow_dispatch:
   schedule:
@@ -27,11 +27,12 @@ jobs:
         run: |
           node --input-type=module <<'JS'
           import {readFileSync,appendFileSync} from 'node:fs';
-          const r=await fetch('https://raw.githubusercontent.com/willyros01/clear-page/desktop-releases/ate-desktop-last-run.json?t='+Date.now(),{headers:{'Cache-Control':'no-cache'}});
+          const r=await fetch('https://api.github.com/repos/willyros01/clear-page/contents/ate-desktop-last-run.json?ref=desktop-releases',{headers:{Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json','Cache-Control':'no-cache'}});
           let ready=false;
           if(r.status!==404){
             if(!r.ok)throw Error('Report lookup HTTP '+r.status);
-            const report=await r.json();let current={};
+            const lookup=await r.json();
+            const report=JSON.parse(Buffer.from(lookup.content,'base64').toString('utf8'));let current={};
             try{current=JSON.parse(readFileSync('downloads/ate-desktop-build.json','utf8'))}catch{}
             let macReady=false;
             if(report.mac_artifact_id){
@@ -41,6 +42,7 @@ jobs:
             }
             ready=!!((report.windows_artifact_id&&(current.windows?.run_id||0)<report.run_id)||(macReady&&(current.mac?.run_id||0)<report.run_id));
           }
+          console.log('Verified desktop release ready for publication: '+ready);
           appendFileSync(process.env.GITHUB_OUTPUT,'ready='+ready+'\n');
           JS
   publish:

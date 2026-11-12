@@ -4,10 +4,15 @@ set -euo pipefail
 TMP=$(mktemp -d)
 cleanup(){ hdiutil detach "$TMP/mount" -quiet 2>/dev/null || true; rm -rf "$TMP"; }
 trap cleanup EXIT
-REPORT=https://raw.githubusercontent.com/willyros01/clear-page/desktop-releases/ate-desktop-last-run.json
-code=$(curl -sSL --retry 2 -w '%{http_code}' "$REPORT?t=$(date +%s)" -o "$TMP/report.json")
+REPORT='https://api.github.com/repos/willyros01/clear-page/contents/ate-desktop-last-run.json?ref=desktop-releases'
+code=$(curl -sSL --retry 2 -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' -H 'Cache-Control: no-cache' -w '%{http_code}' "$REPORT" -o "$TMP/report-response.json")
 if [ "$code" = 404 ]; then echo 'No desktop release report yet.'; exit 0; fi
 [ "$code" = 200 ] || { echo "Report HTTP $code"; exit 1; }
+node - "$TMP/report-response.json" "$TMP/report.json" <<'JS'
+const fs=require('fs'),lookup=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+if(lookup.encoding!=='base64'||typeof lookup.content!=='string')throw Error('Invalid release report response');
+fs.writeFileSync(process.argv[3],Buffer.from(lookup.content,'base64'));
+JS
 node - "$TMP/report.json" <<'JS'
 const r=require(process.argv[2]);
 if(r.app!=='ATE'||!((r.workflow==='ATE Apple and Desktop'&&r.branch==='desktop')||(r.workflow==='ATE Windows website release'&&r.branch==='windows-compiler'))||!Number.isSafeInteger(r.run_id)||r.run_id<1||!/^[a-f0-9]{40}$/.test(r.source_sha)||!/^\d+\.\d+\.\d+$/.test(r.version))throw Error('Unexpected report');
