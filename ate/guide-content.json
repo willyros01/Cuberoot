@@ -27,6 +27,10 @@
     [
       "Try Vim only if you want it",
       "<p>With a hardware keyboard, choose <b>Menu → Editing → Vim</b>. Press <code>i</code> to type and <code>Esc</code> or <code>Ctrl+[</code> for Normal mode. Type <code>/word</code>, press Enter, then <code>n</code> for the next match or <code>N</code> for the opposite direction. Type <code>:</code> in Normal mode for a command. Return to <b>Standard</b> for ordinary editing.</p>"
+    ],
+    [
+      "Check C without installing a compiler",
+      "<p>Choose C as the language, then <b>Menu → Check syntax</b>. The included offline parser checks basic structure without downloads. Headers, macros and types are not checked. On Mac/Windows 0.5.3, optional Clang checking is under <b>Menu → C settings → C checking → Advanced: installed Clang</b>. Switch back to <b>Basic offline parser</b> whenever you prefer.</p>"
     ]
   ],
   "full": [
@@ -88,7 +92,7 @@
     ],
     [
       "Check syntax and C settings",
-      "<p>Choose <b>Menu → Check syntax</b>. Results show errors with line/column positions; tap an error to jump to it. Automatic checks can run while typing. JavaScript, TypeScript, JSON, YAML, HTML and CSS are checked locally without executing your program. TypeScript checking covers syntax, not types. Python, SQL and Markdown currently provide editing/highlighting only.</p><p><b>C on iPhone/iPad and Android:</b> a bundled basic parser catches structural syntax errors. It does not resolve headers, expand macros, check types or compile/run programs; no compiler download is needed.</p><p><b>C on Mac/Windows:</b> Clang performs syntax-only checking. C settings provide the standard, project folder, include directories and macros. If Clang is missing, you may choose an installed compiler. Windows also offers an optional verified official LLVM-MinGW download with progress and cancellation. The download is about 191 MB and requires 3 GB free space; it stays in ATE’s private app folder, with no administrator or PATH change. On Mac, install Apple Command Line Tools separately and select Clang if necessary.</p>"
+      "<p>Choose <b>Menu → Check syntax</b>. Results show errors with line/column positions; tap an error to jump to it. Automatic checks can run while typing. JavaScript, TypeScript, JSON, YAML, HTML and CSS are checked locally without executing your program. TypeScript checking covers syntax, not types. Python, SQL and Markdown currently provide editing/highlighting only.</p><p><b>Basic C checking on every platform:</b> iPhone/iPad and Android already include the offline parser. Starting with desktop 0.5.3, Mac and Windows use it by default too. It catches structural syntax errors without any compiler installation or download. It does not resolve headers, expand macros, check types or certify C-standard conformance. It does not compile or run your program.</p><p><b>Optional advanced C checking on Mac/Windows:</b> open <b>Menu → C settings → C checking</b> and choose <b>Advanced: installed Clang</b>. Select an installed Clang if needed, then configure the C standard, project folder, include directories and macros. Advanced mode uses Clang for syntax-only checks. If Clang is missing, return to <b>Basic offline parser</b> to keep checking immediately.</p><p><b>Optional Windows download:</b> after selecting Advanced mode, Get C compiler offers a verified official LLVM-MinGW download with progress and cancellation. It is about 191 MB and requires 3 GB free space. It stays in ATE’s private app folder, without administrator or PATH changes. Basic mode never requires this download. On Mac, an existing compatible Clang can be selected; Apple Command Line Tools are an optional separate installation.</p>"
     ]
   ]
 }

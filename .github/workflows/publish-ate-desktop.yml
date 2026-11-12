@@ -1,5 +1,5 @@
 name: Publish ATE desktop installers
-# ATE 0.5.2 run 43168469203: publish the verified Windows and notarized universal Mac installers.
+# ATE 0.5.3: publish the verified desktop installers and verify the public downloads.
 on:
   workflow_dispatch:
   schedule:
@@ -65,3 +65,27 @@ jobs:
             --header "Authorization: Bearer $GITHUB_TOKEN" \
             --header 'Accept: application/vnd.github+json' \
             'https://api.github.com/repos/willyros01/Cuberoot/pages/builds' > "$RUNNER_TEMP/pages-build.json"
+      - name: Verify public installers match the published manifests
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const expected=JSON.parse(readFileSync('downloads/ate-desktop-build.json','utf8'));
+          const base='https://www.cuberoot-systems.com/downloads/';
+          let last='Waiting for Pages';
+          for(let attempt=0;attempt<36;attempt++){
+            try{
+              for(const platform of ['mac','windows']){
+                const m=expected[platform];if(!m)continue;
+                const r=await fetch(base+m.file+'?build='+m.run_id+'&verify='+Date.now(),{signal:AbortSignal.timeout(30000)});
+                if(!r.ok)throw Error(platform+' HTTP '+r.status);
+                const b=Buffer.from(await r.arrayBuffer());
+                if(b.length!==m.bytes||createHash('sha256').update(b).digest('hex')!==m.sha256)throw Error(platform+' public download differs from the release manifest');
+                console.log('PASS: public '+platform+' '+m.version+' SHA-256 and '+b.length+' bytes verified');
+              }
+              process.exit(0);
+            }catch(error){last=error.message;console.log(last)}
+            if(attempt<35)await new Promise(resolve=>setTimeout(resolve,10000));
+          }
+          throw Error('Public installer verification failed: '+last);
+          JS
