@@ -1,6 +1,6 @@
 # Current download report rollout — 12 November 2026
 
-The ten-category email update is verified offline and at mobile/tablet widths. Production rollout, three real ATE verification downloads and the explicitly requested test email are in progress. The existing 09:17 Toronto cron job, numeric workflow ID, Resend secret/domain and recipient are preserved. See [current sender and test instructions](../build/apk-counter/README.md). Historical seven-app checkpoints below retain their original evidence and are superseded by the final rollout checkpoint when completed.
+The ten-category email update is complete. Three real ATE downloads, anonymous click/timezone recording and final test-email Inbox delivery are verified. The existing 09:17 Toronto cron job, numeric workflow ID, Resend secret/domain and recipient are preserved. See [current sender and test instructions](../build/apk-counter/README.md). Historical seven-app checkpoints below retain their original evidence and are superseded by the final rollout checkpoint when completed.
 
 ## Canonical cron-job.org APK email configuration — CONFIRMED October 18, 2026
 
@@ -224,14 +224,14 @@ The owner explicitly requested daily reports. A **one-time Gmail delivery test**
 
 ## ATE download reporting and location — TODO (12 November 2026)
 
-Status: **Web portion published and Firebase counter access activated/verified. Live browser click acceptance and email expansion remain pending.** Owner authorized the web portion on 12 November 2026. Editor/parser development remains paused for owner testing.
+Status: **Complete — website, Firebase activation, real browser clicks, ten-category email and Inbox delivery verified.** Owner authorized the web portion on 12 November 2026. Editor/parser development remains paused for owner testing.
 
 - [x] Track **ATE Windows**, **ATE Mac Universal** and **ATE Android** as separate categories, on both the Cuberoot homepage and the ATE download page.
 - [x] Extend only the download-counter Firebase allowlist/permissions for `ate-windows`, `ate-mac` and `ate`; preserve unrelated application/household rules. Investigation confirmed public aggregate reads for these categories currently return permission denied.
-- [ ] Add all three categories to the existing daily email, preserving the seven current categories. Show reporting-period and lifetime counts and reconcile the ten-category grand total. Rename the heading/subject to **Cuberoot Download Clicks**.
+- [x] Add all three categories to the existing daily email, preserving the seven current categories. Show reporting-period and lifetime counts and reconcile the ten-category grand total. Rename the heading/subject to **Cuberoot Download Clicks**.
 - [x] Capture browser-reported timezone with click timestamp and build, using the existing tracking model. Include the ATE categories in the download cockpit, app filter, date-range totals and recent-click location display.
 - [x] Describe timezone-derived area as approximate and unverified, not GPS or a confirmed physical location. No GPS prompt or persistent visitor identifier is needed. The daily email remains a counts report; location details belong in the cockpit.
-- [ ] Verify file-link identification for APK/EXE/DMG, ATE-page script/security-policy loading, click recording, Firebase permissions, cockpit display, email rows/totals and duplicate-send protection before enabling the expanded report.
+- [x] Verify file-link identification for APK/EXE/DMG, ATE-page script/security-policy loading, click recording, Firebase permissions, cockpit display, email rows/totals and duplicate-send protection before enabling the expanded report.
 
 Keep the existing cron-job.org job, numeric workflow-dispatch endpoint, Resend delivery and **09:17 America/Toronto** schedule. Preserve the continuous previous-day 09:17 to current-day 09:17 reporting window and daylight-saving handling. Tracking must not delay or cancel downloads. Counts represent recorded click attempts, not completed downloads/installations. Do not invent or backfill unrecorded historical ATE clicks. No ATE application rebuild is required.
 
@@ -252,3 +252,15 @@ Owner ran `atec.txt` in the authenticated `split-it-44dea` Cloud Shell and provi
 Independent unauthenticated Firestore aggregation queries then succeeded for all ten categories. Lifetime counts at this check: ATE Android 0, ATE Mac Universal 0, ATE Windows 0, Cloud Files 0, Fairpot 2, FIDUNIO 9, The Marker 24, Scorecard 9, SpendRecorder 1, Wire 1. The ATE zero counts are now real query results, not permission-denied placeholders. The verification performed no writes.
 
 On the next signed-in cockpit Refresh, the public-readiness gate can show actual ATE counts. Remaining acceptance: click one real ATE download button, refresh the cockpit, and verify the matching category/timezone event. A completed public read does not by itself prove a browser write; do not mark this live-click acceptance complete until observed. The daily email remains the existing seven-category report at 09:17 Toronto; its ten-category expansion is still pending.
+
+### Download reporting completed — 12 November 2026
+
+Owner explicitly requested completion of all download reporting work and one test email. Release source `3d68a1e5114b8cdac02a92a810b27c434d40dbe8` passed [live acceptance 43302545498](https://github.com/willyros01/Cuberoot/actions/runs/43302545498). The browser used the actual published homepage/ATE page and Firebase SDK without mocks; it downloaded each exact installer/APK, checked its SHA-256/bytes against published release metadata, and verified a matching new anonymous event with server timestamp, build and America/Toronto timezone. Each of ATE Windows, ATE Mac Universal and ATE Android went from 0 to 1 lifetime click. These three genuine verification clicks remain in the report; no event documents were fabricated or removed.
+
+The ten-row production sender preserves the seven original rows, adds the three ATE rows and reconciles ALL APPS in plain text and HTML. Daily cutoff and lifetime freeze remain 09:17 Toronto; the existing date-specific daily idempotency key, numeric workflow ID 386014186, cron-job.org configuration, Resend secret/domain and recipient were preserved. Public report issue #10 also contains all ten rows, confirmed after [run 43302545190](https://github.com/willyros01/Cuberoot/actions/runs/43302545190). Its historical calendar-day window is separate from the email window.
+
+Resend accepted the single requested test email with ID `01a1d17d-a4c1-72bc-a3d6-3496eee0390e`. Inbox delivery was independently confirmed at **15:40:35 Toronto**, subject **Cuberoot Download Clicks - 2026-11-12 (TEST)**, with ten categories, total row and correct 09:17 window. The owner also supplied a received-email screenshot. Both HTML and plain text contain the three ATE rows. At the completed morning cutoff each was correctly 0; total lifetime was 46. The afternoon verification clicks belong in the next scheduled report and the current cockpit now reads 1 for each ATE category. Location stays in the cockpit; no GPS or exact-location claims were added.
+
+Main-branch browser regression 43302545102 and Pages 43302544348 passed. Email rendering passed at 390px and 768px with unchanged 19px table text and no horizontal overflow. One older preflight still assumed seven fixture rows and initially failed; it was corrected at `9f16c34b11fd818e883db05aef1d27699ddcbabc`, and [superseding preflight 43303064986](https://github.com/willyros01/Cuberoot/actions/runs/43303064986) passed. The failed attempt is not claimed green. No second email or repeat download clicks were triggered by that test-only correction.
+
+**All ATE-DOWNLOAD-REPORT items are complete.** Editor/parser development remains paused; no application rebuild was part of this work. Next daily email uses the same existing 09:17 America/Toronto schedule.

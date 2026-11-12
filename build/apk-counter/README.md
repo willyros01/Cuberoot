@@ -29,3 +29,9 @@ python3 build/apk-counter/resend-daily.py --self-test
 The existing reusable `apk-report-resend-test.yml` now calls the same current `send-test.py` instead of stale seven-app/font assertions. Public issue reporting also uses all ten categories, while retaining its historical previous-calendar-day window. That issue snapshot is separate from the email's continuous 09:17 window.
 
 Rollout status and actual email/click verification evidence are recorded in `docs/APK-COCKPIT.md`.
+
+## Completed live acceptance — 12 November 2026
+
+[Run 43302545498](https://github.com/willyros01/Cuberoot/actions/runs/43302545498) passed all three real file downloads/checksums and anonymous timestamp/build/timezone event checks, followed by one accepted test email. The same message was independently found in Gmail Inbox at 15:40:35 Toronto and confirmed by the owner’s screenshot. Subject: **Cuberoot Download Clicks - 2026-11-12 (TEST)**. All ten rows plus ALL APPS are present in HTML/plain text. The completed morning window correctly has ATE 0/0 rows; afternoon test clicks are included in the next daily window. Initial real ATE lifetime counters are now 1 each.
+
+Legacy preflight seven-row assumptions were corrected; [run 43303064986](https://github.com/willyros01/Cuberoot/actions/runs/43303064986) passed. The canonical existing daily workflow remains ID **386014186**. No schedule, scheduler token or recipient change was needed. Full evidence is in `docs/APK-COCKPIT.md`.

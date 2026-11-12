@@ -35,10 +35,14 @@ Following activation, verify actual click recording separately: note a platform'
 - Workflow: `.github/workflows/download-web-check.yml`. Browser test: `web-check.mjs`. Tests require Playwright 1.62.1 and Chrome, installed by CI; the Firebase mocks prevent production writes.
 - Pages deployment [43282988027](https://github.com/willyros01/Cuberoot/actions/runs/43282988027) passed at source `4ed43f2ee87faa05b8002a197b8b772d1f21f2c2`. Public page/module/launcher bytes were independently matched to source. Owner-activated Firebase recording is still pending; live ATE readiness returned HTTP 403. Details are in `docs/APK-COCKPIT.md`.
 
-Email expansion to ten categories remains a separate TODO. Its existing seven-app assertions and 09:17 Toronto delivery remain intact.
+The email expansion to ten categories is now complete and verified. The existing 09:17 Toronto delivery and daily idempotency key remain intact. See `build/apk-counter/README.md` and the completed checkpoint in `docs/APK-COCKPIT.md`.
 
 The readiness test uses public aggregation with no owner Authorization header or cookies. Owner-authenticated access to an empty collection does not count as activation. Platform filtering retains each app’s five recent records even when 35 other events are newer; only the combined display is limited to twenty events.
 
 ## Owner activation checkpoint — 12 November 2026
 
 The owner successfully ran `atec.txt`. Independent public aggregation reads now succeed for all ten categories; each ATE category initially returned zero. This supersedes the earlier pending/HTTP 403 state above. No write or email send was performed during independent verification. The next signed-in Refresh can show actual ATE counts. A real download-button click and matching timezone event still need to be observed before claiming end-to-end live write acceptance. The seven-category daily email is unchanged.
+
+## End-to-end recording completed — 12 November 2026
+
+The owner subsequently authorized full live acceptance and a test email. Run **43302545498** performed three actual browser downloads using the published website and real Firebase SDK, then verified matching new server-time/build/America-Toronto events and the exact file checksums. Each ATE category changed from 0 to 1. These are genuine verification clicks, not fabricated Firestore records. The test email was received and verified with all ten rows. The earlier pending-write checkpoints are superseded; the download reporting work is complete. No editor/application rebuild occurred.
