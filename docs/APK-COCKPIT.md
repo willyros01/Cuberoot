@@ -1,3 +1,7 @@
+# Current download report rollout — 12 November 2026
+
+The ten-category email update is verified offline and at mobile/tablet widths. Production rollout, three real ATE verification downloads and the explicitly requested test email are in progress. The existing 09:17 Toronto cron job, numeric workflow ID, Resend secret/domain and recipient are preserved. See [current sender and test instructions](../build/apk-counter/README.md). Historical seven-app checkpoints below retain their original evidence and are superseded by the final rollout checkpoint when completed.
+
 ## Canonical cron-job.org APK email configuration — CONFIRMED October 18, 2026
 
 **This section supersedes the earlier incorrect repository-dispatch URL and timing-race analysis.**

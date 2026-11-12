@@ -1,4 +1,5 @@
 name: Verify live ATE downloads and send owner test email
+# Owner requested full live acceptance and a test email on 12 November 2026.
 on:
   workflow_dispatch:
   push:
