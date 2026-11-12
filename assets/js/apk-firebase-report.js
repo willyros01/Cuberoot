@@ -124,5 +124,7 @@ export async function loadOwnerReport(range=null){
   events.push(...result.events);
  }
  events.sort((a,b)=>b.at.localeCompare(a.at));
- return {counts,events:events.slice(0,20),pending};
+ // Retain each app's bounded recent records so a quieter platform is still
+ // available when selected. The UI limits the combined view separately.
+ return {counts,events:events.slice(0,APPS.length*5),pending};
 }

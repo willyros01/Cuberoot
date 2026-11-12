@@ -89,7 +89,7 @@ export function cockpit({preview=false,load}) {
    el('div',{},el('h3',{text:name}),
     el('span',{text:pending.has(key)?'Setup pending':selectedRange?count(key,'total')+' all time':count(key,'today')+' today'})),
    el('strong',{text:pending.has(key)?'—':count(key,selectedRange?'range':'total').toLocaleString()}))));
-  const events=data.events.filter(e=>!slug||e.app===slug);
+  const events=data.events.filter(e=>!slug||e.app===slug).slice(0,slug?5:20);
   const list=el('ol',{class:'dc-events'});
   for(const event of events){
    let date='Unknown date';try{date=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Toronto',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(event.at));}catch{}

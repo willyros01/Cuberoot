@@ -46,7 +46,7 @@ export const where=(...args)=>({where:args});export const orderBy=(...args)=>({o
 export const Timestamp={fromDate:d=>d.toISOString()};
 function gate(q){(window.queries??=[]).push(q);if(window.denyApp===q.app){const e=Error('Denied');e.code='permission-denied';throw e}}
 export async function getCountFromServer(q){gate(q);const i=names.indexOf(q.app)+1;return {data:()=>({count:i*(q.constraints?1:10)})}}
-export async function getDocs(q){gate(q);return {docs:q.app.startsWith('ate')?[{data:()=>({createdAt:{toDate:()=>new Date('2026-11-12T14:00:00Z')},timezone:q.app==='ate-mac'?'Europe/London':'Asia/Manila'})}]:[]}};
+export async function getDocs(q){gate(q);return {docs:q.app.startsWith('ate')?[{data:()=>({createdAt:{toDate:()=>new Date('2026-11-12T14:00:00Z')},timezone:q.app==='ate-mac'?'Europe/London':'Asia/Manila'})}]:Array.from({length:5},(_,i)=>({data:()=>({createdAt:{toDate:()=>new Date(Date.parse('2026-11-12T15:00:00Z')-i*1000)},timezone:'America/Toronto'})}))}};
 `;
 await context.route('https://www.gstatic.com/firebasejs/**',route=>{
  const url=route.request().url();const body=url.includes('firebase-firestore')?firebaseStore:url.includes('firebase-auth')?firebaseAuth:firebaseApp;
@@ -108,6 +108,7 @@ try{
  await page.evaluate(()=>window.denyATE=false);await page.locator('.dc-refresh').click();
  await page.waitForFunction(()=>document.querySelector('[data-app="ate-mac"] strong').textContent==='90');
  assert.match(await page.locator('.dc-events').textContent(),/ATE Mac Universal.*London.*Europe\/London/s);
+ // ATE's event is older than 35 other app events: platform filtering must retain it.
  await page.selectOption('#dc-app','');assert.equal(await page.locator('.dc-total-primary strong').textContent(),'550');
  await page.screenshot({path:resolve(evidence,'cockpit-active-fixture.png'),fullPage:true});
  await page.selectOption('#dc-app','ate');await page.fill('#dc-from','2026-11-12');await page.fill('#dc-to','2026-11-12');await page.locator('.dc-apply').click();
