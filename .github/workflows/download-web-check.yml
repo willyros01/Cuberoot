@@ -26,6 +26,8 @@ jobs:
           node-version: 22
       - name: Prepare browser test runner
         run: npm install --prefix "$RUNNER_TEMP/download-web" --no-save playwright@1.62.1
+      - name: Verify scoped counter activation and rollback logic offline
+        run: python3 -m unittest discover -s build/downloads -p '*_test.py' -v
       - name: Verify download actions, tracking and private cockpit
         env:
           PLAYWRIGHT_MODULE: ${{ runner.temp }}/download-web/node_modules/playwright/index.mjs
