@@ -55,3 +55,31 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           curl --fail --silent --show-error --request POST --header "Authorization: Bearer $GITHUB_TOKEN" --header 'Accept: application/vnd.github+json' 'https://api.github.com/repos/willyros01/Cuberoot/pages/builds' > "$RUNNER_TEMP/pages-build.json"
+
+      - name: Verify the public APK download matches the signed release
+        if: steps.publish.outputs.published == 'true'
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const expected=JSON.parse(readFileSync('downloads/ate-build.json','utf8'));
+          let last='';
+          for(let attempt=0;attempt<36;attempt++){
+            try{
+              const base='https://www.cuberoot-systems.com/downloads/';
+              const meta=await fetch(base+'ate-build.json?verify='+Date.now(),{signal:AbortSignal.timeout(30000),cache:'no-store'});
+              if(!meta.ok)throw Error('Metadata HTTP '+meta.status);
+              const actual=await meta.json();
+              if(actual.run_id!==expected.run_id||actual.apk_sha256!==expected.apk_sha256)throw Error('Pages still serving previous release');
+              const response=await fetch(base+'ate.apk?build='+expected.run_id+'&verify='+Date.now(),{signal:AbortSignal.timeout(60000),cache:'no-store'});
+              if(!response.ok)throw Error('APK HTTP '+response.status);
+              const bytes=Buffer.from(await response.arrayBuffer());
+              const sha=createHash('sha256').update(bytes).digest('hex');
+              if(bytes.length!==expected.apk_bytes||sha!==expected.apk_sha256)throw Error('Public APK length/hash mismatch');
+              console.log('PASS: public ATE '+expected.version+' APK, run '+expected.run_id+', '+bytes.length+' bytes, SHA-256 '+sha);
+              process.exit(0);
+            }catch(error){last=error.message;console.log('Waiting for Pages: '+last);}
+            await new Promise(resolve=>setTimeout(resolve,10000));
+          }
+          throw Error('Public APK verification failed: '+last);
+          JS
