@@ -44,13 +44,20 @@ export const collection=(db,...parts)=>({app:parts[1],parts});
 export const query=(records,...constraints)=>({...records,constraints});
 export const where=(...args)=>({where:args});export const orderBy=(...args)=>({orderBy:args});export const limit=n=>({limit:n});
 export const Timestamp={fromDate:d=>d.toISOString()};
-function gate(q){(window.queries??=[]).push(q);if((window.denyATE&&q.app.startsWith('ate'))||window.denyApp===q.app){const e=Error('Denied');e.code='permission-denied';throw e}}
+function gate(q){(window.queries??=[]).push(q);if(window.denyApp===q.app){const e=Error('Denied');e.code='permission-denied';throw e}}
 export async function getCountFromServer(q){gate(q);const i=names.indexOf(q.app)+1;return {data:()=>({count:i*(q.constraints?1:10)})}}
 export async function getDocs(q){gate(q);return {docs:q.app.startsWith('ate')?[{data:()=>({createdAt:{toDate:()=>new Date('2026-11-12T14:00:00Z')},timezone:q.app==='ate-mac'?'Europe/London':'Asia/Manila'})}]:[]}};
 `;
 await context.route('https://www.gstatic.com/firebasejs/**',route=>{
  const url=route.request().url();const body=url.includes('firebase-firestore')?firebaseStore:url.includes('firebase-auth')?firebaseAuth:firebaseApp;
  return route.fulfill({contentType:'text/javascript',headers:{'access-control-allow-origin':'*'},body});
+});
+await context.route('https://firestore.googleapis.com/**',async route=>{
+ assert(!route.request().headers().authorization,'readiness probe must not use owner authentication');
+ const headers={'access-control-allow-origin':'*','access-control-allow-methods':'POST, OPTIONS','access-control-allow-headers':'content-type'};
+ if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers});
+ const denied=await route.request().frame().evaluate(()=>window.denyATE);
+ return route.fulfill({status:denied?403:200,contentType:'application/json',headers,body:JSON.stringify(denied?{error:{status:'PERMISSION_DENIED'}}:[{result:{aggregateFields:{clicks:{integerValue:'0'}}}}])});
 });
 await context.route('**/downloads/*',route=>/\.(apk|exe|dmg)(\?|$)/.test(route.request().url())?route.fulfill({contentType:'application/octet-stream',headers:{'content-disposition':'attachment'},body:'download test fixture'}):route.continue());
 const page=await context.newPage();
@@ -116,5 +123,5 @@ try{
  await page.evaluate(()=>window.testAuth.currentUser=null);
  assert.equal(await page.evaluate(async()=>{try{await window.api.loadOwnerReport();return false}catch(e){return e.message.includes('owner')}}),true);
  assert.deepEqual(errors,[]);
- console.log('PASS: pending ATE permissions preserve existing counts; activation/filter/date ranges/timezone location/all-ten totals; established failures and signed-out access fail closed');
+ console.log('PASS: public readiness gate distinguishes owner-readable empty collections from activated ATE tracking; existing counts/activation/filter/date ranges/timezone location/all-ten totals; established failures and signed-out access fail closed');
 }finally{await context.close();await browser.close();server.close();}

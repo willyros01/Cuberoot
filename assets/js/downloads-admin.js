@@ -5,7 +5,7 @@ import {cockpit} from './downloads-ui.js?v=2.2.0';
 // private sign-in prompt is visible before the owner is authenticated.
 let reportPromise;
 function reportModule(){
- if(!reportPromise)reportPromise=import('./apk-firebase-report.js?v=5').catch(error=>{
+ if(!reportPromise)reportPromise=import('./apk-firebase-report.js?v=6').catch(error=>{
   reportPromise=null;
   throw error;
  });

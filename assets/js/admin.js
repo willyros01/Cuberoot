@@ -7,7 +7,7 @@ import { SITE } from './config.js?v=1.3.0';
 import { el, icon, hydrateIcons, formatDate, formatSize, connectionNotice } from './common.js?v=1.3.0';
 import { GitHubRepo } from './github.js?v=1.3.0';
 import * as V from './vault.js?v=1.3.1';
-import { downloadsTab } from './downloads-admin.js?v=2.2.0';
+import { downloadsTab } from './downloads-admin.js?v=2.2.1';
 
 hydrateIcons();
 const root = document.getElementById('admin-root');

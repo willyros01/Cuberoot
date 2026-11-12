@@ -8,7 +8,7 @@ The shared website catalog retains seven APK categories and adds `ate-windows` (
 
 Both the homepage and `/ate/` load the tracker. The ATE page permits only the existing pinned Firebase SDK origin and Firestore connection origin in addition to its previous CSP. The private cockpit still requires the verified Google owner account. ATE cards, app/date filters and recent timezone-area details use the same catalog. Area is explicitly unverified.
 
-Until Firebase is activated, an ATE `permission-denied` result becomes **Setup pending**, never zero. The existing seven categories remain readable; combined totals stay unavailable while a selected category is pending. Other query failures still fail closed. Successful activation is detected on the next Refresh without another website change. The public `/cockpit/` preview is clearly sample data.
+Until Firebase is activated, an unauthenticated aggregate probe checks each ATE category. Owner-authenticated reads alone are insufficient: the existing owner permission can read empty collections before public writes are allowed. A public `permission-denied` result becomes **Setup pending**, never zero. The existing seven categories remain readable; combined totals stay unavailable while a selected category is pending. Other query failures still fail closed. Successful activation is detected on the next Refresh without another website change. The public `/cockpit/` preview is clearly sample data.
 
 ## Activation requires the owner's Cloud Shell session
 

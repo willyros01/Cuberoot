@@ -61,6 +61,19 @@ function startOfTorontoDay(now=new Date()){
  }
  throw new Error('Unable to determine Toronto reporting day.');
 }
+async function publicATECounterReady(app){
+ // Owner reads can succeed before the public allowlist is activated. Probe
+ // the public aggregate with no Auth token/cookies so that zero is not proof
+ // of activation. This performs no writes or synthetic click generation.
+ const url='https://firestore.googleapis.com/v1/projects/'+firebase.projectId+'/databases/(default)/documents/cuberoot_apk_clicks_v1/'+app+':runAggregationQuery?key='+firebase.apiKey;
+ const response=await fetch(url,{method:'POST',credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',headers:{'Content-Type':'application/json'},body:JSON.stringify({structuredAggregationQuery:{structuredQuery:{from:[{collectionId:'events'}]},aggregations:[{alias:'clicks',count:{}}]}})});
+ if(response.status===403)return false;
+ if(!response.ok)throw new Error('ATE counter readiness unavailable');
+ const rows=await response.json();
+ const raw=rows?.[0]?.result?.aggregateFields?.clicks?.integerValue;
+ if(!Array.isArray(rows)||rows.length!==1||typeof raw!=='string'||!/^\d+$/.test(raw)||!Number.isSafeInteger(Number(raw)))throw new Error('Invalid ATE readiness count');
+ return true;
+}
 export async function loadOwnerReport(range=null){
  const {auth,db}=setup();
  if(auth.currentUser?.uid!==OWNER_UID)throw new Error('Please sign in as the cockpit owner.');
@@ -71,6 +84,7 @@ export async function loadOwnerReport(range=null){
  const since=selected?null:Timestamp.fromDate(startOfTorontoDay());
  const results=await Promise.all(APPS.map(async app=>{
   try{
+  if(ATE_APPS.includes(app)&&!await publicATECounterReady(app))return {app,pending:true};
   const records=collection(db,'cuberoot_apk_clicks_v1',app,'events');
   const period=selected
    ?query(records,where('createdAt','>=',Timestamp.fromDate(selected.start)),
