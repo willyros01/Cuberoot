@@ -2,7 +2,7 @@
 # Publish the latest SUCCESSFUL SpendRecorder Android APK on Cuberoot.
 # Copies ONLY the exact successful APK artifact; never re-signs/rebuilds.
 # A missing artifact is an error: keep the current APK rather than publish drift.
-# Publication check: SpendRecorder 1.1.1 bold recurring text at standard sizes, exact successful run 43378246381.
+# Publication check: SpendRecorder 1.1.2 recurring text matching vendor/name values, exact successful run 43379811160.
 set -euo pipefail
 
 TMP="$(mktemp -d)"
