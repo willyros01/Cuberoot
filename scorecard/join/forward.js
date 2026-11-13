@@ -50,8 +50,17 @@
     $('[data-lead]').textContent = 'Your link opens in The Scorecard app.';
     $('[data-then]').textContent = 'After installing';
   }
+  /* iPhone and iPad (Willy, 5 Nov 2026, item 12): Gmail and Chrome show no
+     Open banner, so the page has its own button, as on Android. It hands the
+     same link to the app by the app's own link name (The Scorecard 2.31.1 and
+     later). Without the app nothing opens and the App Store button below is
+     the way on. */
   if (ios && hasLink) {
-    $('[data-ios-open]').hidden = false;
+    $('[data-open]').href = 'thescorecard://join/' + window.location.search;
+    $('[data-open-box]').hidden = false;
+    $('[data-get-step]').hidden = true;
+    $('[data-lead]').textContent = 'Your link opens in The Scorecard app.';
+    $('[data-then]').textContent = 'After installing';
   }
 
   /* Put this phone's store first, and hide the other one. */
