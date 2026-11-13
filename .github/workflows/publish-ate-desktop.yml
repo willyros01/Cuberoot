@@ -1,5 +1,5 @@
 name: Publish ATE desktop installers
-# ATE 0.5.3 run 43222957484: read the current release report from GitHub's API.
+# ATE 0.6.0 (19), verified native release run 43333187409.
 on:
   workflow_dispatch:
   schedule:
