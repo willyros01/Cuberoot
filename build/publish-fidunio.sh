@@ -58,6 +58,17 @@ console.log(run?.id||'');
 JS
 )"
 if [ -z "$RUN_ID" ]; then echo "No successful FIDUNIO Android build yet."; exit 0; fi
+# Already on the site? Stop here, before looking for the build's file: GitHub
+# deletes a build's files after a while, and asking for them again must not
+# fail a run that has nothing to do (Willy, 13 Nov 2026).
+RUN_SHA="$(RUN_ID="$RUN_ID" node -e 'const r=(require(process.argv[1]).workflow_runs||[]).find((x)=>String(x.id)===process.env.RUN_ID);console.log(r?r.head_sha:"")' "$TMP/runs.json")"
+if [ -f downloads/fidunio-build.json ] && RUN_ID="$RUN_ID" SHA="$RUN_SHA" node -e '
+const r = require("./downloads/fidunio-build.json");
+process.exit(String(r.run_id) === process.env.RUN_ID && r.source_sha === process.env.SHA ? 0 : 1);
+'; then
+  echo "This successful APK run is already published."
+  exit 0
+fi
 curl -fsSL --retry 3 --retry-delay 2 \
   -H "Authorization: Bearer $GITHUB_TOKEN" \
   -H 'Accept: application/vnd.github+json' \
