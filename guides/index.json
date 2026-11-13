@@ -209,8 +209,8 @@
           "title": "Privacy and Card Retention - The Marker (large print)",
           "ext": "html",
           "mime": "text/html",
-          "size": 12342,
-          "date": "2026-10-31T01:53:01.944Z",
+          "size": 12529,
+          "date": "2026-11-13T20:00:18.820Z",
           "original": "index.html",
           "path": "marker/privacy/index.html"
         },
@@ -219,8 +219,8 @@
           "title": "Illustrated Quick Starter Guide - large print",
           "ext": "html",
           "mime": "text/html",
-          "size": 28609,
-          "date": "2026-10-30T21:35:08.819Z",
+          "size": 29867,
+          "date": "2026-11-13T20:00:18.820Z",
           "original": "index.html",
           "path": "marker/quick-start/index.html"
         },
@@ -229,8 +229,8 @@
           "title": "Complete Illustrated User Guide - large print",
           "ext": "html",
           "mime": "text/html",
-          "size": 58376,
-          "date": "2026-10-30T21:35:08.819Z",
+          "size": 62122,
+          "date": "2026-11-13T20:00:18.820Z",
           "original": "index.html",
           "path": "marker/guide/index.html"
         },
@@ -239,8 +239,8 @@
           "title": "Illustrated Quick Starter Guide - PDF",
           "ext": "pdf",
           "mime": "application/pdf",
-          "size": 1742339,
-          "date": "2026-10-30T21:35:08.819Z",
+          "size": 2170708,
+          "date": "2026-11-13T20:00:18.820Z",
           "original": "marker-quick-starter.pdf",
           "path": "guides/the-marker/marker-quick-starter.pdf"
         },
@@ -249,8 +249,8 @@
           "title": "Complete Illustrated User Guide - PDF",
           "ext": "pdf",
           "mime": "application/pdf",
-          "size": 3233138,
-          "date": "2026-10-30T21:35:08.819Z",
+          "size": 4122804,
+          "date": "2026-11-13T20:00:18.821Z",
           "original": "marker-user-guide.pdf",
           "path": "guides/the-marker/marker-user-guide.pdf"
         },
@@ -259,8 +259,8 @@
           "title": "Illustrated Application & Code Documentation — Caddie, Follower and Apple Watch",
           "ext": "html",
           "mime": "text/html",
-          "size": 31602,
-          "date": "2026-11-07",
+          "size": 31849,
+          "date": "2026-11-13T20:00:18.821Z",
           "original": "index.html",
           "path": "marker/code-guide/index.html"
         }
