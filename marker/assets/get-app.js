@@ -35,6 +35,16 @@
   var apk = $('[data-apk]');
   if (android && stores && apk) stores.insertBefore(apk, stores.firstChild);
 
+  /* Copy and continue (Willy, 2 Nov 2026; The Marker 1.1.0): tapping a
+     download button also copies this page's link, with its code. When The
+     Marker first opens after installing, it picks the link up by itself
+     (the iPhone asks once: Allow Paste) and opens the right screen. */
+  if (code) {
+    var link = window.location.origin + window.location.pathname + '?' + kind + '=' + code;
+    var copy = function () { try { if (navigator.clipboard) navigator.clipboard.writeText(link).catch(function () {}); } catch (e) { /* nothing copied: the code is still on the page */ } };
+    Array.prototype.forEach.call(document.querySelectorAll('.store-badge, [data-apk]'), function (b) { b.addEventListener('click', copy); });
+  }
+
   /* The Android download: the current signed build, as on the home page. */
   fetch('../../downloads/marker-build.json', { cache: 'no-store' })
     .then(function (r) { return r.ok ? r.json() : null; })
