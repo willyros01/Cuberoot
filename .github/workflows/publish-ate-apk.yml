@@ -1,6 +1,6 @@
 name: Publish ATE Android APK
 
-# ATE 0.5.2 verified in run 43175083674; publish the permanently signed APK.
+# ATE 0.6.0 (19) verified in run 43340101425; publish the permanently signed APK.
 # Every successful ATE Android build records ate-last-run.json on the clear-page apk-releases branch.
 # This workflow polls that verified result every 5 minutes and publishes only successful APKs.
 # Schedule is required because repository GitHub tokens cannot write to another repo.
