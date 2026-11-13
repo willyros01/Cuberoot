@@ -1,12 +1,12 @@
 {
   "app": "SpendRecorder",
   "channel": "android-debug-test",
-  "source_sha": "9f6aa9558a504870a58837d480ed95b901d4ad42",
-  "run_id": 42931999334,
-  "artifact_id": 13817655561,
+  "source_sha": "2d08be6cbcd14ecd38c7039d2f8b2382bee8eb06",
+  "run_id": 43378246381,
+  "artifact_id": 14015328025,
   "origin": "github-actions-artifact",
-  "apk_sha256": "5fbfec2b9daacadd5b48d410865a66425b48751b0f7918895a4ef4b07800c523",
+  "apk_sha256": "83feb66a5ec682fb52fc3a33bc55271b588f427c88e98aa02a9e362e7132f859",
   "signer_sha256": "67f4284ccdc93bb75bbf939f76974888b3190eff46a1e2fb04489090749625fc",
-  "apk_bytes": 17644100,
-  "published_at": "2026-11-11T00:36:41.395Z"
+  "apk_bytes": 17644272,
+  "published_at": "2026-11-13T06:28:24.180Z"
 }
