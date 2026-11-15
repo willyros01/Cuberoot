@@ -1,0 +1,48 @@
+{
+  "app": "ATE",
+  "platform": "web",
+  "version": "0.8.3",
+  "build": 24,
+  "source_sha": "bf28c25f0a8bf917e9fcd26c12ebded3cb033dc8",
+  "run_id": 43734007478,
+  "files": {
+    "THIRD-PARTY-NOTICES.txt": {
+      "bytes": 163592,
+      "sha256": "f192c2ad85f5f4b0c8d5fbe04b632de512578d36ad963edef5d7ac9fe8eb8024"
+    },
+    "app.js": {
+      "bytes": 1080442,
+      "sha256": "8122e82a424a3571ee27d43a233cef21453027de21610192abe3d4057f7cffec"
+    },
+    "app.js.LEGAL.txt": {
+      "bytes": 120,
+      "sha256": "bdca4f7c6b96696a3c82d115ac43a4e2dba984138e96cb291a3379335359643f"
+    },
+    "index.html": {
+      "bytes": 46957,
+      "sha256": "beb7b070674dd0805d6eaffff06482e817a2ffb4724ae6b515b15be21c8b2170"
+    },
+    "ruff_wasm_bg.wasm": {
+      "bytes": 8332913,
+      "sha256": "98e0f5127935f918f7eca9c2abd9873cad0500c9061f474521c5a2aae9949b68"
+    },
+    "syntax-worker.js": {
+      "bytes": 1200156,
+      "sha256": "9dc91aaa36c0f513c8c3def63586e5017a386cb7e716fdbc69bf6f8de02deacf"
+    },
+    "tree-sitter-bash.wasm": {
+      "bytes": 1358224,
+      "sha256": "8292919c88a0f7d3fb31d0cd0253ca5a9531bc1ede82b0537f2c63dd8abe6a7a"
+    },
+    "tree-sitter-c.wasm": {
+      "bytes": 625918,
+      "sha256": "c852c2a85ebf2beb636aa3b0ef7f7e70458684d74f6741b20dcb296885bed9f9"
+    },
+    "web-tree-sitter.wasm": {
+      "bytes": 210688,
+      "sha256": "488beeff7adb7fd7e21e97cc29a43dc6d031977755eda892d6d96c7f456cfdec"
+    }
+  },
+  "verified_build_run_id": 43732522398,
+  "verified_build_source_sha": "f52d12ec97793e34c3b2471509b0d0094d6ae9b7"
+}
