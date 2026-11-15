@@ -6,7 +6,7 @@ on:
     - cron: '*/5 * * * *'
   push:
     branches: [main]
-    paths: ['build/publish-ate-desktop.sh', '.github/workflows/publish-ate-desktop.yml']
+    paths: ['build/publish-ate-desktop.sh', 'build/publish-ate-web.mjs', 'build/verify-ate-web.mjs', '.github/workflows/publish-ate-desktop.yml']
 permissions:
   contents: write
   pages: write
@@ -91,3 +91,34 @@ jobs:
           }
           throw Error('Public installer verification failed: '+last);
           JS
+
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publish the fully verified ATE web artifact
+        id: web
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node build/publish-ate-web.mjs
+      - name: Request Pages deployment
+        if: steps.web.outputs.published == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail --silent --show-error --request POST --header "Authorization: Bearer $GITHUB_TOKEN" --header 'Accept: application/vnd.github+json' 'https://api.github.com/repos/willyros01/Cuberoot/pages/builds' > "$RUNNER_TEMP/pages-build.json"
+      - name: Verify the public web app and exact published assets
+        if: steps.web.outputs.published == 'true'
+        run: |
+          npm install --no-save --ignore-scripts --package-lock=false playwright@1.62.1
+          npx playwright install --with-deps chromium
+          node build/verify-ate-web.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ate-public-web-evidence
+          path: ate-public-web.png
