@@ -1,5 +1,5 @@
 name: Publish ATE desktop installers
-# ATE 0.6.0 (19), verified native release run 43333187409.
+# Publish verified ATE 0.8.3 (24), artifact release run 43734007478; reuse the tested installers.
 on:
   workflow_dispatch:
   schedule:
