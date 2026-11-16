@@ -1,7 +1,8 @@
 // Each public platform is gated by its own completed verification and artifact.
 // An unrelated platform may still be queued or have a failed test attempt.
 function source(report,run,paths){
- if(run.id!==report.run_id||run.head_sha!==report.source_sha||run.head_branch!==report.branch||run.name!==report.workflow||!paths.includes(run.path))throw Error('Release source provenance mismatch');
+ const workflowName=run.path==='.github/workflows/mac-website-retry.yml'&&run.name==='ATE 0.8.7 Mac website signing from verified universal app'?'ATE Apple and Desktop':run.name;
+ if(run.id!==report.run_id||run.head_sha!==report.source_sha||run.head_branch!==report.branch||workflowName!==report.workflow||!paths.includes(run.path))throw Error('Release source provenance mismatch');
 }
 function job(jobs,name){if(!jobs.some(x=>x.name===name&&x.conclusion==='success'))throw Error('Required release gate not passed: '+name)}
 function artifact(artifacts,id,name){if(!artifacts.some(x=>x.id===id&&x.name===name&&!x.expired))throw Error('Wrong verified artifact: '+name)}

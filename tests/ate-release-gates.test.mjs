@@ -27,7 +27,7 @@ test('Mac requires both native verification and successful website signing/notar
 
 function recovery(){
  const x=fixture();Object.assign(x.report,{windows_artifact_id:null,web_artifact_id:null,mac_artifact_id:3,native_verification_run_id:43810798310,application_source_sha:'23f352a4ceb3ad99a5f112a564253f0f0dd9ea9e'});
- x.run.path='.github/workflows/mac-website-retry.yml';x.jobs=[{name:'mac-release (website)',conclusion:'success',steps:[{name:'Require original successful native Mac tests and unchanged application source',conclusion:'success'}]}];x.artifacts=[{id:3,name:'ate-mac-website-release',expired:false}];return x;
+ x.run.path='.github/workflows/mac-website-retry.yml';x.run.name='ATE 0.8.7 Mac website signing from verified universal app';x.jobs=[{name:'mac-release (website)',conclusion:'success',steps:[{name:'Require original successful native Mac tests and unchanged application source',conclusion:'success'}]}];x.artifacts=[{id:3,name:'ate-mac-website-release',expired:false}];return x;
 }
 test('Mac signing recovery retains original native tests and unchanged source proof',()=>{const x=recovery();assert.doesNotThrow(()=>verifyDesktopRelease(x.report,x.run,x.jobs,x.artifacts))});
 test('Mac recovery rejects missing or failed original native provenance',()=>{
