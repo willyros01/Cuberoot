@@ -18,22 +18,18 @@ const r=require(process.argv[2]);
 if(r.app!=='ATE'||!((r.workflow==='ATE Apple and Desktop'&&r.branch==='desktop')||(r.workflow==='ATE Windows website release'&&r.branch==='windows-compiler'))||!Number.isSafeInteger(r.run_id)||r.run_id<1||!/^[a-f0-9]{40}$/.test(r.source_sha)||!/^\d+\.\d+\.\d+$/.test(r.version))throw Error('Unexpected report');
 for(const k of ['windows_artifact_id','mac_artifact_id'])if(r[k]!==null&&(!Number.isSafeInteger(r[k])||r[k]<1))throw Error('Invalid artifact');
 JS
-# The Windows compiler release must have passed its browser/native/installer gates.
+# Verify only the relevant platform gates; unrelated jobs may still be running.
 node --input-type=module - "$TMP/report.json" <<'JS'
 import {readFileSync} from 'node:fs';
+import {verifyDesktopRelease} from './build/ate-release-gates.mjs';
 const report=JSON.parse(readFileSync(process.argv[2],'utf8'));
-if(report.workflow==='ATE Windows website release'){
- const base='https://api.github.com/repos/willyros01/clear-page/actions/runs/'+report.run_id;
- const headers={Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json'};
- async function get(url){const r=await fetch(url,{headers});if(!r.ok)throw Error('Release provenance HTTP '+r.status);return r.json()}
- const run=await get(base);
- if(run.head_sha!==report.source_sha||run.head_branch!==report.branch||run.name!==report.workflow)throw Error('Windows release source mismatch');
- const {jobs}=await get(base+'/jobs?per_page=100');
- for(const name of ['browser','windows'])if(!jobs.some(j=>j.name===name&&j.conclusion==='success'))throw Error('Windows release gate not passed: '+name);
- const {artifacts}=await get(base+'/artifacts?per_page=100');
- if(!artifacts.some(a=>a.id===report.windows_artifact_id&&a.name==='ate-windows-x64'&&!a.expired))throw Error('Wrong Windows installer artifact');
-}
+const base='https://api.github.com/repos/willyros01/clear-page/actions/runs/'+report.run_id;
+const headers={Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json'};
+async function get(url){const r=await fetch(url,{headers});if(!r.ok)throw Error('Release provenance HTTP '+r.status);return r.json()}
+const [run,{jobs},{artifacts}]=await Promise.all([get(base),get(base+'/jobs?per_page=100'),get(base+'/artifacts?per_page=100')]);
+verifyDesktopRelease(report,run,jobs,artifacts);
 JS
+
 mkdir -p downloads
 if [ -f downloads/ate-desktop-build.json ]; then cp downloads/ate-desktop-build.json "$TMP/meta.json"; else echo '{"app":"ATE"}' > "$TMP/meta.json"; fi
 for platform in windows mac; do

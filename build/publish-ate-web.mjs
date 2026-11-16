@@ -1,3 +1,4 @@
+import {verifyWebRelease} from './ate-release-gates.mjs';
 import {readFileSync,writeFileSync,existsSync,mkdirSync,rmSync,cpSync,mkdtempSync,readdirSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -13,10 +14,7 @@ if(report.app!=='ATE'||report.workflow!=='ATE Apple and Desktop'||report.branch!
 let current={};try{current=JSON.parse(readFileSync('ate/app/ate-web-build.json','utf8'));}catch{}
 if((current.run_id||0)>=report.run_id){console.log('ATE web app is already current.');process.exit(0);}
 const [run,jobs,artifacts]=await Promise.all([get('actions/runs/'+report.run_id),get('actions/runs/'+report.run_id+'/jobs?per_page=100'),get('actions/runs/'+report.run_id+'/artifacts?per_page=100')]);
-if(run.status!=='completed'){console.log('Coordinated release is still finalizing.');process.exit(0);}
-if(run.head_sha!==report.source_sha||run.head_branch!==report.branch||!['.github/workflows/all-platforms.yml','.github/workflows/release-desktop-083.yml'].includes(run.path)||run.conclusion!=='success')throw Error('Coordinated release is not complete and successful');
-for(const name of ['browser','mac-build','windows','report'])if(!jobs.jobs.some(j=>j.name===name&&j.conclusion==='success'))throw Error('Missing release gate '+name);
-if(!artifacts.artifacts.some(a=>a.id===report.web_artifact_id&&a.name==='ate-web-app'&&!a.expired))throw Error('Web artifact does not belong to the verified release');
+verifyWebRelease(report,run,jobs.jobs,artifacts.artifacts);
 const temp=mkdtempSync(join(tmpdir(),'ate-web-'));
 try{
  const response=await fetch(api+'actions/artifacts/'+report.web_artifact_id+'/zip',{headers,signal:AbortSignal.timeout(120000)});

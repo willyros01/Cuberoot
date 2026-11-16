@@ -20,6 +20,11 @@ const browser=await chromium.launch();
 try{
  const page=await browser.newPage({viewport:{width:1194,height:834}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(base+'?verify='+Date.now());await page.waitForSelector('.cm-content');
+ if(await page.locator('#termsDialog[open]').count()){
+  if(!await page.locator('#acceptTerms').isDisabled())throw Error('First-use terms did not require explicit agreement');
+  await page.locator('#termsCheck').check();await page.locator('#acceptTerms').click();await page.waitForSelector('#termsDialog',{state:'hidden'});
+  console.log('PASS: public first-use Terms require agreement and accept through real visible controls');
+ }
  if(!await page.locator('.brand').innerText().then(s=>s.includes(expected.version+' ('+expected.build+')')))throw Error('Public editor shows wrong version');
  await page.locator('#menuButton').click();await page.locator('#advancedMode').click();await page.locator('#closeMenu').click();
  await page.locator('#file').setInputFiles({name:'public-check.sql',mimeType:'application/sql',buffer:Buffer.from('SELECT FROM;')});

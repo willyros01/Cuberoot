@@ -50,7 +50,7 @@
     ],
     [
       "Terms, privacy and support",
-      "<p>The special App Store preparation build introduces a first-use Terms of Use page: read it, tick <b>I have read and agree</b>, then <b>Accept and continue</b>. It remembers that terms version locally and asks again if terms change. Existing drafts are kept. Read it again in <b>Menu → Help → Terms of Use</b>.</p><p><a href=\"https://www.cuberoot-systems.com/ate/privacy/\">Privacy Policy</a> · <a href=\"https://www.cuberoot-systems.com/ate/support/\">Support</a> · <a href=\"https://www.cuberoot-systems.com/ate/terms/\">Terms of Use</a>. App Store submission is being prepared; these links do not mean Apple has approved the app.</p>"
+      "<p>From ATE 0.8.7, first launch shows a Terms of Use page: read it, tick <b>I have read and agree</b>, then <b>Accept and continue</b>. It remembers that terms version locally and asks again if terms change. Existing drafts are kept. Read it again in <b>Menu → Help → Terms of Use</b>.</p><p><a href=\"https://www.cuberoot-systems.com/ate/privacy/\">Privacy Policy</a> · <a href=\"https://www.cuberoot-systems.com/ate/support/\">Support</a> · <a href=\"https://www.cuberoot-systems.com/ate/terms/\">Terms of Use</a>. App Store submission is being prepared; these links do not mean Apple has approved the app.</p>"
     ]
   ],
   "full": [
@@ -132,7 +132,7 @@
     ],
     [
       "Terms, privacy and support",
-      "<p>The special App Store preparation build introduces a first-use Terms of Use page: read it, tick <b>I have read and agree</b>, then <b>Accept and continue</b>. It remembers that terms version locally and asks again if terms change. Existing drafts are kept. Read it again in <b>Menu → Help → Terms of Use</b>.</p><p><a href=\"https://www.cuberoot-systems.com/ate/privacy/\">Privacy Policy</a> · <a href=\"https://www.cuberoot-systems.com/ate/support/\">Support</a> · <a href=\"https://www.cuberoot-systems.com/ate/terms/\">Terms of Use</a>. App Store submission is being prepared; these links do not mean Apple has approved the app.</p>"
+      "<p>From ATE 0.8.7, first launch shows a Terms of Use page: read it, tick <b>I have read and agree</b>, then <b>Accept and continue</b>. It remembers that terms version locally and asks again if terms change. Existing drafts are kept. Read it again in <b>Menu → Help → Terms of Use</b>.</p><p><a href=\"https://www.cuberoot-systems.com/ate/privacy/\">Privacy Policy</a> · <a href=\"https://www.cuberoot-systems.com/ate/support/\">Support</a> · <a href=\"https://www.cuberoot-systems.com/ate/terms/\">Terms of Use</a>. App Store submission is being prepared; these links do not mean Apple has approved the app.</p>"
     ]
   ]
 }

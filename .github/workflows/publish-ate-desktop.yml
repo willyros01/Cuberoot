@@ -1,12 +1,12 @@
 name: Publish ATE desktop installers
-# Publish verified ATE 0.8.3 (24), artifact release run 43734007478; reuse the tested installers.
+# Publish exact verified ATE artifacts after each platform passes its own release gates.
 on:
   workflow_dispatch:
   schedule:
     - cron: '*/5 * * * *'
   push:
     branches: [main]
-    paths: ['build/publish-ate-desktop.sh', 'build/publish-ate-web.mjs', 'build/verify-ate-web.mjs', '.github/workflows/publish-ate-desktop.yml']
+    paths: ['build/ate-release-gates.mjs', 'tests/ate-release-gates.test.mjs', 'build/publish-ate-desktop.sh', 'build/publish-ate-web.mjs', 'build/verify-ate-web.mjs', '.github/workflows/publish-ate-desktop.yml']
 permissions:
   contents: write
   pages: write
@@ -20,6 +20,11 @@ jobs:
       ready: ${{ steps.check.outputs.ready }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test platform-specific release provenance gates
+        run: node --test tests/ate-release-gates.test.mjs
       - id: check
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -100,6 +105,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Test platform-specific release provenance gates
+        run: node --test tests/ate-release-gates.test.mjs
       - name: Publish the fully verified ATE web artifact
         id: web
         env:
