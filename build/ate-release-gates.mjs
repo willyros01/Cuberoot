@@ -13,6 +13,13 @@ export function verifyWebRelease(report,run,jobs,artifacts){
 export function verifyDesktopRelease(report,run,jobs,artifacts){
  const windowsOnly=report.workflow==='ATE Windows website release'&&report.branch==='windows-compiler';
  if(!windowsOnly&&(report.workflow!=='ATE Apple and Desktop'||report.branch!=='desktop'))throw Error('Unexpected desktop release');
+ if(run.path==='.github/workflows/mac-website-retry.yml'){
+  source(report,run,['.github/workflows/mac-website-retry.yml']);
+  if(windowsOnly||report.windows_artifact_id||report.web_artifact_id||report.native_verification_run_id!==43810798310||report.application_source_sha!=='23f352a4ceb3ad99a5f112a564253f0f0dd9ea9e')throw Error('Invalid Mac recovery provenance');
+  const signing=jobs.find(x=>x.name==='mac-release (website)'&&x.conclusion==='success');
+  if(!signing?.steps?.some(x=>x.name==='Require original successful native Mac tests and unchanged application source'&&x.conclusion==='success'))throw Error('Original native Mac provenance gate not passed');
+  artifact(artifacts,report.mac_artifact_id,'ate-mac-website-release');return;
+ }
  source(report,run,windowsOnly?['.github/workflows/windows-website.yml']:coordinated);job(jobs,'browser');
  if(report.windows_artifact_id){job(jobs,'windows');artifact(artifacts,report.windows_artifact_id,'ate-windows-x64')}
  if(report.mac_artifact_id){

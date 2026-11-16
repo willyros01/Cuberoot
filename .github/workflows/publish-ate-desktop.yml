@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       ready: ${{ steps.check.outputs.ready }}
+      mac_needed: ${{ steps.check.outputs.mac_needed }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,7 +34,7 @@ jobs:
           node --input-type=module <<'JS'
           import {readFileSync,appendFileSync} from 'node:fs';
           const r=await fetch('https://api.github.com/repos/willyros01/clear-page/contents/ate-desktop-last-run.json?ref=desktop-releases',{headers:{Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json','Cache-Control':'no-cache'}});
-          let ready=false;
+          let ready=false,macNeeded=false;
           if(r.status!==404){
             if(!r.ok)throw Error('Report lookup HTTP '+r.status);
             const lookup=await r.json();
@@ -45,15 +46,16 @@ jobs:
               if(!jobs.ok)throw Error('Mac verification job lookup HTTP '+jobs.status);
               macReady=(await jobs.json()).jobs.some(j=>j.name.includes('mac-release')&&j.name.includes('website')&&j.conclusion==='success');
             }
+            macNeeded=!!(macReady&&(current.mac?.run_id||0)<report.run_id);
             ready=!!((report.windows_artifact_id&&(current.windows?.run_id||0)<report.run_id)||(macReady&&(current.mac?.run_id||0)<report.run_id));
           }
           console.log('Verified desktop release ready for publication: '+ready);
-          appendFileSync(process.env.GITHUB_OUTPUT,'ready='+ready+'\n');
+          appendFileSync(process.env.GITHUB_OUTPUT,'ready='+ready+'\nmac_needed='+macNeeded+'\n');
           JS
   publish:
     needs: check
     if: needs.check.outputs.ready == 'true'
-    runs-on: macos-26
+    runs-on: ${{ needs.check.outputs.mac_needed == 'true' && 'macos-15' || 'ubuntu-latest' }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
