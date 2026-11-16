@@ -1,26 +1,26 @@
 {
   "app": "ATE",
   "platform": "web",
-  "version": "0.8.4",
-  "build": 25,
-  "source_sha": "0687fc719334656e777bf96da1ae0d72e71206c2",
-  "run_id": 43757468201,
+  "version": "0.8.5",
+  "build": 26,
+  "source_sha": "65069ea7c6444a4a7561f960db4c315dcb640f59",
+  "run_id": 43777747977,
   "files": {
     "THIRD-PARTY-NOTICES.txt": {
       "bytes": 163592,
       "sha256": "f192c2ad85f5f4b0c8d5fbe04b632de512578d36ad963edef5d7ac9fe8eb8024"
     },
     "app.js": {
-      "bytes": 1081355,
-      "sha256": "6b898ebe367ee222ce88e89db2e9aec5b9b3957d9cb8806a9d65134b0d4bc8b3"
+      "bytes": 1082285,
+      "sha256": "3c90cf617197798ff9959a7798a01dcfe8ff33c3fcaa28a5898d17872968b0ae"
     },
     "app.js.LEGAL.txt": {
       "bytes": 120,
       "sha256": "bdca4f7c6b96696a3c82d115ac43a4e2dba984138e96cb291a3379335359643f"
     },
     "index.html": {
-      "bytes": 46957,
-      "sha256": "58940a0fa8c773cc9744e7c363675112f2713262c0d893784a3e4e42256d9566"
+      "bytes": 49465,
+      "sha256": "75c902e252b248bcf52e8264cff7a622a55d767cc453e89e8e16f342aaa96cba"
     },
     "ruff_wasm_bg.wasm": {
       "bytes": 8332913,
