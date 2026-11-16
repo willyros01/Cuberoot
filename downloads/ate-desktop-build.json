@@ -3,13 +3,13 @@
   "windows": {
     "app": "ATE",
     "platform": "windows-x64",
-    "version": "0.8.4",
-    "build": 25,
-    "run_id": 43757468201,
-    "source_sha": "0687fc719334656e777bf96da1ae0d72e71206c2",
+    "version": "0.8.5",
+    "build": 26,
+    "run_id": 43777747977,
+    "source_sha": "65069ea7c6444a4a7561f960db4c315dcb640f59",
     "file": "ate-windows.exe",
-    "sha256": "ddd7ef17c9ef713914ee5c3ae96580e8776f86a61f10c45c50d7ca295538232b",
-    "bytes": 5259760,
+    "sha256": "8ec4be2fd7e8b845a96e87fbc22a8dabc44cc30c1b397108904ac501f2764838",
+    "bytes": 5262037,
     "signature": "unsigned",
     "verification": "ci-installed-and-launched",
     "optional_c_compiler": {
@@ -19,22 +19,22 @@
       "download_bytes": 191037046,
       "verification": "official-download-standard-headers-native-detection"
     },
-    "published_at": "2026-11-15T20:38:26.230Z"
+    "published_at": "2026-11-16T00:17:59.137Z"
   },
   "mac": {
     "app": "ATE",
     "platform": "mac-universal",
-    "version": "0.8.4",
-    "build": 25,
-    "run_id": 43757468201,
-    "source_sha": "0687fc719334656e777bf96da1ae0d72e71206c2",
+    "version": "0.8.5",
+    "build": 26,
+    "run_id": 43777747977,
+    "source_sha": "65069ea7c6444a4a7561f960db4c315dcb640f59",
     "file": "ate-mac.dmg",
-    "sha256": "59e2f3dd3229d10a48f689d150a7e450f60f7b36ebbbe5d496d0667b12dd2b89",
-    "bytes": 12040989,
+    "sha256": "4e6f11f7373228aab1b31ceba7d57f47b64f2a3a7aab0f0737b7e8f7f03370b2",
+    "bytes": 12021010,
     "team_id": "VXMLKHF72B",
     "signature": "developer-id",
     "notarization": "Accepted",
     "stapled": true,
-    "published_at": "2026-11-15T20:38:43.783Z"
+    "published_at": "2026-11-16T00:18:21.713Z"
   }
 }
