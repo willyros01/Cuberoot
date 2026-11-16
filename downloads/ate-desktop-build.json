@@ -24,17 +24,17 @@
   "mac": {
     "app": "ATE",
     "platform": "mac-universal",
-    "version": "0.8.6",
-    "build": 27,
-    "run_id": 43789094751,
-    "source_sha": "51d4b3c4b76a590c6eba7cd77a2bfe9fe642fdf4",
+    "version": "0.8.7",
+    "build": 28,
+    "run_id": 43880399393,
+    "source_sha": "e7629bedc816f699553290322b6791de548488ac",
     "file": "ate-mac.dmg",
-    "sha256": "6d0afb6331316b6b223e9c903649a99d3a5b8a6a22ce3586f38bf0ec95dcdfcf",
-    "bytes": 12021792,
+    "sha256": "1cc14fcb7343c2e4cedbf3b5b6bdbd8f888e2d49a4faac9e094392b708546f56",
+    "bytes": 12094455,
     "team_id": "VXMLKHF72B",
     "signature": "developer-id",
     "notarization": "Accepted",
     "stapled": true,
-    "published_at": "2026-11-16T02:12:27.875Z"
+    "published_at": "2026-11-16T14:03:11.101Z"
   }
 }
