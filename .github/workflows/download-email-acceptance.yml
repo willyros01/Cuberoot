@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main, ate-download-email]
-    paths: ['.github/workflows/download-email-acceptance.yml']
+    paths: ['.github/workflows/download-email-acceptance.yml', 'build/apk-counter/**']
 permissions:
   contents: read
 jobs:
