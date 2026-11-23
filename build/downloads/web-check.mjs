@@ -67,7 +67,7 @@ const errors=[];page.on('pageerror',error=>errors.push(String(error)));
 try{
  for(const pathname of ['/','/ate/']){
   await page.goto(origin+pathname);
-  const links=['ate-windows.exe','ate-mac.dmg','ate.apk','ate-linux.deb'];
+  const links=['ate-windows.exe','ate-mac.dmg','ate.apk','ate-linux.deb','ate-linux-arm64.deb'];
   for(const file of links){
    const selector=`a[download][href*="downloads/${file}?"]`;
    await page.waitForSelector(selector);
@@ -77,18 +77,21 @@ try{
    await page.waitForFunction(n=>(window.writes?.length||0)===n+1,before);
    assert.equal(await link.getAttribute('href'),href,'tracking must preserve download URL');
    const write=await page.evaluate(()=>window.writes.at(-1));
-   const slug=file==='ate.apk'?'ate':file==='ate-mac.dmg'?'ate-mac':file==='ate-linux.deb'?'ate-linux':'ate-windows';
+   const slug=file==='ate.apk'?'ate':file==='ate-mac.dmg'?'ate-mac':/^ate-linux(-arm64)?[.]deb$/.test(file)?'ate-linux':'ate-windows';
    assert.deepEqual(write.ref.parts.slice(0,3),['cuberoot_apk_clicks_v1',slug,'events']);
    assert.match(write.ref.parts[3],/^[a-f0-9-]{36}$/);assert.equal(write.data.app,slug);
    assert.equal(write.data.timezone,'America/Toronto');assert.deepEqual(write.data.createdAt,{serverTimestamp:true});
    assert.match(write.data.build,/^[0-9]+$/);
   }
+  // Linux: two plain buttons (Intel/AMD and ARM); no guessing from the browser.
+  const linuxText=await page.locator('a[download][href*="downloads/ate-linux"]').allInnerTexts();
+  assert.equal(linuxText.length,2,'two Linux buttons');assert.match(linuxText.join(' '),/Intel\/AMD/);assert.match(linuxText.join(' '),/ARM/);
   // Failed writes must not block a download, alter its URL or retry.
   await page.evaluate(()=>window.rejectWrites=true);
   const before=await page.evaluate(()=>window.writes.length);
   const download=page.waitForEvent('download');await page.locator('a[download][href*="ate.apk?"]').first().click();await download;
   await page.waitForTimeout(300);assert.equal(await page.evaluate(()=>window.writes.length),before+1);
-  console.log('PASS: '+pathname+' all four ATE downloads record one timestamp/build/timezone event; failed writes preserve downloads');
+  console.log('PASS: '+pathname+' all five ATE downloads (both Linux buttons) record one timestamp/build/timezone event; failed writes preserve downloads');
  }
  const identification=await page.evaluate(async()=>{
   const {identifyDownload,DOWNLOAD_APPS}=await import('/assets/js/download-apps.js');
