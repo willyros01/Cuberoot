@@ -1,34 +1,46 @@
 {
   "app": "ATE",
   "platform": "web",
-  "version": "0.8.7",
-  "build": 28,
-  "source_sha": "aa690766ebd7ed0d7938f102e06374b8749b3369",
-  "run_id": 43874608420,
+  "version": "0.8.8",
+  "build": 29,
+  "source_sha": "4429ed13ec4ac5653669a40933c98d33a845df5b",
+  "run_id": 45085562313,
   "files": {
     "THIRD-PARTY-NOTICES.txt": {
-      "bytes": 163592,
-      "sha256": "f192c2ad85f5f4b0c8d5fbe04b632de512578d36ad963edef5d7ac9fe8eb8024"
+      "bytes": 256828,
+      "sha256": "aaa448855e6e2d51febcbebcbc8fa243004b050729694a35bd74e814c10942a9"
     },
     "app.js": {
-      "bytes": 1086655,
-      "sha256": "7a4d8fd5c8b417fdfd8ef2180f8474629e010155d8c523ec437e977247f65daa"
+      "bytes": 1299268,
+      "sha256": "1573bb1b8f3ca28f76518ed953cb1d37a5696bc622f4bbb1f100290c4cecb5f7"
     },
     "app.js.LEGAL.txt": {
       "bytes": 120,
       "sha256": "bdca4f7c6b96696a3c82d115ac43a4e2dba984138e96cb291a3379335359643f"
     },
     "index.html": {
-      "bytes": 52850,
-      "sha256": "68ff0812f4c3ad18cc46fc7de76dd31063c21fc1cf44a55c9586e79e01af9293"
+      "bytes": 56281,
+      "sha256": "0dabfe70286dba8108a17b7050df5c48053a8d827082ed47fba2d03cf3ad6c26"
+    },
+    "java-check.js": {
+      "bytes": 222077,
+      "sha256": "b2aa97de973c4aa48f7ae9c288245ad6a513226063c29cedfb289a69640e3660"
+    },
+    "java-check.js.LEGAL.txt": {
+      "bytes": 469,
+      "sha256": "e307472273e1ef372ca969af6d0a32f575f172970adc3b89dfad3600fc632107"
     },
     "ruff_wasm_bg.wasm": {
       "bytes": 8332913,
       "sha256": "98e0f5127935f918f7eca9c2abd9873cad0500c9061f474521c5a2aae9949b68"
     },
     "syntax-worker.js": {
-      "bytes": 1200156,
-      "sha256": "9dc91aaa36c0f513c8c3def63586e5017a386cb7e716fdbc69bf6f8de02deacf"
+      "bytes": 1309423,
+      "sha256": "ab0bd55bed7c22e3d5b9eb5b16b874bd4ee555e06c1b1ea9d257818dca082b0b"
+    },
+    "syntax-worker.js.LEGAL.txt": {
+      "bytes": 1935,
+      "sha256": "28cdbff9bd6f40c649f2afdd9066637c4f5ebec143cb8cf07295f16b0ed04a07"
     },
     "tree-sitter-bash.wasm": {
       "bytes": 1358224,
