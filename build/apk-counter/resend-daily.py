@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cuberoot: verified ten-category download email via Resend, invoked by cron-job.org.
+"""Cuberoot: verified eleven-category download email via Resend, invoked by cron-job.org.
 
 No Google Cloud, Gmail password, Google Apps Script, SMTP, or custom sender domain.
 The default Resend testing sender may send only to the Resend account owner's email;
@@ -47,8 +47,8 @@ def current_day_window(now=None):
 
 def build_report(now=None):
     day, start, end, local = current_day_window(now)
-    if len(counts.APPS) != 10 or len({slug for slug, _ in counts.APPS}) != 10:
-        raise ValueError("Ten unique download categories required")
+    if len(counts.APPS) != 11 or len({slug for slug, _ in counts.APPS}) != 11:
+        raise ValueError("Eleven unique download categories required")
     lines = [
         "CUBEROOT DOWNLOAD CLICKS",
         "Reporting date: " + day.isoformat() + " (America/Toronto)",
@@ -91,7 +91,7 @@ def build_html_report(body):
         if match:
             rows.append((match.group(1), match.group(2), match.group(3)))
     if len(rows) != len(labels) or [r[0] for r in rows] != labels:
-        raise ValueError("HTML table requires all ten categories and matching totals")
+        raise ValueError("HTML table requires all eleven categories and matching totals")
     # Reject incomplete or internally inconsistent reports before HTML/email delivery.
     numbers = [(int(d.replace(",", "")), int(l.replace(",", ""))) for _, d, l in rows]
     if any(d > l for d, l in numbers):
@@ -207,7 +207,7 @@ def main():
         try:
             accepted = send_email(
                 key, "Cuberoot download report FAILURE - " + date,
-                "Ten-category download data could not be verified for " + date +
+                "Eleven-category download data could not be verified for " + date +
                 ". No figures were invented. Review GitHub Actions.",
                 "cuberoot-apk-failure-" + date)
             print("Failure-status message accepted by Resend ID=" + accepted)
@@ -245,32 +245,32 @@ def selftest():
     assert spring[1] == dt.datetime.fromisoformat("2026-03-07T14:17:00+00:00")
     assert spring[2] == dt.datetime.fromisoformat("2026-03-08T13:17:00+00:00")
     assert (spring[2] - spring[1]).total_seconds() == 23 * 3600
-    with patch.object(counts, "count", side_effect=[2, 12] * 10) as calls:
+    with patch.object(counts, "count", side_effect=[2, 12] * 11) as calls:
         day, body = build_report(now)
-        assert day == "2026-10-18" and calls.call_count == 20
+        assert day == "2026-10-18" and calls.call_count == 22
         assert "since yesterday 09:17 AM Toronto through 09:17 AM EDT today" in body
         for call in calls.call_args_list:
             assert call.args[-1] == end
         assert calls.call_args_list[0].args == ("fidunio", start, end)
         assert body.count("\n") >= 14 and "ALL APPS" in body
-        assert "20" in body and "120" in body
+        assert "22" in body and "132" in body
         assert all(label in body for _, label in counts.APPS)
-    with patch.object(counts, "count", side_effect=[0, 0] * 10):
+    with patch.object(counts, "count", side_effect=[0, 0] * 11):
         _, body = build_report(now)
         assert "ALL APPS" in body and "0" in body
-    with patch.object(counts, "count", side_effect=[5, 4] * 10):
+    with patch.object(counts, "count", side_effect=[5, 4] * 11):
         try: build_report(now)
         except ValueError: pass
         else: raise AssertionError("Inconsistent count was accepted")
-    with patch.object(counts, "count", side_effect=[0, 0] * 9 + [ValueError("403")]):
+    with patch.object(counts, "count", side_effect=[0, 0] * 10 + [ValueError("403")]):
         try: build_report(now)
         except ValueError: pass
         else: raise AssertionError("Incomplete count was accepted")
-    with patch.object(counts, "count", side_effect=[0, 0] * 10):
+    with patch.object(counts, "count", side_effect=[0, 0] * 11):
         _, sample = build_report(now)
         rendered = build_html_report(sample)
-        assert rendered.split("<tbody>", 1)[1].split("</tbody>", 1)[0].count("<tr style=") == 11
-        assert "The Marker" in rendered and "ALL APPS" in rendered
+        assert rendered.split("<tbody>", 1)[1].split("</tbody>", 1)[0].count("<tr style=") == 12
+        assert "The Marker" in rendered and "ATE Linux" in rendered and "ALL APPS" in rendered
         assert "Cuberoot Download Clicks" in rendered
         assert "Counts show download clicks, not necessarily completed downloads." in rendered
         assert "23 or 25 hours on daylight-saving changes" in rendered
@@ -288,7 +288,7 @@ def selftest():
     with patch("urllib.request.urlopen", return_value=MockResponse()) as request:
         assert send_email("re_test", "test", "body", "test-unique") == "accepted-email-id"
         assert request.call_args.args[0].get_header("Idempotency-key") == "test-unique"
-    print("PASS: ten categories / continuous 09:17-to-09:17 Toronto day / DST / zero / totals / fail-closed / idempotency tests")
+    print("PASS: eleven categories / continuous 09:17-to-09:17 Toronto day / DST / zero / totals / fail-closed / idempotency tests")
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ try{
   await page.setViewportSize({width,height:1000});
   assert.equal(await page.locator('tbody tr').count(),11);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
-  for(const text of ['ATE Windows','ATE Mac Universal','ATE Android','ALL APPS'])await page.getByText(text,{exact:true}).waitFor({state:'visible'});
+  for(const text of ['ATE Windows','ATE Mac Universal','ATE Android','ATE Linux','ALL APPS'])await page.getByText(text,{exact:true}).waitFor({state:'visible'});
   assert.equal(await page.locator('table').evaluate(e=>getComputedStyle(e).fontSize),'19px');
   await page.screenshot({path:resolve(process.env.EVIDENCE_DIR,'email-layout-sample-'+width+'.png'),fullPage:true});
  }

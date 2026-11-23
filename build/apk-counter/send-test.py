@@ -18,8 +18,8 @@ def main():
     report_date,body=module.build_report(cutoff.astimezone(dt.timezone.utc))
     if report_date!=day.isoformat():raise ValueError('Wrong completed reporting date')
     rendered=module.build_html_report(body)
-    if rendered.count('<tr style=')!=12:raise ValueError('Expected header, ten categories and total')
-    for label in ['ATE Windows','ATE Mac Universal','ATE Android']:
+    if rendered.count('<tr style=')!=13:raise ValueError('Expected header, eleven categories and total')
+    for label in ['ATE Windows','ATE Mac Universal','ATE Android','ATE Linux']:
         if label not in rendered:raise ValueError('Missing ATE row')
     # Separate from the daily key; re-running the same workflow cannot duplicate it.
     run=os.environ['GITHUB_RUN_ID']

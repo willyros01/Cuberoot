@@ -10,7 +10,7 @@ KEY = 'AIzaSyD2ZzzJCOz786VqTMZHpgVG_-FOi-KYI78' # Public Firebase web API key
 ROOT = f'https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents'
 APPS = (('fidunio','FIDUNIO'),('scorecard','Scorecard'),('fairpot','Fairpot'),
         ('wire','Wire'),('spendrecorder','SpendRecorder'),('cloud-files','Cloud Files'),('marker','The Marker'),
-        ('ate-windows','ATE Windows'),('ate-mac','ATE Mac Universal'),('ate','ATE Android'))
+        ('ate-windows','ATE Windows'),('ate-mac','ATE Mac Universal'),('ate','ATE Android'),('ate-linux','ATE Linux'))
 TZ = ZoneInfo('America/Toronto')
 ISSUE = 10
 REPO = 'willyros01/Cuberoot'
@@ -70,12 +70,12 @@ def selftest():
     for now,hours in [('2026-03-09T15:00:00+00:00',23),('2026-11-02T15:00:00+00:00',25)]:
         _,s,e=bounds(dt.datetime.fromisoformat(now))
         assert (e-s).total_seconds()==hours*3600
-    with patch(__name__+'.count',side_effect=[2,12]*10) as mock:
+    with patch(__name__+'.count',side_effect=[2,12]*11) as mock:
         date,body=calculate(dt.datetime.fromisoformat('2026-10-16T14:00:00+00:00'))
-        assert date=='2026-10-15' and mock.call_count==20
+        assert date=='2026-10-15' and mock.call_count==22
         assert all(('| '+name+' | 2 | 12 |') in body for _,name in APPS)
-        assert '**ALL APPS** | **20** | **120**' in body
-    with patch(__name__+'.count',side_effect=[2,12]*9+[ValueError('403')]):
+        assert '**ALL APPS** | **22** | **132**' in body
+    with patch(__name__+'.count',side_effect=[2,12]*10+[ValueError('403')]):
         try:calculate()
         except ValueError:pass
         else:raise AssertionError('Partial report was permitted')
@@ -83,7 +83,7 @@ def selftest():
         try:count('fidunio')
         except ValueError:pass
         else:raise AssertionError('Missing Firestore result was permitted')
-    print('PASS: ten-category/DST/fail-closed tests')
+    print('PASS: eleven-category/DST/fail-closed tests')
 
 def main():
     if '--self-test' in sys.argv:
@@ -96,10 +96,10 @@ def main():
                 {'body':body},method='PATCH',token=token)
     if result.get('number')!=ISSUE or result.get('body')!=body:
         raise ValueError('GitHub report confirmation mismatch')
-    print('PASS: all ten real counts published for '+day)
+    print('PASS: all eleven real counts published for '+day)
 
 if __name__=='__main__':
     try:main()
     except Exception as e:
-        print('FAIL: NOT published; cannot verify all ten counts. '+type(e).__name__+': '+str(e)[:140],file=sys.stderr)
+        print('FAIL: NOT published; cannot verify all eleven counts. '+type(e).__name__+': '+str(e)[:140],file=sys.stderr)
         sys.exit(1)

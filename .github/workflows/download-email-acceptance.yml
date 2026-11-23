@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Verify ten-category report and email logic offline
+      - name: Verify eleven-category report and email logic offline
         run: |
           python3 -m py_compile build/apk-counter/public-report.py build/apk-counter/resend-daily.py build/apk-counter/send-test.py
           python3 build/apk-counter/public-report.py --self-test
@@ -49,7 +49,7 @@ jobs:
           BROWSER_EXECUTABLE: /usr/bin/google-chrome
           EVIDENCE_DIR: ${{ runner.temp }}/live-download-evidence
         run: node build/downloads/live-check.mjs
-      - name: Send the explicitly requested ten-category test email to the existing owner
+      - name: Send the explicitly requested eleven-category test email to the existing owner
         if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[download-acceptance]'))
         env:
           CUBEROOT_RESEND_API_KEY: ${{ secrets.CUBEROOT_RESEND_API_KEY }}
