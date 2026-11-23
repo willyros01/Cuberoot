@@ -1,0 +1,15 @@
+{
+  "app": "ATE",
+  "platform": "linux-x64",
+  "version": "0.8.8",
+  "build": 29,
+  "run_id": 45216005287,
+  "source_sha": "84b5c31367088ac02e184e5e7f47d1bd8730576a",
+  "file": "ate-linux.deb",
+  "sha256": "27650d39f36926207354ca56b2a969198751a3060d3a3ac62504a4546b1a680b",
+  "bytes": 5786884,
+  "signature": "unsigned",
+  "verification": "ci-native-verified-installed-and-launched",
+  "built_on": "ubuntu-22.04",
+  "published_at": "2026-11-23T16:53:38.870Z"
+}
