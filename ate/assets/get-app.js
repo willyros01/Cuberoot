@@ -26,3 +26,14 @@ async function desktopDownloads(){
 }
 desktopDownloads();
 
+async function linuxDownload(){
+ try{
+  const res=await fetch('/downloads/ate-linux-build.json',{cache:'no-store'});if(!res.ok)return;
+  const m=await res.json();
+  if(m.app!=='ATE'||m.platform!=='linux-x64'||m.file!=='ate-linux.deb'||!Number.isSafeInteger(m.run_id)||m.run_id<1||!/^[0-9]+[.][0-9]+[.][0-9]+$/.test(m.version||'')||!/^[a-f0-9]{64}$/.test(m.sha256||'')||m.verification!=='ci-native-verified-installed-and-launched')return;
+  const link=document.getElementById('linux-download');link.href='/downloads/ate-linux.deb?build='+m.run_id;link.download='ate-linux.deb';link.hidden=false;
+  document.getElementById('linux-status').textContent='Linux installer available · Version '+m.version+' · Unsigned .deb package';
+ }catch{}
+}
+linuxDownload();
+

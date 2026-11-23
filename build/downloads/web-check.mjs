@@ -39,7 +39,7 @@ export const getFirestore=()=>({});
 export const doc=(db,...parts)=>({parts});
 export const serverTimestamp=()=>({serverTimestamp:true});
 export const setDoc=(ref,data)=>{(window.writes??=[]).push({ref,data});return window.rejectWrites?Promise.reject(Error('permission denied')):Promise.resolve()};
-const names=['fidunio','scorecard','fairpot','wire','spendrecorder','cloud-files','marker','ate-windows','ate-mac','ate'];
+const names=['fidunio','scorecard','fairpot','wire','spendrecorder','cloud-files','marker','ate-windows','ate-mac','ate','ate-linux'];
 export const collection=(db,...parts)=>({app:parts[1],parts});
 export const query=(records,...constraints)=>({...records,constraints});
 export const where=(...args)=>({where:args});export const orderBy=(...args)=>({orderBy:args});export const limit=n=>({limit:n});
@@ -59,13 +59,15 @@ await context.route('https://firestore.googleapis.com/**',async route=>{
  const denied=await route.request().frame().evaluate(()=>window.denyATE);
  return route.fulfill({status:denied?403:200,contentType:'application/json',headers,body:JSON.stringify(denied?{error:{status:'PERMISSION_DENIED'}}:[{result:{aggregateFields:{clicks:{integerValue:'0'}}}}])});
 });
-await context.route('**/downloads/*',route=>/\.(apk|exe|dmg)(\?|$)/.test(route.request().url())?route.fulfill({contentType:'application/octet-stream',headers:{'content-disposition':'attachment'},body:'download test fixture'}):route.continue());
+await context.route('**/downloads/*',route=>/\.(apk|exe|dmg|deb)(\?|$)/.test(route.request().url())?route.fulfill({contentType:'application/octet-stream',headers:{'content-disposition':'attachment'},body:'download test fixture'}):route.continue());
+// Registered last so it takes priority. The Linux package metadata is a fixture until the first verified .deb is published.
+await context.route('**/downloads/ate-linux-build.json*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({app:'ATE',platform:'linux-x64',version:'0.8.8',build:29,run_id:45216005287,source_sha:'0'.repeat(40),file:'ate-linux.deb',sha256:'a'.repeat(64),bytes:5786884,signature:'unsigned',verification:'ci-native-verified-installed-and-launched'})}));
 const page=await context.newPage();
 const errors=[];page.on('pageerror',error=>errors.push(String(error)));
 try{
  for(const pathname of ['/','/ate/']){
   await page.goto(origin+pathname);
-  const links=['ate-windows.exe','ate-mac.dmg','ate.apk'];
+  const links=['ate-windows.exe','ate-mac.dmg','ate.apk','ate-linux.deb'];
   for(const file of links){
    const selector=`a[download][href*="downloads/${file}?"]`;
    await page.waitForSelector(selector);
@@ -75,7 +77,7 @@ try{
    await page.waitForFunction(n=>(window.writes?.length||0)===n+1,before);
    assert.equal(await link.getAttribute('href'),href,'tracking must preserve download URL');
    const write=await page.evaluate(()=>window.writes.at(-1));
-   const slug=file==='ate.apk'?'ate':file==='ate-mac.dmg'?'ate-mac':'ate-windows';
+   const slug=file==='ate.apk'?'ate':file==='ate-mac.dmg'?'ate-mac':file==='ate-linux.deb'?'ate-linux':'ate-windows';
    assert.deepEqual(write.ref.parts.slice(0,3),['cuberoot_apk_clicks_v1',slug,'events']);
    assert.match(write.ref.parts[3],/^[a-f0-9-]{36}$/);assert.equal(write.data.app,slug);
    assert.equal(write.data.timezone,'America/Toronto');assert.deepEqual(write.data.createdAt,{serverTimestamp:true});
@@ -86,21 +88,21 @@ try{
   const before=await page.evaluate(()=>window.writes.length);
   const download=page.waitForEvent('download');await page.locator('a[download][href*="ate.apk?"]').first().click();await download;
   await page.waitForTimeout(300);assert.equal(await page.evaluate(()=>window.writes.length),before+1);
-  console.log('PASS: '+pathname+' all three ATE downloads record one timestamp/build/timezone event; failed writes preserve downloads');
+  console.log('PASS: '+pathname+' all four ATE downloads record one timestamp/build/timezone event; failed writes preserve downloads');
  }
  const identification=await page.evaluate(async()=>{
   const {identifyDownload,DOWNLOAD_APPS}=await import('/assets/js/download-apps.js');
-  const good=Object.keys(DOWNLOAD_APPS).map(app=>identifyDownload('/downloads/'+(app==='ate-mac'?'ate-mac.dmg':app==='ate-windows'?'ate-windows.exe':app+'.apk')+'?build=123',location.href));
-  const bad=['https://evil.example/downloads/ate.apk','/downloads/other.apk','/downloads/ate-windows.apk','/downloads/ate.exe','/downloads/ate-mac.dmg.extra','/downloads/ate.apk/extra'].map(x=>identifyDownload(x,location.href));
+  const good=Object.keys(DOWNLOAD_APPS).map(app=>identifyDownload('/downloads/'+(app==='ate-mac'?'ate-mac.dmg':app==='ate-windows'?'ate-windows.exe':app==='ate-linux'?'ate-linux.deb':app+'.apk')+'?build=123',location.href));
+  const bad=['https://evil.example/downloads/ate.apk','/downloads/other.apk','/downloads/ate-windows.apk','/downloads/ate.exe','/downloads/ate-mac.dmg.extra','/downloads/ate.apk/extra','/downloads/ate-linux.apk','/downloads/ate.deb','/downloads/ate-linux.deb.extra'].map(x=>identifyDownload(x,location.href));
   return {good,bad,invalidBuild:identifyDownload('/downloads/ate.apk?build=oops',location.href)};
  });
- assert.equal(identification.good.length,10);assert.equal(new Set(identification.good.map(x=>x.app)).size,10);assert(identification.bad.every(x=>x===null));assert.equal(identification.invalidBuild.build,'');
- console.log('PASS: seven existing APKs retained; exact same-origin ATE APK/EXE/DMG paths only');
+ assert.equal(identification.good.length,11);assert.equal(new Set(identification.good.map(x=>x.app)).size,11);assert(identification.bad.every(x=>x===null));assert.equal(identification.invalidBuild.build,'');
+ console.log('PASS: seven existing APKs retained; exact same-origin ATE APK/EXE/DMG/DEB paths only');
  await page.addInitScript(()=>{window.denyATE=true});
  await page.goto(origin+'/__tests__/cockpit.html');
  await page.waitForSelector('[data-app="ate-mac"]');
  await page.waitForFunction(()=>document.querySelector('[data-app="ate-mac"]').textContent.includes('Setup pending'));
- assert.equal(await page.locator('.dc-app').count(),10);assert.equal(await page.locator('.dc-total-primary strong').textContent(),'—');
+ assert.equal(await page.locator('.dc-app').count(),11);assert.equal(await page.locator('.dc-total-primary strong').textContent(),'—');
  assert.equal(await page.locator('[data-app="fidunio"] strong').textContent(),'10');
  await page.screenshot({path:resolve(evidence,'cockpit-pending.png'),fullPage:true});
  await page.selectOption('#dc-app','ate-mac');assert.match(await page.locator('.dc-content').textContent(),/Setup pending/);
@@ -109,7 +111,7 @@ try{
  await page.waitForFunction(()=>document.querySelector('[data-app="ate-mac"] strong').textContent==='90');
  assert.match(await page.locator('.dc-events').textContent(),/ATE Mac Universal.*London.*Europe\/London/s);
  // ATE's event is older than 35 other app events: platform filtering must retain it.
- await page.selectOption('#dc-app','');assert.equal(await page.locator('.dc-total-primary strong').textContent(),'550');
+ await page.selectOption('#dc-app','');assert.equal(await page.locator('.dc-total-primary strong').textContent(),'660');
  await page.screenshot({path:resolve(evidence,'cockpit-active-fixture.png'),fullPage:true});
  await page.selectOption('#dc-app','ate');await page.fill('#dc-from','2026-11-12');await page.fill('#dc-to','2026-11-12');await page.locator('.dc-apply').click();
  await page.waitForFunction(()=>document.querySelector('[data-app="ate"] strong').textContent==='10');

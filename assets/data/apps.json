@@ -59,8 +59,8 @@
       "slug": "ate",
       "icon": "doc",
       "iconSrc": "ate/assets/icon.png",
-      "description": "A clear space for text and code: large adjustable text, keyword colors, automatic indentation, search and replace, select/copy, and optional Vim controls. No account required.",
-      "availability": "Android APK available · iPhone/iPad TestFlight · Mac and Windows downloads coming"
+      "description": "A clear space for text and code: large adjustable text, keyword colors for 25 languages, offline syntax checks, HTML and Markdown Preview, automatic indentation, search and replace, projects and optional Vim controls. No account required.",
+      "availability": "Android APK available · iPhone/iPad TestFlight · Mac, Windows and Linux downloads"
     }
   ],
   "availability": {

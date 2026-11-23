@@ -1,0 +1,50 @@
+name: Publish ATE Linux installer
+# Publishes the exact .deb from the newest successful "ATE Linux" run (clear-page, desktop branch).
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+  push:
+    branches: [main]
+    paths: ['build/publish-ate-linux.sh', '.github/workflows/publish-ate-linux.yml']
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: cuberoot-ate-linux
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: publish
+        name: Verify and publish the exact tested .deb
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          bash build/publish-ate-linux.sh | tee "$RUNNER_TEMP/publish.log"
+          if grep -q '^PASS: published' "$RUNNER_TEMP/publish.log"; then echo published=true >> "$GITHUB_OUTPUT"; fi
+      - name: Request Pages deployment
+        if: steps.publish.outputs.published == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail --silent --show-error --request POST \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header 'Accept: application/vnd.github+json' \
+            'https://api.github.com/repos/willyros01/Cuberoot/pages/builds' > /dev/null
+      - name: Verify the public file matches the published manifest
+        if: steps.publish.outputs.published == 'true'
+        run: |
+          for i in $(seq 1 40); do
+            curl -fsSL "https://www.cuberoot-systems.com/downloads/ate-linux-build.json?nocache=$RANDOM" -o meta.json || true
+            curl -fsSL "https://www.cuberoot-systems.com/downloads/ate-linux.deb?nocache=$RANDOM" -o public.deb || true
+            if [ -s meta.json ] && [ -s public.deb ] && [ "$(sha256sum public.deb | cut -d' ' -f1)" = "$(node -p 'require("./meta.json").sha256')" ]; then echo 'PASS: public Linux installer matches'; exit 0; fi
+            sleep 15
+          done
+          echo 'Public Linux installer did not match within 10 minutes'; exit 1

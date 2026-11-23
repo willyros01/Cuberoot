@@ -1,4 +1,4 @@
-// Explicit owner-authorized acceptance only: three real downloads, real SDK,
+// Explicit owner-authorized acceptance only: four real downloads, real SDK,
 // real public counter reads. Never POST a fabricated click or delete a record.
 import {createHash} from 'node:crypto';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
@@ -29,11 +29,13 @@ async function recent(app){
 }
 const desktop=await json(base+'/downloads/ate-desktop-build.json?verify='+Date.now());
 const android=await json(base+'/downloads/ate-build.json?verify='+Date.now());
-assert.equal(desktop.app,'ATE');assert.equal(android.app,'ATE');
+const linux=await json(base+'/downloads/ate-linux-build.json?verify='+Date.now());
+assert.equal(desktop.app,'ATE');assert.equal(android.app,'ATE');assert.equal(linux.app,'ATE');
 const cases=[
  {app:'ate-windows',page:'/',file:'ate-windows.exe',meta:desktop.windows},
  {app:'ate-mac',page:'/ate/',file:'ate-mac.dmg',meta:desktop.mac},
- {app:'ate',page:'/ate/',file:'ate.apk',meta:{run_id:android.run_id,bytes:android.apk_bytes,sha256:android.apk_sha256}}
+ {app:'ate',page:'/ate/',file:'ate.apk',meta:{run_id:android.run_id,bytes:android.apk_bytes,sha256:android.apk_sha256}},
+ {app:'ate-linux',page:'/ate/',file:'ate-linux.deb',meta:linux}
 ];
 const browser=await chromium.launch({executablePath:process.env.BROWSER_EXECUTABLE||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox']});
 const context=await browser.newContext({acceptDownloads:true,timezoneId:'America/Toronto'});

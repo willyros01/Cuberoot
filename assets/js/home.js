@@ -298,7 +298,15 @@ async function addATEDesktopDownloads(box) {
       available.push(platform);
       actions.appendChild(el('a',{class:'btn app-open android-apk-badge',href:'downloads/'+file+'?build='+m.run_id,download:file,'aria-label':'Download ATE '+label+' installer',title:platform==='windows'?'Windows x64 installer; not digitally signed':'For Intel and Apple silicon Macs'},el('span',{class:'apk-small',text:'Download'}),el('span',{class:'apk-large',text:label})));
     }
-    if(available.length){row.querySelector('.avail').textContent='Android APK available · iPhone/iPad & Mac TestFlight · '+(available.includes('mac')?'Mac universal available':'Mac download coming')+' · '+(available.includes('windows')?'Windows installer available':'Windows download coming');}
+    try{
+      const lr=await fetch('downloads/ate-linux-build.json',{cache:'no-store'});
+      const m=lr.ok?await lr.json():null;
+      if(m&&m.app==='ATE'&&m.platform==='linux-x64'&&m.file==='ate-linux.deb'&&Number.isSafeInteger(m.run_id)&&m.run_id>0&&/^[0-9]+[.][0-9]+[.][0-9]+$/.test(m.version||'')&&/^[a-f0-9]{64}$/.test(m.sha256||'')&&m.verification==='ci-native-verified-installed-and-launched'){
+        available.push('linux');
+        actions.appendChild(el('a',{class:'btn app-open android-apk-badge',href:'downloads/ate-linux.deb?build='+m.run_id,download:'ate-linux.deb','aria-label':'Download ATE Linux installer',title:'Linux .deb installer for Ubuntu, Mint and Debian (64-bit); not digitally signed'},el('span',{class:'apk-small',text:'Download'}),el('span',{class:'apk-large',text:'Linux'})));
+      }
+    }catch{}
+    if(available.length){row.querySelector('.avail').textContent='Android APK available · iPhone/iPad & Mac TestFlight · '+(available.includes('mac')?'Mac universal available':'Mac download coming')+' · '+(available.includes('windows')?'Windows installer available':'Windows download coming')+(available.includes('linux')?' · Linux installer available':'');}
   } catch {}
 }
 
