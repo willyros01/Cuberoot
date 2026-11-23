@@ -1,4 +1,4 @@
-import {DOWNLOAD_APPS as APPS,ATE_APPS} from './download-apps.js?v=2';
+import {DOWNLOAD_APPS as APPS,ATE_APPS} from './download-apps.js?v=3';
 function el(tag, attrs={}, ...children) {
  const n=document.createElement(tag);
  for(const [k,v] of Object.entries(attrs)){if(k==='text')n.textContent=v;else if(k.startsWith('on'))n.addEventListener(k.slice(2),v);else n.setAttribute(k,v);}

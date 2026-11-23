@@ -303,7 +303,13 @@ async function addATEDesktopDownloads(box) {
       const m=lr.ok?await lr.json():null;
       if(m&&m.app==='ATE'&&m.platform==='linux-x64'&&m.file==='ate-linux.deb'&&Number.isSafeInteger(m.run_id)&&m.run_id>0&&/^[0-9]+[.][0-9]+[.][0-9]+$/.test(m.version||'')&&/^[a-f0-9]{64}$/.test(m.sha256||'')&&m.verification==='ci-native-verified-installed-and-launched'){
         available.push('linux');
-        actions.appendChild(el('a',{class:'btn app-open android-apk-badge',href:'downloads/ate-linux.deb?build='+m.run_id,download:'ate-linux.deb','aria-label':'Download ATE Linux installer',title:'Linux .deb installer for Ubuntu, Mint and Debian (64-bit); not digitally signed'},el('span',{class:'apk-small',text:'Download'}),el('span',{class:'apk-large',text:'Linux'})));
+        let arm=false;
+        if(m.arm64&&m.arm64.file==='ate-linux-arm64.deb'&&/^[a-f0-9]{64}$/.test(m.arm64.sha256||'')){
+          if(/aarch64|arm64|armv8/i.test(navigator.userAgent))arm=true;
+          else try{if(navigator.userAgentData&&navigator.userAgentData.getHighEntropyValues&&/Linux/i.test(navigator.userAgent)){const v=await navigator.userAgentData.getHighEntropyValues(['architecture']);arm=v.architecture==='arm';}}catch{}
+        }
+        const lf=arm?'ate-linux-arm64.deb':'ate-linux.deb';
+        actions.appendChild(el('a',{class:'btn app-open android-apk-badge',href:'downloads/'+lf+'?build='+m.run_id,download:lf,'aria-label':'Download ATE Linux installer',title:(arm?'ARM':'Intel/AMD')+' Linux .deb installer for Ubuntu, Mint and Debian; the ATE page has the other version; not digitally signed'},el('span',{class:'apk-small',text:'Download'}),el('span',{class:'apk-large',text:'Linux'})));
       }
     }catch{}
     if(available.length){row.querySelector('.avail').textContent='Android APK available · iPhone/iPad & Mac TestFlight · '+(available.includes('mac')?'Mac universal available':'Mac download coming')+' · '+(available.includes('windows')?'Windows installer available':'Windows download coming')+(available.includes('linux')?' · Linux installer available':'');}

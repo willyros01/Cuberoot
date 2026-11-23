@@ -1,7 +1,7 @@
 // Independent best-effort download click counter. Does not change anchors.
 // No Firebase Auth or persistent visitor identifiers are used.
 // A record is a CLICK attempt, never proof that a file was downloaded.
-import {identifyDownload} from './download-apps.js?v=2';
+import {identifyDownload} from './download-apps.js?v=3';
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {getFirestore,doc,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 

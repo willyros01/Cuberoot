@@ -7,7 +7,7 @@ export const DOWNLOAD_APPS=Object.freeze({
 export const ATE_APPS=Object.freeze(['ate-windows','ate-mac','ate','ate-linux']);
 const files=new Map([
  ...Object.keys(DOWNLOAD_APPS).filter(app=>!ATE_APPS.includes(app)).map(app=>['/downloads/'+app+'.apk',app]),
- ['/downloads/ate.apk','ate'],['/downloads/ate-windows.exe','ate-windows'],['/downloads/ate-mac.dmg','ate-mac'],['/downloads/ate-linux.deb','ate-linux']
+ ['/downloads/ate.apk','ate'],['/downloads/ate-windows.exe','ate-windows'],['/downloads/ate-mac.dmg','ate-mac'],['/downloads/ate-linux.deb','ate-linux'],['/downloads/ate-linux-arm64.deb','ate-linux']
 ]);
 export function identifyDownload(href,base){
  const url=new URL(href,base),origin=new URL(base).origin;

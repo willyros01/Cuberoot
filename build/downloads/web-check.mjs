@@ -61,7 +61,7 @@ await context.route('https://firestore.googleapis.com/**',async route=>{
 });
 await context.route('**/downloads/*',route=>/\.(apk|exe|dmg|deb)(\?|$)/.test(route.request().url())?route.fulfill({contentType:'application/octet-stream',headers:{'content-disposition':'attachment'},body:'download test fixture'}):route.continue());
 // Registered last so it takes priority. The Linux package metadata is a fixture until the first verified .deb is published.
-await context.route('**/downloads/ate-linux-build.json*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({app:'ATE',platform:'linux-x64',version:'0.8.8',build:29,run_id:45216005287,source_sha:'0'.repeat(40),file:'ate-linux.deb',sha256:'a'.repeat(64),bytes:5786884,signature:'unsigned',verification:'ci-native-verified-installed-and-launched'})}));
+await context.route('**/downloads/ate-linux-build.json*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({app:'ATE',platform:'linux-x64',version:'0.8.8',build:29,run_id:45216005287,source_sha:'0'.repeat(40),file:'ate-linux.deb',sha256:'a'.repeat(64),bytes:5786884,arm64:{platform:'linux-arm64',file:'ate-linux-arm64.deb',sha256:'b'.repeat(64),bytes:5600000},signature:'unsigned',verification:'ci-native-verified-installed-and-launched'})}));
 const page=await context.newPage();
 const errors=[];page.on('pageerror',error=>errors.push(String(error)));
 try{
@@ -93,10 +93,11 @@ try{
  const identification=await page.evaluate(async()=>{
   const {identifyDownload,DOWNLOAD_APPS}=await import('/assets/js/download-apps.js');
   const good=Object.keys(DOWNLOAD_APPS).map(app=>identifyDownload('/downloads/'+(app==='ate-mac'?'ate-mac.dmg':app==='ate-windows'?'ate-windows.exe':app==='ate-linux'?'ate-linux.deb':app+'.apk')+'?build=123',location.href));
-  const bad=['https://evil.example/downloads/ate.apk','/downloads/other.apk','/downloads/ate-windows.apk','/downloads/ate.exe','/downloads/ate-mac.dmg.extra','/downloads/ate.apk/extra','/downloads/ate-linux.apk','/downloads/ate.deb','/downloads/ate-linux.deb.extra'].map(x=>identifyDownload(x,location.href));
-  return {good,bad,invalidBuild:identifyDownload('/downloads/ate.apk?build=oops',location.href)};
+  const arm=identifyDownload('/downloads/ate-linux-arm64.deb?build=7',location.href);
+  const bad=['https://evil.example/downloads/ate.apk','/downloads/ate-linux-arm64.deb.extra','/downloads/ate-arm64.deb','/downloads/other.apk','/downloads/ate-windows.apk','/downloads/ate.exe','/downloads/ate-mac.dmg.extra','/downloads/ate.apk/extra','/downloads/ate-linux.apk','/downloads/ate.deb','/downloads/ate-linux.deb.extra'].map(x=>identifyDownload(x,location.href));
+  return {good,arm,bad,invalidBuild:identifyDownload('/downloads/ate.apk?build=oops',location.href)};
  });
- assert.equal(identification.good.length,11);assert.equal(new Set(identification.good.map(x=>x.app)).size,11);assert(identification.bad.every(x=>x===null));assert.equal(identification.invalidBuild.build,'');
+ assert.equal(identification.good.length,11);assert.equal(new Set(identification.good.map(x=>x.app)).size,11);assert(identification.bad.every(x=>x===null));assert.equal(identification.invalidBuild.build,'');assert.equal(identification.arm.app,'ate-linux');assert.equal(identification.arm.build,'7');
  console.log('PASS: seven existing APKs retained; exact same-origin ATE APK/EXE/DMG/DEB paths only');
  await page.addInitScript(()=>{window.denyATE=true});
  await page.goto(origin+'/__tests__/cockpit.html');

@@ -1,5 +1,5 @@
 // Cuberoot private download cockpit: owner Google account; memory-only session.
-import {DOWNLOAD_APPS,ATE_APPS} from './download-apps.js?v=2';
+import {DOWNLOAD_APPS,ATE_APPS} from './download-apps.js?v=3';
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import {initializeAuth,GoogleAuthProvider,signInWithPopup,inMemoryPersistence,browserPopupRedirectResolver,signOut}
   from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
