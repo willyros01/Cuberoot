@@ -11,11 +11,11 @@ try{
  await page.goto(pathToFileURL(process.env.EMAIL_LAYOUT_FILE).href);
  for(const width of [390,768]){
   await page.setViewportSize({width,height:1000});
-  assert.equal(await page.locator('tbody tr').count(),11);
+  assert.equal(await page.locator('tbody tr').count(),12);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
   for(const text of ['ATE Windows','ATE Mac Universal','ATE Android','ATE Linux','ALL APPS'])await page.getByText(text,{exact:true}).waitFor({state:'visible'});
   assert.equal(await page.locator('table').evaluate(e=>getComputedStyle(e).fontSize),'19px');
   await page.screenshot({path:resolve(process.env.EVIDENCE_DIR,'email-layout-sample-'+width+'.png'),fullPage:true});
  }
- console.log('PASS: ten-category email at 390px and 768px, 19px table text, no horizontal overflow');
+ console.log('PASS: eleven-category email at 390px and 768px, 19px table text, no horizontal overflow');
 }finally{await browser.close()}
