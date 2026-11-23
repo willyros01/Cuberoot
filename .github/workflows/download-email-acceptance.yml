@@ -31,7 +31,7 @@ jobs:
           from unittest.mock import patch
           spec=importlib.util.spec_from_file_location('email_preview',Path('build/apk-counter/resend-daily.py'))
           m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
-          with patch.object(m.counts,'count',side_effect=[2,12]*10):
+          with patch.object(m.counts,'count',side_effect=[2,12]*len(m.counts.APPS)):
               _,body=m.build_report(dt.datetime.fromisoformat('2026-11-12T15:00:00+00:00'))
           Path(os.environ['RUNNER_TEMP']+'/email-layout-sample.html').write_text(m.build_html_report(body))
           PY
@@ -42,7 +42,7 @@ jobs:
           EVIDENCE_DIR: ${{ runner.temp }}/live-download-evidence
           EMAIL_LAYOUT_FILE: ${{ runner.temp }}/email-layout-sample.html
         run: node build/apk-counter/email-layout.mjs
-      - name: Verify three real published downloads and counter events
+      - name: Verify four real published downloads and counter events
         if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[download-acceptance]'))
         env:
           PLAYWRIGHT_MODULE: ${{ runner.temp }}/download-web/node_modules/playwright/index.mjs
