@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Run in the owner's Google Cloud Shell: adds the ATE Linux download category only.
+# No passwords or tokens are printed. Project split-it-44dea is selected by the helper.
+set -euo pipefail
+gcloud config set project split-it-44dea >/dev/null
+F=$(mktemp)
+trap 'rm -f "$F"' EXIT
+curl --fail --silent --show-error --location \
+  'https://raw.githubusercontent.com/willyros01/Cuberoot/843611e2df0650d952739938fe50d2db125a9e72/build/downloads/activate-ate-linux-counter.py' \
+  --output "$F"
+printf '%s  %s\n' '2b84fca5e7eecad685b3ab747463df406680897a92b96a7fbda4cb13cb694dc3' "$F" | sha256sum --check --status
+python3 "$F"
