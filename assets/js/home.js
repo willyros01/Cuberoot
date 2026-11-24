@@ -228,14 +228,15 @@ async function addFidunioDownload(box) {
     if (!row) return;
     const details = row.querySelector('h3')?.parentElement;
     if (!details) return;
-    details.appendChild(el('div', { class: 'actions' },
-      el('a', { class: 'btn app-open android-apk-badge', href: url,
-        download: 'fidunio-' + meta.run_id + '.apk',
-        'aria-label': 'Download signed FIDUNIO Android APK' },
-        el('span', { class: 'apk-small', text: 'Download' }),
-        el('span', { class: 'apk-large', text: 'Android APK' }) )));
+    const actions = details.querySelector('.actions') ||
+      details.appendChild(el('div', { class: 'actions' }));
+    actions.appendChild(el('a', { class: 'btn app-open android-apk-badge', href: url,
+      download: 'fidunio-' + meta.run_id + '.apk',
+      'aria-label': 'Download signed FIDUNIO Android APK' },
+      el('span', { class: 'apk-small', text: 'Download' }),
+      el('span', { class: 'apk-large', text: 'Android APK' })));
     const avail = row.querySelector('.avail');
-    if (avail) avail.textContent = 'Web app · iPhone TestFlight · Signed Android APK available';
+    if (avail) avail.textContent += ' · Signed Android APK available';
   } catch (_) {
     // Never advertise an absent or unverified FIDUNIO APK.
   }
@@ -323,8 +324,15 @@ async function loadApps() {
       el('div', {},
         el('h3', { text: a.name }),
         el('p', { text: a.description }),
-        a.url ? el('div', { class: 'actions' },
-          el('a', { class: 'btn app-open', href: a.url, 'aria-label': 'Open ' + a.name, text: a.actionLabel || ('Open ' + a.name + ' →') })) : null,
+        a.url || a.appStoreUrl ? el('div', { class: 'actions' },
+          a.url ? el('a', { class: 'btn app-open', href: a.url, 'aria-label': 'Open ' + a.name, text: a.actionLabel || ('Open ' + a.name + ' →') }) : null,
+          a.appStoreUrl ? el('a', {
+            class: 'app-store-badge', href: a.appStoreUrl, target: '_blank', rel: 'noopener noreferrer',
+            'aria-label': 'Download ' + a.name + ' on the Apple App Store'
+          }, el('img', {
+            src: 'assets/img/app-store-badge.svg', alt: 'Download on the App Store',
+            width: '165', height: '55', loading: 'lazy'
+          })) : null) : null,
         el('div', { class: 'avail', text: a.availability || ((av.now || 'Web app now') + ' · ' + (av.soon || 'iOS & Android soon')) })),
       el('a', { class: 'docs', href: 'docs.html?app=' + encodeURIComponent(a.slug), 'aria-label': 'Documentation for ' + a.name, text: 'Docs →' }))));
     addFairpotAppStore(box);

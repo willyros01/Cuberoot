@@ -5,7 +5,8 @@
       "slug": "fidunio",
       "icon": "fidunio",
       "description": "Private, invitation-only messaging with true end-to-end encryption. Group chats, photo sharing and disappearing messages — the everyday features of the leading messaging apps, for invited members only.",
-      "availability": "Web app available · iPhone TestFlight"
+      "appStoreUrl": "https://apps.apple.com/app/id6818880685",
+      "availability": "Web app available · App Store for iPhone and iPad"
     },
     {
       "name": "Fairpot",
