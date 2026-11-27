@@ -1,13 +1,13 @@
 {
   "app": "ATE",
   "channel": "signed-android-apk",
-  "version": "0.8.8",
-  "source_sha": "4429ed13ec4ac5653669a40933c98d33a845df5b",
-  "run_id": 45085562313,
-  "artifact_id": 14779531522,
+  "version": "0.8.9",
+  "source_sha": "a44550f3df481f40feb2b6bee2bf7bbb433eabad",
+  "run_id": 45944744818,
+  "artifact_id": 15174547603,
   "origin": "github-actions-artifact",
-  "apk_sha256": "408d03e087183b68ab4722b16f422d104361d806a1e4087d5f02085b12df9fc1",
+  "apk_sha256": "26880ca67fc2855bcbddf587ac531802c15e6bfd416c6668aa46be307ac43f81",
   "signer_sha256": "ef654829950fdf9d59f061c7b0fdc80358373a619fc02fa10480816e0665d6e4",
-  "apk_bytes": 7541215,
-  "published_at": "2026-11-23T00:09:51.241Z"
+  "apk_bytes": 7569887,
+  "published_at": "2026-11-27T05:45:12.749Z"
 }
