@@ -3,19 +3,19 @@
   "platform": "linux-x64",
   "version": "0.8.9",
   "build": 30,
-  "run_id": 45942521963,
-  "source_sha": "8b955e90445075fbad1fa5c13b61c3661d1f56da",
+  "run_id": 45944802463,
+  "source_sha": "a44550f3df481f40feb2b6bee2bf7bbb433eabad",
   "file": "ate-linux.deb",
-  "sha256": "fd5d08ee7db46859677f024ba10a9f1da461bb11469b0e12fe63215d61a1047d",
-  "bytes": 5814264,
+  "sha256": "94a17646c309cc635742367e75ffb1d7ee089eab2928f7d00dceea3c504352f5",
+  "bytes": 5814304,
   "arm64": {
     "platform": "linux-arm64",
     "file": "ate-linux-arm64.deb",
-    "sha256": "7237225f5159217a90047e51ca7a24b1f2e8ac91c4c6b135a0fc163c8c990626",
-    "bytes": 5711368
+    "sha256": "715677382cef6bcf2c5e2f89ec526077dcbd3be72f51f4c4fc6f793b87112fa5",
+    "bytes": 5711352
   },
   "signature": "unsigned",
   "verification": "ci-native-verified-installed-and-launched",
   "ubuntu_2604_install_check": "packagekit-passed-amd64-arm64",
-  "published_at": "2026-11-27T05:00:39.490Z"
+  "published_at": "2026-11-27T05:30:30.356Z"
 }
