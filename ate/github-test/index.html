@@ -163,6 +163,12 @@ footer #counts{white-space:nowrap}
 .gh-meta{opacity:.75}.gh-body{white-space:pre-wrap;overflow-wrap:anywhere}.gh-comment{border-left:3px solid var(--line);padding:4px 10px;margin:8px 0}.gh-comment p{white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0}
 .gh-code{font:700 22pt/1.2 ui-monospace,Menlo,monospace;letter-spacing:.12em;user-select:all;margin:8px 0}
 .gh-diff{font:12pt/1.45 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:6px;overflow-x:auto;margin:6px 0}
+.gh-busy{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;margin:8px 0;padding:14px 16px;border:2px solid var(--accent);border-radius:10px;background:var(--paper);box-shadow:0 4px 14px rgba(0,0,0,.15)}.gh-busy[hidden]{display:none}
+.gh-busy-words{display:flex;flex-direction:column;gap:4px;font-size:18px}.gh-busy-hint{color:var(--muted);font-size:16px}.gh-busy-hint:empty{display:none}
+.gh-spinner{flex-shrink:0;display:inline-block;width:34px;height:34px;border-radius:50%;border:4px solid color-mix(in srgb,var(--accent) 22%,transparent);border-top-color:var(--accent);animation:gh-spin .9s linear infinite;vertical-align:middle}
+.gh-waiting .gh-spinner{width:22px;height:22px;border-width:3px;margin-right:6px}
+@keyframes gh-spin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){.gh-spinner{animation-duration:2.5s}}
+dialog.gh-is-busy #githubStatus{display:none}
 .gh-log{max-height:60vh;overflow:auto}.gh-log-find{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;margin:8px 0}.gh-log-find .gh-field{flex:1 1 220px;margin:0}.gh-log-step{font-weight:700;color:var(--accent)}.gh-log-hit{background:#FFF1B8!important;color:#222c29!important}.gh-log-here{background:#FFD24D!important;color:#222c29!important;outline:2px solid #8A3B12}
 .gh-line{white-space:pre-wrap;overflow-wrap:anywhere;padding:0 8px}.gh-sign{display:inline-block;width:1.4em;font-weight:700}
 .gh-add{background:rgba(46,160,67,.18)}.gh-del{background:rgba(248,81,73,.18)}.gh-gap{opacity:.65;font-style:italic;background:rgba(127,127,127,.12)}
