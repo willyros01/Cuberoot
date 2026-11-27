@@ -1,26 +1,26 @@
 {
   "app": "ATE",
   "platform": "web",
-  "version": "0.8.8",
-  "build": 29,
-  "source_sha": "4429ed13ec4ac5653669a40933c98d33a845df5b",
-  "run_id": 45085562313,
+  "version": "0.8.9",
+  "build": 30,
+  "source_sha": "a44550f3df481f40feb2b6bee2bf7bbb433eabad",
+  "run_id": 45944744818,
   "files": {
     "THIRD-PARTY-NOTICES.txt": {
       "bytes": 256828,
       "sha256": "aaa448855e6e2d51febcbebcbc8fa243004b050729694a35bd74e814c10942a9"
     },
     "app.js": {
-      "bytes": 1299268,
-      "sha256": "1573bb1b8f3ca28f76518ed953cb1d37a5696bc622f4bbb1f100290c4cecb5f7"
+      "bytes": 1378162,
+      "sha256": "84da31c8a1f75510503187ee2de245ff264dfc83453ed8a3b6cdb6fe9b49be77"
     },
     "app.js.LEGAL.txt": {
       "bytes": 120,
       "sha256": "bdca4f7c6b96696a3c82d115ac43a4e2dba984138e96cb291a3379335359643f"
     },
     "index.html": {
-      "bytes": 56281,
-      "sha256": "0dabfe70286dba8108a17b7050df5c48053a8d827082ed47fba2d03cf3ad6c26"
+      "bytes": 68186,
+      "sha256": "e1a57757e07cc5da0cfba55f36da128b70abf0e1737823a721daa2a6f6bd5720"
     },
     "java-check.js": {
       "bytes": 222077,
