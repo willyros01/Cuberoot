@@ -19,7 +19,7 @@
           "title": "Complete Illustrated User Guide — 1.1.88",
           "ext": "html",
           "mime": "text/html",
-          "size": 23813,
+          "size": 23796,
           "date": "2026-11-28T16:40:00.000Z",
           "original": "index.html",
           "path": "fidunio/guide/index.html"
@@ -29,7 +29,7 @@
           "title": "Illustrated HELP Guide — setup, alerts and responding",
           "ext": "html",
           "mime": "text/html",
-          "size": 13123,
+          "size": 13097,
           "date": "2026-11-28T16:40:00.000Z",
           "original": "index.html",
           "path": "fidunio/help/index.html"
@@ -49,7 +49,7 @@
           "title": "Complete Illustrated User Guide — 1.1.88, PDF",
           "ext": "pdf",
           "mime": "application/pdf",
-          "size": 822064,
+          "size": 822032,
           "date": "2026-11-28T16:40:00.000Z",
           "original": "fidunio-user-guide.pdf",
           "path": "guides/fidunio/fidunio-user-guide.pdf"
@@ -59,7 +59,7 @@
           "title": "Illustrated HELP Guide — 1.1.88, PDF",
           "ext": "pdf",
           "mime": "application/pdf",
-          "size": 807511,
+          "size": 807475,
           "date": "2026-11-28T16:40:00.000Z",
           "original": "fidunio-help-guide.pdf",
           "path": "guides/fidunio/fidunio-help-guide.pdf"
@@ -363,4 +363,3 @@
     }
   }
 }
-
