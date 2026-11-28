@@ -1,3 +1,13 @@
+## 2026-11-28 — FIDUNIO 1.1.88 documentation refresh
+
+Public current guides: `fidunio/quick-start/`, `fidunio/guide/`, `fidunio/help/`; matching large-print PDFs in `guides/fidunio/`. The two older 1.1.54a PDFs remain available, explicitly archived in the public document index. HELP illustrations are real simulator screenshots from Hermes evidence snapshot `9d9d0950ffdad9a15e352b055ab60a9371a01a5a`, using fictional accounts. Diagrams describe the user flow. No private chats, real location coordinates, credentials or app data were used.
+
+This refresh updates only FIDUNIO guide/index/description/support/privacy information; other apps and APK bytes/manifests/publishers are untouched. Source version 1.1.88 does not mean the public App Store has approved that version. HELP notifications depend on network, permission and OS settings; Critical Alerts approval remains pending.
+
+Program and durable architecture documentation is maintained in `hermes/docs/HELP-PROGRAM-DOCUMENTATION.md`; the encrypted Cuberoot vault and reader permissions are unchanged. Source/generation and screenshot provenance: `hermes/docs/source/`. Development authorities: `hermes/main` web, `hermes/ios` native iOS and `hermes/Android` Android/Fire. Retired `main-3` is not an active parity build.
+
+---
+
 # Cuberoot Systems — public website and APK distribution
 
 ## Cross-repository documentation index — 2026-10-15
@@ -6,7 +16,7 @@ This repository hosts the Cuberoot Systems public site and selected signed Andro
 
 | Public app | Authoritative source and platform branches | Current evidence / limitations |
 |---|---|---|
-| FIDUNIO | `hermes/main` web, `hermes/main-3` web parity, `hermes/ios` iOS, `hermes/Android` Fire native | Fire HD 8 ADM **direct notification receipt PASS**, 15 Oct after Firebase ID repair; full tap/PIN/correct-message and group ADM not independently accepted. See `hermes/Android/docs/ADM-LIVE.md` in its repository. |
+| FIDUNIO | `hermes/main` web, `hermes/ios` iOS, `hermes/Android` Android/Fire native | Fire HD 8 ADM **direct notification receipt PASS**, 15 Oct after Firebase ID repair; full tap/PIN/correct-message and group ADM not independently accepted. See `hermes/Android/docs/ADM-LIVE.md` in its repository. |
 | The Scorecard | `scorecard/main` web, `scorecard/v2` current iOS, `scorecard/android` | Apple Build 24 review package on `v2`; Fire HD 8 Android 2.30.1 device baseline owner-accepted. App Store approval not inferred. |
 | Fairpot | `fairpot/main` iOS, `fairpot/android` Fire | Native APK signing/publishing and restored expense/photo verified; later backup-to-Downloads retest needs owner acceptance. Legacy `split` kept separate. |
 | Wire | `balita/main` live web/news sender, `balita/android` Fire | Physical ADM receipt PASS on 0.17.58; Back touch behavior later repaired in Android source, further physical acceptance required. |
@@ -34,3 +44,4 @@ Coverage includes both account modes, courses and photo verification, guests and
 Both public HTML guides and their PDFs now cover the in-app date calendar, Fix a score / Done fixing, posted-card corrections (24 hours for the original scorer; owner/admin of every represented group at any time), deleted-round re-posting, Hide, local-only course deletion and changed history/start controls. Source of truth: `willyros01/marker` main `9b6cc89`.
 
 Illustrations are produced by the established `marker/build-guides.mjs` workflow. `marker/screens/fixtures.js` bundles the current pure model/scoring helpers and actual app screen functions; it substitutes in-memory fictional data and excludes boot, service access, browser storage and event listeners. `marker/assets/marker-source.css` is the exact source stylesheet. This refresh supersedes the earlier hand-maintained screen fixtures. Screens are teaching examples and do not prove live correction or native-build acceptance. Refresh fixtures from application source before future interface updates.
+

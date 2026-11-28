@@ -4,9 +4,9 @@
       "name": "FIDUNIO",
       "slug": "fidunio",
       "icon": "fidunio",
-      "description": "Private, invitation-only messaging with true end-to-end encryption. Group chats, photo sharing and disappearing messages — the everyday features of the leading messaging apps, for invited members only.",
+      "description": "Private, invitation-only messaging with end-to-end encrypted direct and group chats, photos, files and disappearing messages. HELP alerts your chosen FIDUNIO contacts and lets you share your location and exchange messages. It does not contact emergency services.",
       "appStoreUrl": "https://apps.apple.com/app/id6818880685",
-      "availability": "Web app available · App Store for iPhone and iPad"
+      "availability": "Web app · App Store for iPhone and iPad · Signed Android APK · Illustrated user and HELP guides"
     },
     {
       "name": "Fairpot",
@@ -69,3 +69,4 @@
     "soon": "iOS & Android soon"
   }
 }
+

@@ -5,8 +5,68 @@
       "name": "FIDUNIO",
       "docs": [
         {
+          "id": "fidunio-quick-html-1188",
+          "title": "Quick Start Guide — 1.1.88, large print",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 4948,
+          "date": "2026-11-28T16:40:00.000Z",
+          "original": "index.html",
+          "path": "fidunio/quick-start/index.html"
+        },
+        {
+          "id": "fidunio-full-html-1188",
+          "title": "Complete Illustrated User Guide — 1.1.88",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 23813,
+          "date": "2026-11-28T16:40:00.000Z",
+          "original": "index.html",
+          "path": "fidunio/guide/index.html"
+        },
+        {
+          "id": "fidunio-help-html-1188",
+          "title": "Illustrated HELP Guide — setup, alerts and responding",
+          "ext": "html",
+          "mime": "text/html",
+          "size": 13123,
+          "date": "2026-11-28T16:40:00.000Z",
+          "original": "index.html",
+          "path": "fidunio/help/index.html"
+        },
+        {
+          "id": "fidunio-quick-pdf-1188",
+          "title": "Quick Start Guide — 1.1.88, large-print PDF",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 50165,
+          "date": "2026-11-28T16:40:00.000Z",
+          "original": "fidunio-quick-start.pdf",
+          "path": "guides/fidunio/fidunio-quick-start.pdf"
+        },
+        {
+          "id": "fidunio-full-pdf-1188",
+          "title": "Complete Illustrated User Guide — 1.1.88, PDF",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 822064,
+          "date": "2026-11-28T16:40:00.000Z",
+          "original": "fidunio-user-guide.pdf",
+          "path": "guides/fidunio/fidunio-user-guide.pdf"
+        },
+        {
+          "id": "fidunio-help-pdf-1188",
+          "title": "Illustrated HELP Guide — 1.1.88, PDF",
+          "ext": "pdf",
+          "mime": "application/pdf",
+          "size": 807511,
+          "date": "2026-11-28T16:40:00.000Z",
+          "original": "fidunio-help-guide.pdf",
+          "path": "guides/fidunio/fidunio-help-guide.pdf"
+        },
+        {
           "id": "32c75af4df6ee9144820692363cbc7b6",
-          "title": "v1 1 54a user guide",
+          "title": "Archived 1.1.54a — v1 1 54a user guide",
           "ext": "pdf",
           "mime": "application/pdf",
           "size": 472668,
@@ -16,7 +76,7 @@
         },
         {
           "id": "3fcc792773932b7e9c1ae0003142ca5d",
-          "title": "v1 1 54a user guide addendum",
+          "title": "Archived 1.1.54a — v1 1 54a user guide addendum",
           "ext": "pdf",
           "mime": "application/pdf",
           "size": 970343,
@@ -31,7 +91,7 @@
       "docs": [
         {
           "id": "4dca436518a47a47969a7a9a33af8843",
-          "title": "The Scorecard \u2014 Quick Start (2.31.4)",
+          "title": "The Scorecard — Quick Start (2.31.4)",
           "ext": "pdf",
           "mime": "application/pdf",
           "size": 916662,
@@ -41,7 +101,7 @@
         },
         {
           "id": "e351679ca10b5ea001688c511b514074",
-          "title": "The Scorecard \u2014 Full User Guide (2.31.4)",
+          "title": "The Scorecard — Full User Guide (2.31.4)",
           "ext": "pdf",
           "mime": "application/pdf",
           "size": 4108458,
@@ -51,7 +111,7 @@
         },
         {
           "id": "4a93e75dd8144f9cb0832cd7806bf7e0",
-          "title": "The Scorecard \u2014 Android Quick Start (Fire HD 8)",
+          "title": "The Scorecard — Android Quick Start (Fire HD 8)",
           "ext": "html",
           "mime": "text/html",
           "size": 6653,
@@ -61,7 +121,7 @@
         },
         {
           "id": "scorecard-code-guide-20261107",
-          "title": "Illustrated Application & Code Documentation \u2014 web, iOS and Android",
+          "title": "Illustrated Application & Code Documentation — web, iOS and Android",
           "ext": "html",
           "mime": "text/html",
           "size": 25954,
@@ -156,7 +216,7 @@
       "docs": [
         {
           "id": "c10df11e5a1a4c92b874d2010e12f963",
-          "title": "Cloud Files \u2014 Quick Start Guide (Fire HD 8)",
+          "title": "Cloud Files — Quick Start Guide (Fire HD 8)",
           "ext": "html",
           "mime": "text/html",
           "size": 6275,
@@ -171,7 +231,7 @@
       "docs": [
         {
           "id": "spendrecorder-guide-1-1-0",
-          "title": "SpendRecorder 1.1 \u2014 User Guide and Automatic Recurring Expenses",
+          "title": "SpendRecorder 1.1 — User Guide and Automatic Recurring Expenses",
           "ext": "html",
           "mime": "text/html",
           "size": 9166,
@@ -181,12 +241,12 @@
         },
         {
           "id": "f1bce04ae40a3a6ec10cfe65b7b2c165",
-          "title": "Legacy Expense Ledger \u2014 User Guide (archived)",
+          "title": "Legacy Expense Ledger — User Guide (archived)",
           "ext": "pdf",
           "mime": "application/pdf",
           "size": 805420,
           "date": "2026-09-25T14:12:37.163Z",
-          "original": "Expense Ledger \u2014 User Guide.pdf",
+          "original": "Expense Ledger — User Guide.pdf",
           "path": "guides/spendrecorder/expense-ledger-user-guide.pdf"
         }
       ]
@@ -246,7 +306,7 @@
         },
         {
           "id": "marker-code-guide-20261107",
-          "title": "Illustrated Application & Code Documentation \u2014 Caddie, Follower and Apple Watch",
+          "title": "Illustrated Application & Code Documentation — Caddie, Follower and Apple Watch",
           "ext": "html",
           "mime": "text/html",
           "size": 31849,
@@ -303,3 +363,4 @@
     }
   }
 }
+
