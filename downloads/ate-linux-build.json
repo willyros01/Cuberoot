@@ -2,20 +2,20 @@
   "app": "ATE",
   "platform": "linux-x64",
   "version": "0.8.9",
-  "build": 30,
-  "run_id": 45944802463,
-  "source_sha": "a44550f3df481f40feb2b6bee2bf7bbb433eabad",
+  "build": 31,
+  "run_id": 46113914472,
+  "source_sha": "67d83ccb569e6e11c399959559b765db393fbef2",
   "file": "ate-linux.deb",
-  "sha256": "94a17646c309cc635742367e75ffb1d7ee089eab2928f7d00dceea3c504352f5",
-  "bytes": 5814304,
+  "sha256": "2a2690c27ea69d6763e0485d085a7af8637b7c29c8bb7c3830d55ba0cce6175e",
+  "bytes": 5816872,
   "arm64": {
     "platform": "linux-arm64",
     "file": "ate-linux-arm64.deb",
-    "sha256": "715677382cef6bcf2c5e2f89ec526077dcbd3be72f51f4c4fc6f793b87112fa5",
-    "bytes": 5711352
+    "sha256": "4edba6c23ba44f8d1fdfb946bbf8a7f0819be046ac4619745c73e04a4fca6965",
+    "bytes": 5712240
   },
   "signature": "unsigned",
   "verification": "ci-native-verified-installed-and-launched",
   "ubuntu_2604_install_check": "packagekit-passed-amd64-arm64",
-  "published_at": "2026-11-27T05:30:30.356Z"
+  "published_at": "2026-11-28T06:15:30.267Z"
 }
